@@ -1,6 +1,10 @@
 [version]
 current = "1.2.41"
 
+[git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
 [[file]]
 src = "package.json"
 search = '"version": "{current_version}"'

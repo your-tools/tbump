@@ -1,7 +1,11 @@
+import argparse
+import os
+
 import path
 import ui
 
 import tbump.config
+from tbump.git import run_git
 
 
 def display_diffs(file_path, diffs):
@@ -33,6 +37,38 @@ def replace_in_file(file_path, old_string, new_string, search=None):
     file_path.write_lines(new_lines)
 
 
+def check_dirty(working_path):
+    rc, out = run_git(working_path, "status", "--porcelain", raises=False)
+    if rc != 0:
+        ui.fatal("git status failed")
+    dirty = False
+    for line in out.splitlines():
+        if line.startswith("??"):
+            ui.warning(line, end="")
+            dirty = True
+    if dirty:
+        ui.fatal("Repository is dirty")
+
+
+def commit(working_path, new_version):
+    ui.info_2("Making bump commit")
+    run_git(working_path, "add", ".")
+    run_git(working_path, "commit", "--message", "Bump to %s" % new_version)
+
+
+def tag(working_path, tag):
+    ui.info_2("Creating tag", tag)
+    run_git(working_path, "tag", tag)
+
+
+def commit_and_tag(config, new_version):
+    working_path = path.Path.getcwd()
+    check_dirty(working_path)
+    commit(working_path, new_version)
+    tag_name = config.tag_template.format(new_version=new_version)
+    tag(working_path, tag_name)
+
+
 def parse_config():
     config = tbump.config.parse(path.Path("tbump.toml"))
     return config
@@ -50,7 +86,14 @@ def bump_version(config, new_version):
 
 
 def main(args):
-    new_version = args[0]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("new_version")
+    parser.add_argument("-C", "--cwd", dest="working_dir")
+    args = parser.parse_args(args=args)
+    working_dir = args.working_dir
+    new_version = args.new_version
+    if working_dir:
+        os.chdir(working_dir)
     config = parse_config()
     ui.info_1(
             "Bumping from",
@@ -58,3 +101,4 @@ def main(args):
             ui.reset, "to",
             ui.reset, ui.bold, new_version)
     bump_version(config, new_version)
+    commit_and_tag(config, new_version)

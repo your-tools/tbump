@@ -6,6 +6,7 @@ import path
 import pytest
 
 import tbump.main
+import tbump.git
 
 
 def assert_in_file(file_name, expected_line):
@@ -29,16 +30,14 @@ def setup_test(test_path, tmp_path, monkeypatch):
        }
     }
     """))
-    subprocess.run(["git", "init"])
-    subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "--message", "initial commit"])
-
-    monkeypatch.chdir(tmp_path)
+    tbump.git.run_git(tmp_path, "init")
+    tbump.git.run_git(tmp_path, "add", ".")
+    tbump.git.run_git(tmp_path, "commit", "--message", "initial commit")
 
 
-def test_main(tmp_path, test_path, monkeypatch):
+def test_replaces(tmp_path, test_path, monkeypatch):
     setup_test(test_path, tmp_path, monkeypatch)
-    tbump.main.main(["1.2.42-alpha-1"])
+    tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
 
     toml_path = tmp_path.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
@@ -48,7 +47,14 @@ def test_main(tmp_path, test_path, monkeypatch):
     assert_in_file("package.json", '"other-dep": "1.2.41"')
 
 
-def test_git(tmp_path, test_path, monkeypatch):
+def test_commit_and_tag(tmp_path, test_path, monkeypatch):
     setup_test(test_path, tmp_path, monkeypatch)
+    tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
 
-    tbump.main.main(["1.2.42-alpha-1"])
+    rc, out = tbump.git.run_git(tmp_path, "log", "--oneline", raises=False)
+    assert rc == 0
+    assert "Bump to 1.2.42-alpha-1" in out
+
+    rc, out = tbump.git.run_git(tmp_path, "tag", "--list", raises=False)
+    assert rc == 0
+    assert out == "v1.2.42-alpha-1"
