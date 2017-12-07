@@ -59,16 +59,15 @@ def commit(working_path, message):
     run_git(working_path, "commit", "--message", message)
 
 
+def check_ref_does_not_exists(working_path, tag_name):
+    rc, _ = run_git(working_path, "rev-parse", tag_name, raises=False)
+    if rc == 0:
+        ui.fatal("git ref", tag_name, "already exists")
+
 
 def tag(working_path, tag):
     ui.info_2("Creating tag", tag)
     run_git(working_path, "tag", tag)
-
-
-def commit_and_tag(working_path, config, new_version):
-    commit(working_path, new_version)
-    tag_name = config.tag_template.format(new_version=new_version)
-    tag(working_path, tag_name)
 
 
 def parse_config():
@@ -103,9 +102,15 @@ def main(args=None):
             ui.reset, "to",
             ui.reset, ui.bold, new_version)
     working_path = path.Path.getcwd()
+
     check_dirty(working_path)
+
+    tag_name = config.tag_template.format(new_version=new_version)
+    check_ref_does_not_exists(working_path, tag_name)
+
     bump_version(config, new_version)
 
     message = config.message_template.format(new_version=new_version)
     commit(working_path, message)
-    commit_and_tag(working_path, config, new_version)
+
+    tag(working_path, tag_name)

@@ -68,3 +68,13 @@ def test_abort_if_dirty(tmp_path, test_path, monkeypatch, message_recorder):
     with pytest.raises(SystemExit) as e:
         tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
     assert message_recorder.find("dirty")
+
+
+def test_abort_if_tag_exists(tmp_path, test_path, monkeypatch, message_recorder):
+
+    setup_test(test_path, tmp_path, monkeypatch)
+    tbump.git.run_git(tmp_path, "tag", "v1.2.42")
+
+    with pytest.raises(SystemExit) as e:
+        tbump.main.main(["-C", tmp_path, "1.2.42"])
+    assert message_recorder.find("1.2.42 already exists")
