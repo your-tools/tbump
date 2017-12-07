@@ -1,0 +1,18 @@
+[[source]]
+
+name = "pypi"
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+
+[packages]
+
+toml = "*"
+"path.py" = "*"
+attrs = "*"
+
+
+[dev-packages]
+
+pytest = "*"
+pytest-sugar = "*"
