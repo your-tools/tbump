@@ -1,5 +1,5 @@
 [version]
-current = "0.41"
+current = "1.2.41"
 
 parse = '''
   (?P<major>\d+)
@@ -26,7 +26,3 @@ search = '"version": "{current_version}"'
 
 [[file]]
 src = "VERSION"
-
-[[file]]
-src = "Changelog.md"
-assert_present = true
