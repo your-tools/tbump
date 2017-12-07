@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 import path
 import ui
@@ -43,11 +44,13 @@ def check_dirty(working_path):
         ui.fatal("git status failed")
     dirty = False
     for line in out.splitlines():
-        if line.startswith("??"):
-            ui.warning(line, end="")
+        # Ignore untracked files
+        if not line.startswith("??"):
             dirty = True
     if dirty:
-        ui.fatal("Repository is dirty")
+        ui.error("Repository is dirty")
+        ui.info(out)
+        sys.exit(1)
 
 
 def commit(working_path, new_version):
@@ -61,9 +64,7 @@ def tag(working_path, tag):
     run_git(working_path, "tag", tag)
 
 
-def commit_and_tag(config, new_version):
-    working_path = path.Path.getcwd()
-    check_dirty(working_path)
+def commit_and_tag(working_path, config, new_version):
     commit(working_path, new_version)
     tag_name = config.tag_template.format(new_version=new_version)
     tag(working_path, tag_name)
@@ -100,5 +101,7 @@ def main(args=None):
             ui.reset, ui.bold, config.current_version,
             ui.reset, "to",
             ui.reset, ui.bold, new_version)
+    working_path = path.Path.getcwd()
+    check_dirty(working_path)
     bump_version(config, new_version)
-    commit_and_tag(config, new_version)
+    commit_and_tag(working_path, config, new_version)

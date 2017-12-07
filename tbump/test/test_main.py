@@ -4,6 +4,7 @@ import textwrap
 import toml
 import path
 import pytest
+from ui.tests.conftest import message_recorder
 
 import tbump.main
 import tbump.git
@@ -58,3 +59,12 @@ def test_commit_and_tag(tmp_path, test_path, monkeypatch):
     rc, out = tbump.git.run_git(tmp_path, "tag", "--list", raises=False)
     assert rc == 0
     assert out == "v1.2.42-alpha-1"
+
+
+def test_abort_if_dirty(tmp_path, test_path, monkeypatch, message_recorder):
+    setup_test(test_path, tmp_path, monkeypatch)
+    tmp_path.joinpath("VERSION").write_text("unstaged changes\n", append=True)
+
+    with pytest.raises(SystemExit) as e:
+        tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
+    assert message_recorder.find("dirty")
