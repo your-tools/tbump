@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "08a943582c8fa59c7d33adcaf5277c39ce0b687b20a5bff4e125e3f2aa98322b"
+            "sha256": "8c068a83bd7aaeee14b35d43ca13fe7a0fae407b91b35aa9cee9eaa91fd762c4"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -34,6 +34,13 @@
             ],
             "version": "==17.3.0"
         },
+        "colorama": {
+            "hashes": [
+                "sha256:463f8483208e921368c9f306094eb6f725c6ca42b0f97e313cb5d5512459feda",
+                "sha256:48eb22f4f8461b1df5734a074b57042430fb06e1d61bd1e11b078c0fe6d7a1f1"
+            ],
+            "version": "==0.3.9"
+        },
         "path.py": {
             "hashes": [
                 "sha256:3038968a2e8fc8e5d505586149cf583860e7321bf3d3ac01308dbc089b1d8c3d",
@@ -41,9 +48,29 @@
             ],
             "version": "==10.5"
         },
+        "python-cli-ui": {
+            "hashes": [
+                "sha256:2206f673a106fba79e1d5c97bd040aa804ff7e843b5bf94dd110aa7ee85c910b",
+                "sha256:3ba45a1b9d2148f938bc270515ab86d7b6f27eb3ad2ca6e96e0b2eb768240e58"
+            ],
+            "version": "==0.6.1"
+        },
+        "tabulate": {
+            "hashes": [
+                "sha256:e4ca13f26d0a6be2a2915428dc21e732f1e44dad7f76d7030b2ef1ec251cf7f2"
+            ],
+            "version": "==0.8.2"
+        },
         "toml": {
             "hashes": [],
             "version": "==0.9.3.1"
+        },
+        "unidecode": {
+            "hashes": [
+                "sha256:61f807220eda0203a774a09f84b4304a3f93b5944110cc132af29ddb81366883",
+                "sha256:280a6ab88e1f2eb5af79edff450021a0d3f0448952847cd79677e55e58bad051"
+            ],
+            "version": "==0.4.21"
         }
     },
     "develop": {
