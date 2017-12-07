@@ -23,7 +23,7 @@ def run_git(working_path, *cmd, raises=True):
     returncode = process.returncode
     if raises:
         if returncode != 0:
-            ui.fatal(" ".join(cmd), "failed")
+            ui.fatal(" ".join(git_cmd), "failed")
     else:
         if out.endswith('\n'):
             out = out.strip('\n')
