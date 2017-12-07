@@ -8,6 +8,7 @@ import toml
 class Config:
     current_version = attr.ib()
     tag_template = attr.ib(default=None)
+    message_template = attr.ib(default=None)
     files = attr.ib(default=None)
 
 

@@ -53,10 +53,11 @@ def check_dirty(working_path):
         sys.exit(1)
 
 
-def commit(working_path, new_version):
+def commit(working_path, message):
     ui.info_2("Making bump commit")
     run_git(working_path, "add", ".")
-    run_git(working_path, "commit", "--message", "Bump to %s" % new_version)
+    run_git(working_path, "commit", "--message", message)
+
 
 
 def tag(working_path, tag):
@@ -104,4 +105,7 @@ def main(args=None):
     working_path = path.Path.getcwd()
     check_dirty(working_path)
     bump_version(config, new_version)
+
+    message = config.message_template.format(new_version=new_version)
+    commit(working_path, message)
     commit_and_tag(working_path, config, new_version)
