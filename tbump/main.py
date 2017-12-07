@@ -85,7 +85,7 @@ def bump_version(config, new_version):
     replace_in_file(path.Path("tbump.toml"), current_version, new_version)
 
 
-def main(args):
+def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
