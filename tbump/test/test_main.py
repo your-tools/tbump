@@ -19,9 +19,11 @@ def assert_in_file(file_name, expected_line):
 
 
 def setup_test(test_path, tmp_path, monkeypatch):
-    toml_path = test_path.joinpath("tbump.toml").copy(tmp_path)
-    tmp_path.joinpath("VERSION").write_text("1.2.41")
-    tmp_path.joinpath("package.json").write_text(textwrap.dedent("""
+    src_path = tmp_path.joinpath("src")
+    src_path.mkdir()
+    test_path.joinpath("tbump.toml").copy(src_path)
+    src_path.joinpath("VERSION").write_text("1.2.41")
+    src_path.joinpath("package.json").write_text(textwrap.dedent("""
     {
        "name": "foo",
        "version": "1.2.41",
@@ -31,16 +33,30 @@ def setup_test(test_path, tmp_path, monkeypatch):
        }
     }
     """))
-    tbump.git.run_git(tmp_path, "init")
-    tbump.git.run_git(tmp_path, "add", ".")
-    tbump.git.run_git(tmp_path, "commit", "--message", "initial commit")
+    tbump.git.run_git(src_path, "init")
+    tbump.git.run_git(src_path, "add", ".")
+    tbump.git.run_git(src_path, "commit", "--message", "initial commit")
+    setup_remote(tmp_path)
+    return src_path
+
+
+def setup_remote(tmp_path):
+    git_path = tmp_path.joinpath("git")
+    git_path.mkdir()
+    remote_path = git_path.joinpath("repo.git")
+    remote_path.mkdir()
+    tbump.git.run_git(remote_path, "init", "--bare")
+
+    src_path = tmp_path.joinpath("src")
+    tbump.git.run_git(src_path, "remote", "add", "origin", remote_path)
+    tbump.git.run_git(src_path, "push", "-u", "origin", "master")
 
 
 def test_replaces(tmp_path, test_path, monkeypatch):
-    setup_test(test_path, tmp_path, monkeypatch)
-    tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    tbump.main.main(["-C", src_path, "1.2.42-alpha-1"])
 
-    toml_path = tmp_path.joinpath("tbump.toml")
+    toml_path = src_path.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.42-alpha-1"
 
@@ -49,32 +65,42 @@ def test_replaces(tmp_path, test_path, monkeypatch):
 
 
 def test_commit_and_tag(tmp_path, test_path, monkeypatch):
-    setup_test(test_path, tmp_path, monkeypatch)
-    tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    tbump.main.main(["-C", src_path, "1.2.42-alpha-1"])
 
-    rc, out = tbump.git.run_git(tmp_path, "log", "--oneline", raises=False)
+    rc, out = tbump.git.run_git(src_path, "log", "--oneline", raises=False)
     assert rc == 0
     assert "Bump to 1.2.42-alpha-1" in out
 
-    rc, out = tbump.git.run_git(tmp_path, "tag", "--list", raises=False)
+    rc, out = tbump.git.run_git(src_path, "tag", "--list", raises=False)
     assert rc == 0
     assert out == "v1.2.42-alpha-1"
 
 
 def test_abort_if_dirty(tmp_path, test_path, monkeypatch, message_recorder):
-    setup_test(test_path, tmp_path, monkeypatch)
-    tmp_path.joinpath("VERSION").write_text("unstaged changes\n", append=True)
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    src_path.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
     with pytest.raises(SystemExit) as e:
-        tbump.main.main(["-C", tmp_path, "1.2.42-alpha-1"])
+        tbump.main.main(["-C", src_path, "1.2.42-alpha-1"])
     assert message_recorder.find("dirty")
 
 
 def test_abort_if_tag_exists(tmp_path, test_path, monkeypatch, message_recorder):
-
-    setup_test(test_path, tmp_path, monkeypatch)
-    tbump.git.run_git(tmp_path, "tag", "v1.2.42")
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    tbump.git.run_git(src_path, "tag", "v1.2.42")
 
     with pytest.raises(SystemExit) as e:
-        tbump.main.main(["-C", tmp_path, "1.2.42"])
+        tbump.main.main(["-C", src_path, "1.2.42"])
     assert message_recorder.find("1.2.42 already exists")
+
+
+def test_push(tmp_path, test_path, monkeypatch, message_recorder, mock):
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    ask_mock = mock.patch("ui.ask_yes_no")
+    ask_mock.return_value = True
+    tbump.main.main(["-C", src_path, "--push", "1.2.42"])
+    ask_mock.assert_called_with("OK to push", default=False)
+    rc, out = tbump.git.run_git(src_path, "ls-remote", raises=False)
+    assert rc == 0
+    assert "tags/v1.2.42" in out

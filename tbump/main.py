@@ -70,6 +70,25 @@ def tag(working_path, tag):
     run_git(working_path, "tag", tag)
 
 
+def get_current_branch(working_path):
+    cmd = ("rev-parse", "--abbrev-ref", "HEAD")
+    rc, out = run_git(working_path, *cmd, raises=False)
+    if rc != 0:
+        ui.fatal("Failed to get current ref")
+    if out == "HEAD":
+        ui.fatal("Not on any branch")
+    return out
+
+
+def get_tracking_ref(working_path):
+    rc, out = run_git(working_path,
+                      "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
+                      raises=False)
+    if rc != 0:
+        ui.fatal("Failed to get tracking ref")
+    return out
+
+
 def parse_config():
     config = tbump.config.parse(path.Path("tbump.toml"))
     return config
@@ -90,6 +109,7 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
+    parser.add_argument("--push", action="store_true")
     args = parser.parse_args(args=args)
     working_dir = args.working_dir
     new_version = args.new_version
@@ -104,6 +124,9 @@ def main(args=None):
     working_path = path.Path.getcwd()
 
     check_dirty(working_path)
+    branch_name = get_current_branch(working_path)
+    tracking_ref = get_tracking_ref(working_path)
+    remote_name, remote_branch = tracking_ref.split("/", maxsplit=1)
 
     tag_name = config.tag_template.format(new_version=new_version)
     check_ref_does_not_exists(working_path, tag_name)
@@ -114,3 +137,9 @@ def main(args=None):
     commit(working_path, message)
 
     tag(working_path, tag_name)
+
+    if args.push:
+        answer = ui.ask_yes_no("OK to push", default=False)
+        if answer:
+            run_git(working_path, "push", remote_name, remote_branch, verbose=True)
+            run_git(working_path, "push", remote_name, tag_name, verbose=True)

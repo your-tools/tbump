@@ -3,7 +3,7 @@ import subprocess
 import ui
 
 
-def run_git(working_path, *cmd, raises=True):
+def run_git(working_path, *cmd, raises=True, verbose=False):
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
     options = dict()
@@ -11,7 +11,8 @@ def run_git(working_path, *cmd, raises=True):
         options["stdout"] = subprocess.PIPE
         options["stderr"] = subprocess.STDOUT
 
-    ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
+    if verbose:
+        ui.info_3(*git_cmd)
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)
 
     if raises:
