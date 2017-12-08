@@ -9,6 +9,8 @@ import ui
 import tbump.config
 from tbump.git import run_git
 
+TBUMP_VERSION = "0.0.2"
+
 
 def display_diffs(file_path, diffs):
     ui.info_2("Patching",
@@ -113,6 +115,7 @@ def main(args=None):
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
     parser.add_argument("--push", action="store_true")
+    parser.add_argument("--version", action="version", version=TBUMP_VERSION)
     args = parser.parse_args(args=args)
     working_dir = args.working_dir
     new_version = args.new_version

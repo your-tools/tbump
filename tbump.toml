@@ -1,4 +1,3 @@
-
 [git]
 message_template  = "Bump to {new_version}"
 tag_template = "v{new_version}"
@@ -8,3 +7,7 @@ current = "0.0.2"
 
 [[file]]
 src = "setup.py"
+
+
+[[file]]
+src = "tbump/main.py"
