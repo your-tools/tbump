@@ -1,6 +1,7 @@
 tbump: bump software releases
 =============================
 
+
 Installation
 ------------
 
@@ -39,3 +40,13 @@ Then run:
 * Make a commit based on the ``message_template``
 
 * Make a tag based on the ``tag_template``
+
+* Ask wether to push the current branch and the tag (unless ``--no-interactive`` is used)
+
+
+Screenshot
+-----------
+
+Here's what a typical usage of ``tbump`` looks like:
+
+.. image:: scrot.png
