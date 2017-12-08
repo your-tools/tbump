@@ -17,7 +17,7 @@ def display_diffs(file_path, diffs):
               ui.reset, ui.bold, file_path)
     for old, new in diffs:
         ui.info(ui.red, "-", old)
-        ui.info(ui.green, "+", old)
+        ui.info(ui.green, "+", new)
 
 
 def should_replace(line, old_string, search=None):
@@ -32,10 +32,11 @@ def replace_in_file(file_path, old_string, new_string, search=None):
     diffs = list()
     new_lines = list()
     for old_line in old_lines:
-        new_line = old_line
         if should_replace(old_line, old_string, search):
             new_line = old_line.replace(old_string, new_string)
             diffs.append((old_line, new_line))
+        else:
+            new_line = old_line
         new_lines.append(new_line)
     if not diffs:
         ui.fatal("File", file_path, "did not change")
