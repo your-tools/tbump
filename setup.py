@@ -11,7 +11,7 @@ def get_long_description():
 
 
 setup(name="tbump",
-      version="0.0.4",
+      version="0.0.5",
       description="Bump software releases",
       long_description=get_long_description(),
       url="https://github.com/SuperTanker/tbump",

@@ -3,7 +3,7 @@ message_template  = "Bump to {new_version}"
 tag_template = "v{new_version}"
 
 [version]
-current = "0.0.4"
+current = "0.0.5"
 
 [[file]]
 src = "setup.py"
