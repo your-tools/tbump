@@ -95,6 +95,23 @@ def test_abort_if_tag_exists(tmp_path, test_path, monkeypatch, message_recorder)
     assert message_recorder.find("1.2.42 already exists")
 
 
+def test_abort_if_file_does_not_change(tmp_path, test_path, monkeypatch, message_recorder):
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    invalid_src = src_path.joinpath("foo.txt")
+    invalid_src.write_text("this is foo")
+    tbump_path = src_path.joinpath("tbump.toml")
+    tbump_path.write_text("""\
+    [[file]]
+    src = "foo.txt"
+    """, append=True)
+    tbump.git.run_git(src_path, "add", ".")
+    tbump.git.run_git(src_path, "commit", "--message", "add foo.txt")
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", src_path, "1.2.42"])
+    assert "foo.txt did not change"
+
+
 def test_push(tmp_path, test_path, monkeypatch, message_recorder, mock):
     src_path = setup_test(test_path, tmp_path, monkeypatch)
     ask_mock = mock.patch("ui.ask_yes_no")

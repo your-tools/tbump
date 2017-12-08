@@ -22,6 +22,7 @@ setup(name="tbump",
         "attrs",
         "path.py",
         "python-cli-ui",
+        "schema",
         "toml",
       ],
       classifiers=[

@@ -1,0 +1,6 @@
+[version]
+current = "0.42"
+
+[git]
+message_template = "Release {new_version}"
+tag_template = "v{version}"  # should be "v{new_version}"

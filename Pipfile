@@ -7,13 +7,15 @@ verify_ssl = true
 
 [packages]
 
-toml = "*"
-"path.py" = "*"
 attrs = "*"
+"path.py" = "*"
 python-cli-ui = "*"
+schema = "*"
+toml = "*"
 
 
 [dev-packages]
 
 pytest = "*"
 pytest-sugar = "*"
+pytest-mock = "*"

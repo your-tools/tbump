@@ -3,6 +3,7 @@ import os
 import sys
 
 import path
+import schema
 import ui
 
 import tbump.config
@@ -34,6 +35,8 @@ def replace_in_file(file_path, old_string, new_string, search=None):
             new_line = old_line.replace(old_string, new_string)
             diffs.append((old_line, new_line))
         new_lines.append(new_line)
+    if not diffs:
+        ui.fatal("File", file_path, "did not change")
     display_diffs(file_path, diffs)
     file_path.write_lines(new_lines)
 
@@ -115,7 +118,12 @@ def main(args=None):
     new_version = args.new_version
     if working_dir:
         os.chdir(working_dir)
-    config = parse_config()
+    try:
+        config = parse_config()
+    except IOError as io_error:
+        ui.fatal("Could not read config file:", io_error)
+    except Exception as e:
+        ui.fatal("Invalid config:",  e)
     ui.info_1(
             "Bumping from",
             ui.reset, ui.bold, config.current_version,

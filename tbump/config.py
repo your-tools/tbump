@@ -1,7 +1,10 @@
+import os
 import re
 
 import attr
+import schema
 import toml
+import ui
 
 
 @attr.s
@@ -18,10 +21,49 @@ class File:
     search = attr.ib(default=None)
 
 
+class ValidTag():
+    message = "tag_template should contain the string {new_version}"
+
+    def validate(self, value):
+        if "{new_version}" not in value:
+            raise schema.SchemaError(self.message)
+        return True
+
+
+class ValidFile():
+    message = "src should be an existing path"
+
+    def validate(self, value):
+        if not os.path.exists(value):
+            raise schema.SchemaError(self.message)
+
+
+def validate(config):
+    file_schema = schema.Schema({
+        "src": ValidFile(),
+        schema.Optional("search"): str,
+    })
+    tbump_schema = schema.Schema(
+      {
+        "version":  {
+          "current": str,
+        },
+        "git": {
+          "message_template": str,
+          "tag_template": ValidTag(),
+        },
+        "file": [file_schema],
+        }
+    )
+    tbump_schema.validate(config)
+
+
 def parse(cfg_path):
     parsed = None
     with cfg_path.open() as stream:
         parsed = toml.load(stream)
+
+    validate(parsed)
     config = Config(
         current_version=parsed["version"]["current"]
     )

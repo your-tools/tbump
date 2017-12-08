@@ -1,15 +1,16 @@
 import re
 
 import path
+import pytest
+import schema
 
 import tbump.config
 
 
-def test_parse_config():
+def test_happy_parse(monkeypatch):
     this_dir = path.Path(__file__).parent
-    test_cfg_path = this_dir.abspath().joinpath("tbump.toml")
-    config = tbump.config.parse(test_cfg_path)
-
+    monkeypatch.chdir(this_dir)
+    config = tbump.config.parse(path.Path("tbump.toml"))
     foo_json = tbump.config.File(
         src="package.json",
         search='"version": "{current_version}"'
@@ -22,3 +23,12 @@ def test_parse_config():
     ]
 
     assert config.current_version == "1.2.41"
+
+
+def test_wrong_syntax():
+    this_dir = path.Path(__file__).parent
+    invalid_path = this_dir.abspath().joinpath("invalid.toml")
+
+    with pytest.raises(schema.SchemaError) as e:
+        tbump.config.parse(invalid_path)
+    assert "should contain" in e.value.args[0]
