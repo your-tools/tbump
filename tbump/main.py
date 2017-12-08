@@ -114,7 +114,7 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
-    parser.add_argument("--push", action="store_true")
+    parser.add_argument("--non-interactive", dest="interactive", action="store_false")
     parser.add_argument("--version", action="version", version=TBUMP_VERSION)
     args = parser.parse_args(args=args)
     working_dir = args.working_dir
@@ -149,7 +149,7 @@ def main(args=None):
 
     tag(working_path, tag_name)
 
-    if args.push:
+    if args.interactive:
         answer = ui.ask_yes_no("OK to push", default=False)
         if answer:
             run_git(working_path, "push", remote_name, remote_branch, verbose=True)
