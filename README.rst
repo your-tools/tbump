@@ -1,6 +1,11 @@
 tbump: bump software releases
 =============================
 
+.. image:: https://img.shields.io/travis/SuperTanker/tbump.svg?branch=master
+  :target: https://travis-ci.org/SuperTanker/tbump
+
+.. image:: https://img.shields.io/github/license/SuperTanker/tbump.svg
+  :target: https://github.com/SuperTanker/tbump/blob/master/LICENSE
 
 Installation
 ------------
