@@ -54,4 +54,4 @@ Screenshot
 
 Here's what a typical usage of ``tbump`` looks like:
 
-.. image:: scrot.png
+.. image:: https://raw.githubusercontent.com/SuperTanker/tbump/master/scrot.png
