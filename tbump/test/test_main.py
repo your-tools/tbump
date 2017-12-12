@@ -121,3 +121,12 @@ def test_interactive_push(tmp_path, test_path, monkeypatch, message_recorder, mo
     rc, out = tbump.git.run_git(src_path, "ls-remote", raises=False)
     assert rc == 0
     assert "tags/v1.2.42" in out
+
+
+def test_do_not_add_untracked_files(tmp_path, test_path, monkeypatch):
+    src_path = setup_test(test_path, tmp_path, monkeypatch)
+    src_path.joinpath("untracked.txt").write_text("please don't add me")
+    tbump.main.main(["-C", src_path, "1.2.42", "--non-interactive"])
+    rc, out = tbump.git.run_git(src_path, "show", "--stat", "HEAD", raises=False)
+    assert rc == 0
+    assert "untracked.txt" not in out

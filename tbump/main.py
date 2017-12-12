@@ -61,7 +61,7 @@ def check_dirty(working_path):
 
 def commit(working_path, message):
     ui.info_2("Making bump commit")
-    run_git(working_path, "add", ".")
+    run_git(working_path, "add", "--update")
     run_git(working_path, "commit", "--message", message)
 
 
