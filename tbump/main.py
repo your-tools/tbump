@@ -9,7 +9,7 @@ import ui
 import tbump.config
 from tbump.git import run_git
 
-TBUMP_VERSION = "0.0.6"
+TBUMP_VERSION = "0.0.7"
 
 
 def display_diffs(file_path, diffs):
