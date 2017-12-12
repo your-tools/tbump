@@ -153,5 +153,7 @@ def main(args=None):
     if args.interactive:
         answer = ui.ask_yes_no("OK to push", default=False)
         if answer:
-            run_git(working_path, "push", remote_name, remote_branch, verbose=True)
-            run_git(working_path, "push", remote_name, tag_name, verbose=True)
+            run_git(working_path, "push",
+                    remote_name,
+                    remote_branch, tag_name,
+                    verbose=True)
