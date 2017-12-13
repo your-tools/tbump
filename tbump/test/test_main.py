@@ -27,9 +27,8 @@ def test_abort_if_file_does_not_exist(test_repo, message_recorder):
     test_repo.joinpath("package.json").remove()
     tbump.git.run_git(test_repo, "add", "--update")
     tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
-    print(e.value)
     assert message_recorder.find("package.json does not exist")
 
 
@@ -48,7 +47,7 @@ def test_commit_and_tag(test_repo):
 def test_abort_if_dirty(test_repo, message_recorder):
     test_repo.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("dirty")
 
@@ -56,7 +55,7 @@ def test_abort_if_dirty(test_repo, message_recorder):
 def test_abort_if_tag_exists(test_repo, message_recorder):
     tbump.git.run_git(test_repo, "tag", "v1.2.42")
 
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("1.2.42 already exists")
 
