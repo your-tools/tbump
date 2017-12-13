@@ -7,7 +7,7 @@ import schema
 import tbump.config
 
 
-def test_happy_parse(monkeypatch):
+def test_happy_parse(monkeypatch, complex_version_regex):
     this_dir = path.Path(__file__).parent
     monkeypatch.chdir(this_dir)
     config = tbump.config.parse(path.Path("tbump.toml"))
@@ -16,13 +16,19 @@ def test_happy_parse(monkeypatch):
         search='"version": "{current_version}"'
     )
     version_txt = tbump.config.File(src="VERSION")
+    pub_js = tbump.config.File(
+        src="pub.js",
+        version_template="{major}.{minor}.{patch}")
+
+    assert config.version_regex.pattern == complex_version_regex.pattern
 
     assert config.files == [
         foo_json,
         version_txt,
+        pub_js,
     ]
 
-    assert config.current_version == "1.2.41"
+    assert config.current_version == "1.2.41-alpha-1"
 
 
 def test_wrong_syntax():

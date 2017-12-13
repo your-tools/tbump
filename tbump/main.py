@@ -102,12 +102,23 @@ def parse_config():
 
 def bump_version(config, new_version):
     current_version = config.current_version
+    version_regex = config.version_regex
+    current_groups = version_regex.match(current_version).groupdict()
+    new_groups = version_regex.match(new_version).groupdict()
     for file in config.files:
         file_path = path.Path(file.src)
+        if file.version_template:
+            file_current_version = file.version_template.format(**current_groups)
+            file_new_version = file.version_template.format(**new_groups)
+        else:
+            file_current_version = current_version
+            file_new_version = new_version
+
         to_search = None
         if file.search:
-            to_search = file.search.format(current_version=current_version)
-        replace_in_file(file_path, current_version, new_version, search=to_search)
+            to_search = file.search.format(current_version=file_current_version)
+
+        replace_in_file(file_path, file_current_version, file_new_version, search=to_search)
     replace_in_file(path.Path("tbump.toml"), current_version, new_version)
 
 

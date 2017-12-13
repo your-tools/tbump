@@ -19,33 +19,34 @@ def assert_in_file(file_name, expected_line):
 
 
 def test_replaces(test_repo):
-    tbump.main.main(["-C", test_repo, "1.2.42-alpha-1", "--non-interactive"])
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
-    assert new_toml["version"]["current"] == "1.2.42-alpha-1"
+    assert new_toml["version"]["current"] == "1.2.41-alpha-2"
 
-    assert_in_file("package.json", '"version": "1.2.42-alpha-1"')
-    assert_in_file("package.json", '"other-dep": "1.2.41"')
+    assert_in_file("package.json", '"version": "1.2.41-alpha-2"')
+    assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
+    assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
 def test_commit_and_tag(test_repo):
-    tbump.main.main(["-C", test_repo, "1.2.42-alpha-1", "--non-interactive"])
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
     rc, out = tbump.git.run_git(test_repo, "log", "--oneline", raises=False)
     assert rc == 0
-    assert "Bump to 1.2.42-alpha-1" in out
+    assert "Bump to 1.2.41-alpha-2" in out
 
     rc, out = tbump.git.run_git(test_repo, "tag", "--list", raises=False)
     assert rc == 0
-    assert out == "v1.2.42-alpha-1"
+    assert out == "v1.2.41-alpha-2"
 
 
 def test_abort_if_dirty(test_repo, message_recorder):
     test_repo.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
     with pytest.raises(SystemExit) as e:
-        tbump.main.main(["-C", test_repo, "1.2.42-alpha-1", "--non-interactive"])
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("dirty")
 
 

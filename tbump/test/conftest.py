@@ -17,6 +17,23 @@ def test_path():
     return this_dir.abspath()
 
 
+@pytest.fixture
+def complex_version_regex():
+    pattern = """\
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (
+    -
+    (?P<channel>alpha|beta)
+    -
+    (?P<release>\d+)
+  )?
+  """
+    return re.compile(pattern, re.VERBOSE)
+
 
 def setup_repo(tmp_path, test_path):
     src_path = tmp_path.joinpath("src")
