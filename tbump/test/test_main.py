@@ -22,17 +22,8 @@ def setup_test(test_path, tmp_path, monkeypatch):
     src_path = tmp_path.joinpath("src")
     src_path.mkdir()
     test_path.joinpath("tbump.toml").copy(src_path)
-    src_path.joinpath("VERSION").write_text("1.2.41")
-    src_path.joinpath("package.json").write_text(textwrap.dedent("""
-    {
-       "name": "foo",
-       "version": "1.2.41",
-       "dependencies": {
-         "some-dep": "1.3",
-         "other-dep": "1.2.41"
-       }
-    }
-    """))
+    test_path.joinpath("VERSION").copy(src_path)
+    test_path.joinpath("package.json").copy(src_path)
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
