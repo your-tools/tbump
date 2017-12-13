@@ -1,5 +1,6 @@
 [version]
 current = "0.42"
+regex = ".*"
 
 [git]
 message_template = "Release {new_version}"

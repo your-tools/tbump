@@ -27,6 +27,13 @@ Create a ``tbump.toml`` file looking like:
 
     [version]
     current = "1.2.41"
+    regex = '''
+      (?P<major>\d+)
+      \.
+      (?P<minor>\d+)
+      \.
+      (?P<patch>\d+)
+    '''
 
     [git]
     message_template = "Bump to {new_version}"

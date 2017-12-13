@@ -42,7 +42,7 @@ def validate(config):
       {
         "version":  {
           "current": str,
-          schema.Optional("regex"): str,
+          "regex": str,
         },
         "git": {
           "message_template": str,
