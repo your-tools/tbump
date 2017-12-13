@@ -5,17 +5,10 @@ import toml
 import path
 import pytest
 from ui.tests.conftest import message_recorder
+from tbump.test.conftest import assert_in_file
 
 import tbump.main
 import tbump.git
-
-
-def assert_in_file(file_name, expected_line):
-    file_path = path.Path(file_name)
-    for line in file_path.lines():
-        if expected_line in line:
-            return
-    assert False, "No line found matching %s" % expected_line
 
 
 def test_replaces(test_repo):
@@ -28,6 +21,16 @@ def test_replaces(test_repo):
     assert_in_file("package.json", '"version": "1.2.41-alpha-2"')
     assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
+
+
+def test_abort_if_file_does_not_exist(test_repo, message_recorder):
+    test_repo.joinpath("package.json").remove()
+    tbump.git.run_git(test_repo, "add", "--update")
+    tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
+    with pytest.raises(SystemExit) as e:
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+    print(e.value)
+    assert message_recorder.find("package.json does not exist")
 
 
 def test_commit_and_tag(test_repo):

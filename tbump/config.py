@@ -32,17 +32,9 @@ class ValidTag():
         return True
 
 
-class ValidFile():
-    message = "src should be an existing path"
-
-    def validate(self, value):
-        if not os.path.exists(value):
-            raise schema.SchemaError(self.message)
-
-
 def validate(config):
     file_schema = schema.Schema({
-        "src": ValidFile(),
+        "src": str,
         schema.Optional("search"): str,
         schema.Optional("version_template"): str,
     })

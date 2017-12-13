@@ -35,6 +35,19 @@ def complex_version_regex():
     return re.compile(pattern, re.VERBOSE)
 
 
+def assert_in_file(*args):
+    parts = args[0:-1]
+    first = parts[0]
+    rest = parts[1:]
+    last = parts[-1]
+    expected_line = args[-1]
+    file_path = path.Path(first).joinpath(*rest)
+    for line in file_path.lines():
+        if expected_line in line:
+            return
+    assert False, "No line found matching %s in %s" % (expected_line, last)
+
+
 def setup_repo(tmp_path, test_path):
     src_path = tmp_path.joinpath("src")
     src_path.mkdir()
