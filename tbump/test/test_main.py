@@ -18,7 +18,7 @@ def assert_in_file(file_name, expected_line):
     assert False, "No line found matching %s" % expected_line
 
 
-def setup_test(test_path, tmp_path, monkeypatch):
+def setup_test(test_path, tmp_path):
     src_path = tmp_path.joinpath("src")
     src_path.mkdir()
     test_path.joinpath("tbump.toml").copy(src_path)
@@ -43,8 +43,8 @@ def setup_remote(tmp_path):
     tbump.git.run_git(src_path, "push", "-u", "origin", "master")
 
 
-def test_replaces(tmp_path, test_path, monkeypatch):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_replaces(tmp_path, test_path):
+    src_path = setup_test(test_path, tmp_path)
     tbump.main.main(["-C", src_path, "1.2.42-alpha-1", "--non-interactive"])
 
     toml_path = src_path.joinpath("tbump.toml")
@@ -55,8 +55,8 @@ def test_replaces(tmp_path, test_path, monkeypatch):
     assert_in_file("package.json", '"other-dep": "1.2.41"')
 
 
-def test_commit_and_tag(tmp_path, test_path, monkeypatch):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_commit_and_tag(tmp_path, test_path):
+    src_path = setup_test(test_path, tmp_path)
     tbump.main.main(["-C", src_path, "1.2.42-alpha-1", "--non-interactive"])
 
     rc, out = tbump.git.run_git(src_path, "log", "--oneline", raises=False)
@@ -68,8 +68,8 @@ def test_commit_and_tag(tmp_path, test_path, monkeypatch):
     assert out == "v1.2.42-alpha-1"
 
 
-def test_abort_if_dirty(tmp_path, test_path, monkeypatch, message_recorder):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_abort_if_dirty(tmp_path, test_path, message_recorder):
+    src_path = setup_test(test_path, tmp_path)
     src_path.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
     with pytest.raises(SystemExit) as e:
@@ -77,8 +77,8 @@ def test_abort_if_dirty(tmp_path, test_path, monkeypatch, message_recorder):
     assert message_recorder.find("dirty")
 
 
-def test_abort_if_tag_exists(tmp_path, test_path, monkeypatch, message_recorder):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_abort_if_tag_exists(tmp_path, test_path, message_recorder):
+    src_path = setup_test(test_path, tmp_path)
     tbump.git.run_git(src_path, "tag", "v1.2.42")
 
     with pytest.raises(SystemExit) as e:
@@ -86,8 +86,8 @@ def test_abort_if_tag_exists(tmp_path, test_path, monkeypatch, message_recorder)
     assert message_recorder.find("1.2.42 already exists")
 
 
-def test_abort_if_file_does_not_change(tmp_path, test_path, monkeypatch, message_recorder):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_abort_if_file_does_not_change(tmp_path, test_path, message_recorder):
+    src_path = setup_test(test_path, tmp_path)
     invalid_src = src_path.joinpath("foo.txt")
     invalid_src.write_text("this is foo")
     tbump_path = src_path.joinpath("tbump.toml")
@@ -103,8 +103,8 @@ def test_abort_if_file_does_not_change(tmp_path, test_path, monkeypatch, message
     assert "foo.txt did not change"
 
 
-def test_interactive_push(tmp_path, test_path, monkeypatch, message_recorder, mock):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_interactive_push(tmp_path, test_path, message_recorder, mock):
+    src_path = setup_test(test_path, tmp_path)
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = True
     tbump.main.main(["-C", src_path, "1.2.42"])
@@ -114,8 +114,8 @@ def test_interactive_push(tmp_path, test_path, monkeypatch, message_recorder, mo
     assert "tags/v1.2.42" in out
 
 
-def test_do_not_add_untracked_files(tmp_path, test_path, monkeypatch):
-    src_path = setup_test(test_path, tmp_path, monkeypatch)
+def test_do_not_add_untracked_files(tmp_path, test_path):
+    src_path = setup_test(test_path, tmp_path)
     src_path.joinpath("untracked.txt").write_text("please don't add me")
     tbump.main.main(["-C", src_path, "1.2.42", "--non-interactive"])
     rc, out = tbump.git.run_git(src_path, "show", "--stat", "HEAD", raises=False)
