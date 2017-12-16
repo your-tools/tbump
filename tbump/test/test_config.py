@@ -94,7 +94,7 @@ def test_invalid_regex(tmp_path):
         [[file]]
         src = "VERSION"
         """,
-        "unterminated subpattern"
+        "Key 'regex' error"
     )
 
 
