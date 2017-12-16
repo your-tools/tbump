@@ -23,6 +23,12 @@ def test_replaces(test_repo):
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
+def test_new_version_does_not_match(test_repo, message_recorder):
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.41a2", "--non-interactive"])
+    assert message_recorder.find("Could not parse 1.2.41a2")
+
+
 def test_abort_if_file_does_not_exist(test_repo, message_recorder):
     test_repo.joinpath("package.json").remove()
     tbump.git.run_git(test_repo, "add", "--update")

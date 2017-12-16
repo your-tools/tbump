@@ -82,12 +82,18 @@ class FileBumper():
         self.new_version = None
         self.new_groups = None
 
+    def parse_version(self, version):
+        match = self.version_regex.fullmatch(version)
+        if match is None:
+            ui.fatal("Could not parse", version, "as a valid version string")
+        return match.groupdict()
+
     def set_config(self, config):
         self.files = config.files
         self.check_files_exist()
         self.version_regex = config.version_regex
         self.current_version = config.current_version
-        self.current_groups = self.version_regex.match(self.current_version).groupdict()
+        self.current_groups = self.parse_version(self.current_version)
 
     def check_files_exist(self):
         for file in self.files:
@@ -97,7 +103,7 @@ class FileBumper():
 
     def compute_changes(self, new_version):
         self.new_version = new_version
-        self.new_groups = self.version_regex.match(new_version).groupdict()
+        self.new_groups = self.parse_version(self.new_version)
         res = list()
         tbump_toml_change = Change("tbump.toml", self.current_version, new_version)
         res.append(tbump_toml_change)
