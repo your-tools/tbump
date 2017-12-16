@@ -12,4 +12,4 @@ install:
 
 script:
   - pipenv check
-  - pipenv run pytest
+  - pipenv run pytest --cov . --cov-report term-missing
