@@ -1,3 +1,4 @@
+import collections
 import sys
 
 import attr
@@ -9,24 +10,17 @@ import tbump.git
 
 
 @attr.s
-class Replacement:
+class Change:
     src = attr.ib()
     old = attr.ib()
     new = attr.ib()
     search = attr.ib(default=None)
 
 
-def display_changes(file_path, changes):
-    ui.info_2("Patching",
-              ui.reset, ui.bold, file_path)
-    changed = False
-    for old, new in changes:
-        if old != new:
-            changed = True
-            ui.info(ui.red, "-", old)
-            ui.info(ui.green, "+", new)
-    if not changed:
-        ui.info(ui.brown, "No changes")
+@attr.s
+class Replacement:
+    old = attr.ib()
+    new = attr.ib()
 
 
 def should_replace(line, old_string, search=None):
@@ -36,21 +30,40 @@ def should_replace(line, old_string, search=None):
         return (old_string in line) and (search in line)
 
 
-def replace_in_file(file_path, old_string, new_string, search=None):
-    old_lines = file_path.lines(retain=False)
-    changes = list()
-    new_lines = list()
-    for old_line in old_lines:
+def find_replacements(file_path, old_string, new_string, search=None):
+    old_lines = file_path.lines()
+    replacements = dict()
+    for i, old_line in enumerate(old_lines):
         if should_replace(old_line, old_string, search):
             new_line = old_line.replace(old_string, new_string)
-            changes.append((old_line, new_line))
+            replacements[i] = Replacement(old_line, new_line)
+    return replacements
+
+
+def display_replacements(file_path, replacements):
+    ui.info_2("Patching",
+              ui.reset, ui.bold, file_path.basename())
+    changed = False
+    for replacement in replacements.values():
+        if replacement.old != replacement.new:
+            changed = True
+            ui.info(ui.red, "-", replacement.old, end="")
+            ui.info(ui.green, "+", replacement.new, end="")
+    if not changed:
+        ui.info(ui.brown, "No changes")
+
+
+def replace_in_file(file_path, replacements):
+    display_replacements(file_path, replacements)
+    new_contents = ""
+    old_lines = file_path.lines()
+    for i, old_line in enumerate(old_lines):
+        replacement = replacements.get(i)
+        if replacement:
+            new_contents += replacement.new
         else:
-            new_line = old_line
-        new_lines.append(new_line)
-    if not changes:
-        ui.fatal("File", file_path, "did not change")
-    display_changes(file_path, changes)
-    file_path.write_lines(new_lines)
+            new_contents += old_line
+    file_path.write_text(new_contents)
 
 
 class FileBumper():
@@ -80,7 +93,7 @@ class FileBumper():
         self.new_version = new_version
         self.new_groups = self.version_regex.match(new_version).groupdict()
         res = list()
-        tbump_toml_change = Replacement("tbump.toml", self.current_version, new_version)
+        tbump_toml_change = Change("tbump.toml", self.current_version, new_version)
         res.append(tbump_toml_change)
         for file in self.files:
             change = self.compute_changes_for_file(file)
@@ -99,11 +112,25 @@ class FileBumper():
         if file.search:
             to_search = file.search.format(current_version=current_version)
 
-        return Replacement(file.src, current_version, new_version,
-                           search=to_search)
+        return Change(file.src, current_version, new_version, search=to_search)
         return res
 
     def apply_changes(self, changes):
+        todo = collections.OrderedDict()
+        errors = list()
         for change in changes:
             file_path = path.Path(self.working_path).joinpath(change.src)
-            replace_in_file(file_path, change.old, change.new, search=change.search)
+            replacements = find_replacements(file_path, change.old, change.new,
+                                             search=change.search)
+            todo[file_path] = replacements
+            if not replacements:
+                errors.append(change.src)
+
+        if errors:
+            message = [" Some files did not match the old version string\n"]
+            for error in errors:
+                message.extend([ui.reset, " * ", ui.bold, error, "\n"])
+            ui.fatal(*message, sep="", end="")
+
+        for file_path, replacements in todo.items():
+            replace_in_file(file_path, replacements)

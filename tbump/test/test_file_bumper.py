@@ -11,13 +11,13 @@ def test_file_bumper(test_repo):
     bumper.set_config(config)
     changes = bumper.compute_changes(new_version="1.2.41-alpha-2")
     assert changes == [
-        tbump.file_bumper.Replacement("tbump.toml", "1.2.41-alpha-1", "1.2.41-alpha-2"),
-        tbump.file_bumper.Replacement(
+        tbump.file_bumper.Change("tbump.toml", "1.2.41-alpha-1", "1.2.41-alpha-2"),
+        tbump.file_bumper.Change(
             "package.json", "1.2.41-alpha-1", "1.2.41-alpha-2",
             search='"version": "1.2.41-alpha-1"',
         ),
-        tbump.file_bumper.Replacement("VERSION", "1.2.41-alpha-1", "1.2.41-alpha-2"),
-        tbump.file_bumper.Replacement("pub.js", "1.2.41", "1.2.41"),
+        tbump.file_bumper.Change("VERSION", "1.2.41-alpha-1", "1.2.41-alpha-2"),
+        tbump.file_bumper.Change("pub.js", "1.2.41", "1.2.41"),
     ]
 
     bumper.apply_changes(changes)

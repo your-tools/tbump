@@ -60,7 +60,7 @@ def test_abort_if_tag_exists(test_repo, message_recorder):
     assert message_recorder.find("1.2.42 already exists")
 
 
-def test_abort_if_file_does_not_change(test_repo, message_recorder):
+def test_abort_if_file_does_not_match(test_repo, message_recorder):
     invalid_src = test_repo.joinpath("foo.txt")
     invalid_src.write_text("this is foo")
     tbump_path = test_repo.joinpath("tbump.toml")
@@ -74,6 +74,8 @@ def test_abort_if_file_does_not_change(test_repo, message_recorder):
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("did not match")
+    assert message_recorder.find("foo\.txt")
+    assert_in_file("VERSION", "1.2.41-alpha-1")
 
 
 def test_interactive_push(test_repo, message_recorder, mock):
