@@ -2,6 +2,7 @@ import pytest
 
 import tbump.file_bumper
 from tbump.test.conftest import assert_in_file
+from ui.tests.conftest import message_recorder
 
 
 def test_file_bumper(test_repo):
@@ -25,3 +26,85 @@ def test_file_bumper(test_repo):
     assert_in_file(test_repo, "package.json", '"version": "1.2.41-alpha-2"')
     assert_in_file(test_repo, "package.json", '"other-dep": "1.2.41-alpha-1"')
     assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
+
+
+def test_looking_for_empty_groups(tmp_path, message_recorder):
+    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path.write_text(
+        """
+        [version]
+        current = "1.2"
+        regex = '''
+            (?P<major>\d+)
+            \.
+            (?P<minor>\d+)
+            (
+              \.
+              (?P<patch>\d+)
+            )?
+        '''
+
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "foo"
+        version_template = "{major}.{minor}.{patch}"
+
+        """
+    )
+    foo_path = tmp_path.joinpath("foo")
+    foo_path.write_text(
+        """
+        version = "1.2"
+        """
+    )
+    config = tbump.config.parse(tbump_path)
+    bumper = tbump.file_bumper.FileBumper(tmp_path)
+    bumper.set_config(config)
+    with pytest.raises(SystemExit) as e:
+        bumper.compute_changes(new_version="1.3.1")
+    assert message_recorder.find("refusing to look for version containing 'None'")
+
+
+def test_replacing_with_empty_groups(tmp_path, message_recorder):
+    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path.write_text(
+        """
+        [version]
+        current = "1.2.3"
+        regex = '''
+            (?P<major>\d+)
+            \.
+            (?P<minor>\d+)
+            (
+              \.
+              (?P<patch>\d+)
+            )?
+        '''
+
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "foo"
+        version_template = "{major}.{minor}.{patch}"
+
+        """
+    )
+    foo_path = tmp_path.joinpath("foo")
+    foo_path.write_text(
+        """
+        version = "1.2.3"
+        """
+    )
+
+    bumper = tbump.file_bumper.FileBumper(tmp_path)
+    config = tbump.config.parse(tbump_path)
+    bumper.set_config(config)
+    with pytest.raises(SystemExit):
+        changes = bumper.compute_changes(new_version="1.3")
+
+    assert message_recorder.find("refusing to replace by version containing 'None'")

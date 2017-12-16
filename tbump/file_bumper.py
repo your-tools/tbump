@@ -30,6 +30,20 @@ def should_replace(line, old_string, search=None):
         return (old_string in line) and (search in line)
 
 
+def on_version_containing_none(src, verb, version, *, groups, template):
+    message = [
+        " ", src + ":",
+        " refusing to ", verb, " version containing 'None'\n",
+    ]
+    message += [
+        "More info:\n",
+        " * version groups:  ", groups, "\n"
+        " * template:        ", template, "\n",
+        " * version:         ", version, "\n",
+    ]
+    ui.fatal(*message, end="", sep="")
+
+
 def find_replacements(file_path, old_string, new_string, search=None):
     old_lines = file_path.lines()
     replacements = dict()
@@ -115,7 +129,23 @@ class FileBumper():
     def compute_changes_for_file(self, file):
         if file.version_template:
             current_version = file.version_template.format(**self.current_groups)
+            if "None" in current_version:
+                on_version_containing_none(
+                    file.src,
+                    "look for",
+                    current_version,
+                    groups=self.current_groups,
+                    template=file.version_template
+                )
             new_version = file.version_template.format(**self.new_groups)
+            if "None" in new_version:
+                on_version_containing_none(
+                    file.src,
+                    "replace by",
+                    new_version,
+                    groups=self.new_groups,
+                    template=file.version_template
+                )
         else:
             current_version = self.current_version
             new_version = self.new_version
