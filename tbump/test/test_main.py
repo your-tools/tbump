@@ -73,7 +73,7 @@ def test_abort_if_file_does_not_change(test_repo, message_recorder):
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
-    assert "foo.txt did not change"
+    assert message_recorder.find("did not match")
 
 
 def test_interactive_push(test_repo, message_recorder, mock):
