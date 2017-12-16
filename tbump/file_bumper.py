@@ -113,7 +113,7 @@ class FileBumper():
         for file in self.files:
             expected_path = self.working_path.joinpath(file.src)
             if not expected_path.exists():
-                ui.fatal(str(expected_path), "does not exist")
+                ui.fatal(file.src, "does not exist")
 
     def compute_changes(self, new_version):
         self.new_version = new_version
