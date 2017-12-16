@@ -66,20 +66,26 @@ class GitBumper():
         tag_name = self.tag_template.format(new_version=new_version)
         self.check_ref_does_not_exists(tag_name)
 
-    def commit(self, message):
-        ui.info_2("Making bump commit")
-        self.run_git("add", "--update")
-        self.run_git("commit", "--message", message)
+    def commit(self, message, dry_run=False):
+        if dry_run:
+            ui.info_2("Would commit with message: '%s'" % message)
+        else:
+            ui.info_2("Making bump commit")
+            self.run_git("add", "--update")
+            self.run_git("commit", "--message", message)
 
-    def tag(self, tag_name):
-        ui.info_2("Creating tag", tag_name)
-        self.run_git("tag", tag_name)
+    def tag(self, tag_name, dry_run=False):
+        if dry_run:
+            ui.info_2("Would create tag:", tag_name)
+        else:
+            ui.info_2("Creating tag", tag_name)
+            self.run_git("tag", tag_name)
 
-    def bump(self, new_version):
+    def bump(self, new_version, dry_run=False):
         message = self.message_template.format(new_version=new_version)
-        self.commit(message)
+        self.commit(message, dry_run=dry_run)
         tag_name = self.tag_template.format(new_version=new_version)
-        self.tag(tag_name)
+        self.tag(tag_name, dry_run=dry_run)
 
     def push(self, new_version):
         tag_name = self.tag_template.format(new_version=new_version)

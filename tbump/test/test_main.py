@@ -94,3 +94,10 @@ def test_do_not_add_untracked_files(test_repo):
     rc, out = tbump.git.run_git(test_repo, "show", "--stat", "HEAD", raises=False)
     assert rc == 0
     assert "untracked.txt" not in out
+
+
+def test_dry_run(test_repo):
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
+
+    toml_path = test_repo.joinpath("tbump.toml")
+    assert_in_file("VERSION", "1.2.41-alpha-1")

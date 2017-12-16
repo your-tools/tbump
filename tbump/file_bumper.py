@@ -40,9 +40,13 @@ def find_replacements(file_path, old_string, new_string, search=None):
     return replacements
 
 
-def display_replacements(file_path, replacements):
-    ui.info_2("Patching",
-              ui.reset, ui.bold, file_path.basename())
+def display_replacements(file_path, replacements, dry_run=False):
+    if dry_run:
+        ui.info_2("Would patch",
+                  ui.reset, ui.bold, file_path.basename())
+    else:
+        ui.info_2("Patching",
+                  ui.reset, ui.bold, file_path.basename())
     changed = False
     for replacement in replacements.values():
         if replacement.old != replacement.new:
@@ -53,8 +57,10 @@ def display_replacements(file_path, replacements):
         ui.info(ui.brown, "No changes")
 
 
-def replace_in_file(file_path, replacements):
-    display_replacements(file_path, replacements)
+def replace_in_file(file_path, replacements, dry_run=False):
+    display_replacements(file_path, replacements, dry_run=dry_run)
+    if dry_run:
+        return
     new_contents = ""
     old_lines = file_path.lines()
     for i, old_line in enumerate(old_lines):
@@ -115,7 +121,7 @@ class FileBumper():
         return Change(file.src, current_version, new_version, search=to_search)
         return res
 
-    def apply_changes(self, changes):
+    def apply_changes(self, changes, dry_run=False):
         todo = collections.OrderedDict()
         errors = list()
         for change in changes:
@@ -133,4 +139,4 @@ class FileBumper():
             ui.fatal(*message, sep="", end="")
 
         for file_path, replacements in todo.items():
-            replace_in_file(file_path, replacements)
+            replace_in_file(file_path, replacements, dry_run=dry_run)
