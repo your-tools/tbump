@@ -54,38 +54,6 @@ def find_replacements(file_path, old_string, new_string, search=None):
     return replacements
 
 
-def display_replacements(file_path, replacements, dry_run=False):
-    if dry_run:
-        ui.info_2("Would patch",
-                  ui.reset, ui.bold, file_path.basename())
-    else:
-        ui.info_2("Patching",
-                  ui.reset, ui.bold, file_path.basename())
-    changed = False
-    for replacement in replacements.values():
-        if replacement.old != replacement.new:
-            changed = True
-            ui.info(ui.red, "-", replacement.old, end="")
-            ui.info(ui.green, "+", replacement.new, end="")
-    if not changed:
-        ui.info(ui.brown, "No changes")
-
-
-def replace_in_file(file_path, replacements, dry_run=False):
-    display_replacements(file_path, replacements, dry_run=dry_run)
-    if dry_run:
-        return
-    new_contents = ""
-    old_lines = file_path.lines()
-    for i, old_line in enumerate(old_lines):
-        replacement = replacements.get(i)
-        if replacement:
-            new_contents += replacement.new
-        else:
-            new_contents += old_line
-    file_path.write_text(new_contents)
-
-
 class FileBumper():
     def __init__(self, working_path):
         self.working_path = working_path
@@ -95,6 +63,37 @@ class FileBumper():
         self.current_groups = None
         self.new_version = None
         self.new_groups = None
+
+    def replace_in_file(self, file_path, replacements, dry_run=False):
+        self.display_replacements(file_path, replacements, dry_run=dry_run)
+        if dry_run:
+            return
+        new_contents = ""
+        old_lines = file_path.lines()
+        for i, old_line in enumerate(old_lines):
+            replacement = replacements.get(i)
+            if replacement:
+                new_contents += replacement.new
+            else:
+                new_contents += old_line
+        file_path.write_text(new_contents)
+
+    def display_replacements(self, file_path, replacements, dry_run=False):
+        relpath = self.working_path.relpathto(file_path)
+        if dry_run:
+            ui.info_2("Would patch",
+                      ui.reset, ui.bold, relpath)
+        else:
+            ui.info_2("Patching",
+                      ui.reset, ui.bold, relpath)
+        changed = False
+        for replacement in replacements.values():
+            if replacement.old != replacement.new:
+                changed = True
+                ui.info(ui.red, "-", replacement.old, end="")
+                ui.info(ui.green, "+", replacement.new, end="")
+        if not changed:
+            ui.info(ui.brown, "No changes")
 
     def parse_version(self, version):
         match = self.version_regex.fullmatch(version)
@@ -155,7 +154,6 @@ class FileBumper():
             to_search = file.search.format(current_version=current_version)
 
         return Change(file.src, current_version, new_version, search=to_search)
-        return res
 
     def apply_changes(self, changes, dry_run=False):
         todo = collections.OrderedDict()
@@ -175,4 +173,4 @@ class FileBumper():
             ui.fatal(*message, sep="", end="")
 
         for file_path, replacements in todo.items():
-            replace_in_file(file_path, replacements, dry_run=dry_run)
+            self.replace_in_file(file_path, replacements, dry_run=dry_run)
