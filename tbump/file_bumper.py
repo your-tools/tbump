@@ -162,7 +162,9 @@ class FileBumper():
             file_path = path.Path(self.working_path).joinpath(change.src)
             replacements = find_replacements(file_path, change.old, change.new,
                                              search=change.search)
-            todo[file_path] = replacements
+            if file_path not in todo:
+                todo[file_path] = dict()
+            todo[file_path].update(replacements)
             if not replacements:
                 errors.append(change.src)
 

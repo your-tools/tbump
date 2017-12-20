@@ -108,3 +108,52 @@ def test_replacing_with_empty_groups(tmp_path, message_recorder):
         changes = bumper.compute_changes(new_version="1.3")
 
     assert message_recorder.find("refusing to replace by version containing 'None'")
+
+
+def test_changing_same_file_twice(tmp_path):
+    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path.write_text(
+        """
+        [version]
+        current = "1.2.3"
+        regex = '''
+            (?P<major>\d+)
+            \.
+            (?P<minor>\d+)
+            (
+              \.
+              (?P<patch>\d+)
+            )?
+        '''
+
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "foo.c"
+        version_template = "{major}.{minor}"
+        search = "PUBLIC_VERSION"
+
+        [[file]]
+        src = "foo.c"
+        search = "FULL_VERSION"
+
+        """
+    )
+
+    foo_c = tmp_path.joinpath("foo.c")
+    foo_c.write_text(
+        """
+        #define FULL_VERSION "1.2.3"
+        #define PUBLIC_VERSION "1.2"
+        """
+    )
+    bumper = tbump.file_bumper.FileBumper(tmp_path)
+    config = tbump.config.parse(tbump_path)
+    bumper.set_config(config)
+    changes = bumper.compute_changes(new_version="1.3.0")
+    bumper.apply_changes(changes)
+
+    assert_in_file(foo_c, '#define FULL_VERSION "1.3.0"')
+    assert_in_file(foo_c, '#define PUBLIC_VERSION "1.3"')
