@@ -12,7 +12,7 @@ from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 
 
-TBUMP_VERSION = "0.0.8"
+TBUMP_VERSION = "0.0.9"
 
 
 @contextlib.contextmanager
