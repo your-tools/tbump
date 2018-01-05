@@ -1,0 +1,4 @@
+[run]
+source = tbump
+omit = tbump/test/*,setup.py
+branch = True
