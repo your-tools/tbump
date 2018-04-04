@@ -1,10 +1,8 @@
 import argparse
 import contextlib
 import os
-import sys
 
 import path
-import schema
 import ui
 
 import tbump.config

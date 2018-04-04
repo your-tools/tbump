@@ -1,5 +1,3 @@
-import sys
-
 import ui
 
 import tbump.git

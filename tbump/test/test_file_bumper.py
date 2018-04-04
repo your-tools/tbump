@@ -2,7 +2,6 @@ import pytest
 
 import tbump.file_bumper
 from tbump.test.conftest import assert_in_file
-from ui.tests.conftest import message_recorder
 
 
 def test_file_bumper(test_repo):

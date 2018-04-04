@@ -1,5 +1,4 @@
 import collections
-import sys
 
 import attr
 import path
