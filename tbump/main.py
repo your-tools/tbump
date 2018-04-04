@@ -27,6 +27,14 @@ def bump_git(git_bumper, new_version, dry_run=False):
 
 
 def main(args=None):
+    # Supress backtrace if exception derives from tbump.Error
+    try:
+        run(args)
+    except tbump.Error:
+        sys.exit(1)
+
+
+def run(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
