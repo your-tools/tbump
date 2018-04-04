@@ -45,11 +45,12 @@ class GitBumper():
         return out
 
     def get_tracking_ref(self):
+        branch_name = self.get_current_branch()
         rc, out = self.run_git(
             "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
             raises=False)
         if rc != 0:
-            ui.fatal("Failed to get tracking ref")
+            ui.fatal("Current branch (%s)" % branch_name, "does not track anything. Cannot push.")
         return out
 
     def check_ref_does_not_exists(self, tag_name):
@@ -59,7 +60,7 @@ class GitBumper():
 
     def check_state(self, new_version):
         self.check_dirty()
-        branch_name = self.get_current_branch()
+        self.get_current_branch()
         tracking_ref = self.get_tracking_ref()
         self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
 
