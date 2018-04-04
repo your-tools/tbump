@@ -1,16 +1,22 @@
 import argparse
 import contextlib
 import os
+import sys
 
 import path
 import ui
 
+import tbump
 import tbump.config
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 
 
 TBUMP_VERSION = "1.0.0"
+
+
+class InvalidConfig(tbump.Error):
+    pass
 
 
 @contextlib.contextmanager
@@ -37,9 +43,11 @@ def main(args=None):
     try:
         config = tbump.config.parse(path.Path("tbump.toml"))
     except IOError as io_error:
-        ui.fatal("Could not read config file:", io_error)
+        ui.error("Could not read config file:", io_error)
+        raise InvalidConfig(io_error)
     except Exception as e:
-        ui.fatal("Invalid config:",  e)
+        ui.error("Invalid config:",  e)
+        raise InvalidConfig(e)
     bumping_message = [
         "Bumping from",
         ui.reset, ui.bold, config.current_version,

@@ -3,6 +3,22 @@ import ui
 import tbump.git
 
 
+class DirtyRepository(tbump.git.GitError):
+    pass
+
+
+class NotOnAnyBranch(tbump.git.GitError):
+    pass
+
+
+class NoTrackedBranch(tbump.git.GitError):
+    pass
+
+
+class RefAlreadyExists(tbump.git.GitError):
+    pass
+
+
 class GitBumper():
     def __init__(self, repo_path):
         self.repo_path = repo_path
@@ -31,7 +47,7 @@ class GitBumper():
         if dirty:
             ui.error("Repository is dirty")
             ui.info(out)
-            sys.exit(1)
+            raise DirtyRepository()
 
     def get_current_branch(self):
         cmd = ("rev-parse", "--abbrev-ref", "HEAD")
@@ -39,7 +55,8 @@ class GitBumper():
         if rc != 0:
             ui.fatal("Failed to get current ref")
         if out == "HEAD":
-            ui.fatal("Not on any branch")
+            ui.error("Not on any branch")
+            raise NotOnAnyBranch()
         return out
 
     def get_tracking_ref(self):
@@ -48,13 +65,16 @@ class GitBumper():
             "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
             raises=False)
         if rc != 0:
-            ui.fatal("Current branch (%s)" % branch_name, "does not track anything. Cannot push.")
+            ui.error("Current branch (%s)" % branch_name,
+                     "does not track anything. Cannot push.")
+            raise NoTrackedBranch()
         return out
 
     def check_ref_does_not_exists(self, tag_name):
         rc, _ = self.run_git("rev-parse", tag_name, raises=False)
         if rc == 0:
-            ui.fatal("git ref", tag_name, "already exists")
+            ui.error("git ref", tag_name, "already exists")
+            raise RefAlreadyExists(ref=tag_name)
 
     def check_state(self, new_version):
         self.check_dirty()

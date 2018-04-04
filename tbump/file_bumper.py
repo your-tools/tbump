@@ -4,6 +4,7 @@ import attr
 import path
 import ui
 
+import tbump
 import tbump.config
 import tbump.git
 
@@ -20,6 +21,22 @@ class Change:
 class Replacement:
     old = attr.ib()
     new = attr.ib()
+
+
+class BadSubstitution(tbump.Error):
+    pass
+
+
+class InvalidVersion(tbump.Error):
+    pass
+
+
+class SourceFileNotFound(tbump.Error):
+    pass
+
+
+class OldVersionNotFound(tbump.Error):
+    pass
 
 
 def should_replace(line, old_string, search=None):
@@ -40,7 +57,8 @@ def on_version_containing_none(src, verb, version, *, groups, template):
         " * template:        ", template, "\n",
         " * version:         ", version, "\n",
     ]
-    ui.fatal(*message, end="", sep="")
+    ui.error(*message, end="", sep="")
+    raise BadSubstitution(src=src, version=version, groups=groups, template=template)
 
 
 def find_replacements(file_path, old_string, new_string, search=None):
@@ -97,7 +115,8 @@ class FileBumper():
     def parse_version(self, version):
         match = self.version_regex.fullmatch(version)
         if match is None:
-            ui.fatal("Could not parse", version, "as a valid version string")
+            ui.error("Could not parse", version, "as a valid version string")
+            raise InvalidVersion(version=version, regex=self.version_regex)
         return match.groupdict()
 
     def set_config(self, config):
@@ -111,7 +130,8 @@ class FileBumper():
         for file in self.files:
             expected_path = self.working_path.joinpath(file.src)
             if not expected_path.exists():
-                ui.fatal(file.src, "does not exist")
+                ui.error(file.src, "does not exist")
+                raise SourceFileNotFound(src=file.src)
 
     def compute_changes(self, new_version):
         self.new_version = new_version
@@ -171,7 +191,8 @@ class FileBumper():
             message = [" Some files did not match the old version string\n"]
             for error in errors:
                 message.extend([ui.reset, " * ", ui.bold, error, "\n"])
-            ui.fatal(*message, sep="", end="")
+            ui.error(*message, sep="", end="")
+            raise OldVersionNotFound(sources=errors)
 
         for file_path, replacements in todo.items():
             self.replace_in_file(file_path, replacements, dry_run=dry_run)

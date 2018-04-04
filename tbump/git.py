@@ -2,6 +2,12 @@ import subprocess
 
 import ui
 
+import tbump
+
+
+class GitError(tbump.Error):
+    pass
+
 
 def run_git(working_path, *cmd, raises=True, verbose=False):
     git_cmd = list(cmd)
@@ -24,7 +30,8 @@ def run_git(working_path, *cmd, raises=True, verbose=False):
     returncode = process.returncode
     if raises:
         if returncode != 0:
-            ui.fatal(" ".join(git_cmd), "failed")
+            ui.error(" ".join(cmd), " failed")
+            raise GitError(cmd)
     else:
         if out.endswith('\n'):
             out = out.strip('\n')

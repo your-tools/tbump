@@ -23,5 +23,5 @@ def test_git_bumper_no_tracking_ref(test_repo):
     git_bumper.set_config(config)
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.git_bumper.NoTrackedBranch):
         git_bumper.check_state("1.2.42")

@@ -1,6 +1,8 @@
 import toml
 from tbump.test.conftest import assert_in_file
 
+import pytest
+
 import tbump.main
 import tbump.git
 
@@ -18,18 +20,20 @@ def test_replaces(test_repo):
 
 
 def test_new_version_does_not_match(test_repo, message_recorder):
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.file_bumper.InvalidVersion) as e:
         tbump.main.main(["-C", test_repo, "1.2.41a2", "--non-interactive"])
     assert message_recorder.find("Could not parse 1.2.41a2")
+    assert e.value.version == "1.2.41a2"
 
 
 def test_abort_if_file_does_not_exist(test_repo, message_recorder):
     test_repo.joinpath("package.json").remove()
     tbump.git.run_git(test_repo, "add", "--update")
     tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.file_bumper.SourceFileNotFound) as e:
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("package.json does not exist")
+    assert e.value.src == "package.json"
 
 
 def test_commit_and_tag(test_repo):
@@ -47,7 +51,7 @@ def test_commit_and_tag(test_repo):
 def test_abort_if_dirty(test_repo, message_recorder):
     test_repo.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.git_bumper.DirtyRepository):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("dirty")
 
@@ -55,9 +59,10 @@ def test_abort_if_dirty(test_repo, message_recorder):
 def test_abort_if_tag_exists(test_repo, message_recorder):
     tbump.git.run_git(test_repo, "tag", "v1.2.42")
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.git_bumper.RefAlreadyExists) as e:
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
-    assert message_recorder.find("1.2.42 already exists")
+    assert message_recorder.find("v1.2.42 already exists")
+    assert e.value.ref == "v1.2.42"
 
 
 def test_abort_if_file_does_not_match(test_repo, message_recorder):
@@ -71,11 +76,12 @@ def test_abort_if_file_does_not_match(test_repo, message_recorder):
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "add foo.txt")
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(tbump.file_bumper.OldVersionNotFound) as e:
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("did not match")
     assert message_recorder.find("foo\.txt")
     assert_in_file("VERSION", "1.2.41-alpha-1")
+    assert e.value.sources == ["foo.txt"]
 
 
 def test_interactive_push(test_repo, message_recorder, mock):
@@ -98,6 +104,4 @@ def test_do_not_add_untracked_files(test_repo):
 
 def test_dry_run(test_repo):
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
-
-    toml_path = test_repo.joinpath("tbump.toml")
     assert_in_file("VERSION", "1.2.41-alpha-1")
