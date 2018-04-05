@@ -82,6 +82,24 @@ def test_abort_if_file_does_not_match(test_repo, message_recorder):
     assert e.value.sources == ["foo.txt"]
 
 
+def test_no_tracked_branch__interactive__ask_to_skip_push(test_repo, mock):
+    ask_mock = mock.patch("ui.ask_yes_no")
+    ask_mock.return_value = True
+    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
+
+    tbump.main.run(["-C", test_repo, "1.2.42"])
+
+    ask_mock.assert_called_with("Continue anyway?", default=False)
+    assert_in_file("VERSION", "1.2.42")
+
+
+def test_no_tracked_branch__non_interactive__abort(test_repo, mock):
+    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
+
+    with pytest.raises(tbump.git_bumper.NoTrackedBranch):
+        tbump.main.run(["-C", test_repo, "1.2.42", "--non-interactive"])
+
+
 def test_interactive_push(test_repo, message_recorder, mock):
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = True
