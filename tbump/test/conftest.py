@@ -5,9 +5,6 @@ import pytest
 
 import tbump.git
 
-from ui.tests.conftest import message_recorder
-message_recorder
-
 
 @pytest.fixture()
 def tmp_path(tmpdir):

@@ -24,19 +24,36 @@ class Replacement:
 
 
 class BadSubstitution(tbump.Error):
-    pass
+    def print_error(self):
+        message = [
+            " ", self.src + ":",
+            " refusing to ", self.verb, " version containing 'None'\n",
+        ]
+        message += [
+            "More info:\n",
+            " * version groups:  ", self.groups, "\n"
+            " * template:        ", self.template, "\n",
+            " * version:         ", self.version, "\n",
+        ]
+        ui.error(*message, end="", sep="")
 
 
 class InvalidVersion(tbump.Error):
-    pass
+    def print_error(self):
+        ui.error("Could not parse", self.version, "as a valid version string")
 
 
 class SourceFileNotFound(tbump.Error):
-    pass
+    def print_error(self):
+        ui.error(self.src, "does not exist")
 
 
 class OldVersionNotFound(tbump.Error):
-    pass
+    def print_error(self):
+        message = [" Some files did not match the old version string\n"]
+        for src in self.src:
+            message.extend([ui.reset, " * ", ui.bold, src, "\n"])
+        ui.error(*message, sep="", end="")
 
 
 def should_replace(line, old_string, search=None):
@@ -47,17 +64,6 @@ def should_replace(line, old_string, search=None):
 
 
 def on_version_containing_none(src, verb, version, *, groups, template):
-    message = [
-        " ", src + ":",
-        " refusing to ", verb, " version containing 'None'\n",
-    ]
-    message += [
-        "More info:\n",
-        " * version groups:  ", groups, "\n"
-        " * template:        ", template, "\n",
-        " * version:         ", version, "\n",
-    ]
-    ui.error(*message, end="", sep="")
     raise BadSubstitution(src=src, version=version, groups=groups, template=template)
 
 
@@ -115,7 +121,6 @@ class FileBumper():
     def parse_version(self, version):
         match = self.version_regex.fullmatch(version)
         if match is None:
-            ui.error("Could not parse", version, "as a valid version string")
             raise InvalidVersion(version=version, regex=self.version_regex)
         return match.groupdict()
 
@@ -130,7 +135,6 @@ class FileBumper():
         for file in self.files:
             expected_path = self.working_path.joinpath(file.src)
             if not expected_path.exists():
-                ui.error(file.src, "does not exist")
                 raise SourceFileNotFound(src=file.src)
 
     def compute_changes(self, new_version):
@@ -188,10 +192,6 @@ class FileBumper():
                 errors.append(change.src)
 
         if errors:
-            message = [" Some files did not match the old version string\n"]
-            for error in errors:
-                message.extend([ui.reset, " * ", ui.bold, error, "\n"])
-            ui.error(*message, sep="", end="")
             raise OldVersionNotFound(sources=errors)
 
         for file_path, replacements in todo.items():

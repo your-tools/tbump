@@ -16,7 +16,11 @@ TBUMP_VERSION = "1.0.0"
 
 
 class InvalidConfig(tbump.Error):
-    pass
+    def print_error(self):
+        if self.io_error:
+            ui.error("Could not read config file:", self.io_error)
+        if self.parse_error:
+            ui.error("Invalid config:",  self.parse_error)
 
 
 class Cancelled(tbump.Error):
@@ -27,7 +31,8 @@ def main(args=None):
     # Supress backtrace if exception derives from tbump.Error
     try:
         run(args)
-    except tbump.Error:
+    except tbump.Error as error:
+        error.print_error()
         sys.exit(1)
 
 
@@ -62,11 +67,9 @@ class Runner(metaclass=abc.ABCMeta):
         try:
             config = tbump.config.parse(tbump_path)
         except IOError as io_error:
-            ui.error("Could not read config file:", io_error)
-            raise InvalidConfig(io_error)
-        except Exception as e:
-            ui.error("Invalid config:",  e)
-            raise InvalidConfig(e)
+            raise InvalidConfig(io_error=io_error)
+        except Exception as parse_error:
+            raise InvalidConfig(parse_error=parse_error)
         return config
 
     def handle_working_dir(args):
@@ -116,7 +119,8 @@ class InteractiveRunner(Runner):
     def check(self):
         try:
             self.git_bumper.check_state(self.new_version)
-        except tbump.git_bumper.NoTrackedBranch:
+        except tbump.git_bumper.NoTrackedBranch as e:
+            e.print_error()
             self.tracked_branch = False
             proceed = ui.ask_yes_no("Continue anyway?", default=False)
             if not proceed:
