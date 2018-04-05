@@ -68,7 +68,7 @@ Then run:
   configuration
 
 * Make a commit based on the ``message_template``. (Using
-* Make a tag based on the ``tag_template``
+* Make an **annotated** tag based on the ``tag_template``
 
 * Ask wether to push the current branch and the tag (unless ``--no-interactive`` is used)
 
