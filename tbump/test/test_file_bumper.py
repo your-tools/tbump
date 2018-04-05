@@ -2,7 +2,6 @@ import pytest
 
 import tbump.file_bumper
 from tbump.test.conftest import assert_in_file
-from ui.tests.conftest import message_recorder
 
 
 def test_file_bumper(test_repo):
@@ -28,7 +27,7 @@ def test_file_bumper(test_repo):
     assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
-def test_looking_for_empty_groups(tmp_path, message_recorder):
+def test_looking_for_empty_groups(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         """
@@ -63,12 +62,13 @@ def test_looking_for_empty_groups(tmp_path, message_recorder):
     config = tbump.config.parse(tbump_path)
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config(config)
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
         bumper.compute_changes(new_version="1.3.1")
-    assert message_recorder.find("refusing to look for version containing 'None'")
+    assert e.value.src == "foo"
+    assert e.value.groups == {"major": "1", "minor": "2", "patch": None}
 
 
-def test_replacing_with_empty_groups(tmp_path, message_recorder):
+def test_replacing_with_empty_groups(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         """
@@ -104,10 +104,9 @@ def test_replacing_with_empty_groups(tmp_path, message_recorder):
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     config = tbump.config.parse(tbump_path)
     bumper.set_config(config)
-    with pytest.raises(SystemExit):
-        changes = bumper.compute_changes(new_version="1.3")
-
-    assert message_recorder.find("refusing to replace by version containing 'None'")
+    with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
+        bumper.compute_changes(new_version="1.3")
+    assert e.value.groups == {"major": "1", "minor": "3", "patch": None}
 
 
 def test_changing_same_file_twice(tmp_path):
