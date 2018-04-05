@@ -12,8 +12,7 @@ def test_git_bumper_happy_path(test_repo):
     git_bumper.check_state("1.2.42")
     test_repo.joinpath("VERSION").write_text("1.2.42")
     git_bumper.bump("1.2.42")
-    rc, out = tbump.git.run_git(test_repo, "log", "--oneline", raises=False)
-    assert rc == 0
+    _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
     assert "Bump to 1.2.42" in out
 
 

@@ -35,10 +35,12 @@ class GitBumper():
         full_args = [self.repo_path] + list(args)
         return tbump.git.run_git(*full_args, **kwargs)
 
+    def run_git_captured(self, *args, **kwargs):
+        full_args = [self.repo_path] + list(args)
+        return tbump.git.run_git_captured(*full_args, **kwargs)
+
     def check_dirty(self):
-        rc, out = self.run_git("status", "--porcelain", raises=False)
-        if rc != 0:
-            ui.fatal("git status failed")
+        _, out = self.run_git_captured("status", "--porcelain")
         dirty = False
         for line in out.splitlines():
             # Ignore untracked files
@@ -51,9 +53,7 @@ class GitBumper():
 
     def get_current_branch(self):
         cmd = ("rev-parse", "--abbrev-ref", "HEAD")
-        rc, out = self.run_git(*cmd, raises=False)
-        if rc != 0:
-            ui.fatal("Failed to get current ref")
+        _, out = self.run_git_captured(*cmd)
         if out == "HEAD":
             ui.error("Not on any branch")
             raise NotOnAnyBranch()
@@ -61,9 +61,9 @@ class GitBumper():
 
     def get_tracking_ref(self):
         branch_name = self.get_current_branch()
-        rc, out = self.run_git(
+        rc, out = self.run_git_captured(
             "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
-            raises=False)
+            check=False)
         if rc != 0:
             ui.error("Current branch (%s)" % branch_name,
                      "does not track anything. Cannot push.")
@@ -71,7 +71,7 @@ class GitBumper():
         return out
 
     def check_ref_does_not_exists(self, tag_name):
-        rc, _ = self.run_git("rev-parse", tag_name, raises=False)
+        rc, _ = self.run_git_captured("rev-parse", tag_name, check=False)
         if rc == 0:
             ui.error("git ref", tag_name, "already exists")
             raise RefAlreadyExists(ref=tag_name)

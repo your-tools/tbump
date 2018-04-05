@@ -39,12 +39,10 @@ def test_abort_if_file_does_not_exist(test_repo, message_recorder):
 def test_commit_and_tag(test_repo):
     tbump.main.run(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
-    rc, out = tbump.git.run_git(test_repo, "log", "--oneline", raises=False)
-    assert rc == 0
+    _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
     assert "Bump to 1.2.41-alpha-2" in out
 
-    rc, out = tbump.git.run_git(test_repo, "tag", "--list", raises=False)
-    assert rc == 0
+    _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
     assert out == "v1.2.41-alpha-2"
 
 
@@ -89,16 +87,14 @@ def test_interactive_push(test_repo, message_recorder, mock):
     ask_mock.return_value = True
     tbump.main.run(["-C", test_repo, "1.2.42"])
     ask_mock.assert_called_with("OK to push", default=False)
-    rc, out = tbump.git.run_git(test_repo, "ls-remote", raises=False)
-    assert rc == 0
+    _, out = tbump.git.run_git_captured(test_repo, "ls-remote")
     assert "tags/v1.2.42" in out
 
 
 def test_do_not_add_untracked_files(test_repo):
     test_repo.joinpath("untracked.txt").write_text("please don't add me")
     tbump.main.run(["-C", test_repo, "1.2.42", "--non-interactive"])
-    rc, out = tbump.git.run_git(test_repo, "show", "--stat", "HEAD", raises=False)
-    assert rc == 0
+    _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
 
 
