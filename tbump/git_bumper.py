@@ -79,7 +79,7 @@ class GitBumper():
             ui.info_2("Would create tag:", tag_name)
         else:
             ui.info_2("Creating tag", tag_name)
-            self.run_git("tag", tag_name)
+            self.run_git("tag", "--annotate", "--message", tag_name, tag_name)
 
     def bump(self, new_version, dry_run=False):
         message = self.message_template.format(new_version=new_version)
