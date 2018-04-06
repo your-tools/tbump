@@ -67,7 +67,8 @@ Then run:
 * Replace the string ``1.2.41`` by ``1.2.42`` in every file listed in the
   configuration
 
-* Make a commit based on the ``message_template``. (Using
+* Make a commit based on the ``message_template``.
+
 * Make an **annotated** tag based on the ``tag_template``
 
 * Ask wether to push the current branch and the tag (unless ``--no-interactive`` is used)
