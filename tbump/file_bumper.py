@@ -51,7 +51,7 @@ class SourceFileNotFound(tbump.Error):
 class OldVersionNotFound(tbump.Error):
     def print_error(self):
         message = [" Some files did not match the old version string\n"]
-        for src in self.src:
+        for src in self.sources:
             message.extend([ui.reset, " * ", ui.bold, src, "\n"])
         ui.error(*message, sep="", end="")
 
@@ -64,7 +64,7 @@ def should_replace(line, old_string, search=None):
 
 
 def on_version_containing_none(src, verb, version, *, groups, template):
-    raise BadSubstitution(src=src, version=version, groups=groups, template=template)
+    raise BadSubstitution(src=src, verb=verb, version=version, groups=groups, template=template)
 
 
 def find_replacements(file_path, old_string, new_string, search=None):

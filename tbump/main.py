@@ -16,6 +16,10 @@ TBUMP_VERSION = "1.0.1"
 
 
 class InvalidConfig(tbump.Error):
+    def __init__(self, io_error=None, parse_error=None):
+        self.io_error = io_error
+        self.parse_error = parse_error
+
     def print_error(self):
         if self.io_error:
             ui.error("Could not read config file:", self.io_error)
@@ -24,7 +28,8 @@ class InvalidConfig(tbump.Error):
 
 
 class Cancelled(tbump.Error):
-    pass
+    def print_error(self):
+        ui.error("Cancelled by user")
 
 
 def main(args=None):
@@ -71,10 +76,6 @@ class Runner(metaclass=abc.ABCMeta):
         except Exception as parse_error:
             raise InvalidConfig(parse_error=parse_error)
         return config
-
-    def handle_working_dir(args):
-        if args.working_dir:
-            os.chdir(args.working_dir)
 
     def setup_git_bumper(self):
         git_bumper = GitBumper(self.working_path)
@@ -124,7 +125,7 @@ class InteractiveRunner(Runner):
             self.tracked_branch = False
             proceed = ui.ask_yes_no("Continue anyway?", default=False)
             if not proceed:
-                raise Cancelled()
+                raise Cancelled from None
 
     def push(self):
         if self.dry_run:
