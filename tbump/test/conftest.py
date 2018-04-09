@@ -1,4 +1,5 @@
 import re
+import os
 
 import path
 import pytest
@@ -36,6 +37,13 @@ def complex_version_regex():
   )?
   """
     return re.compile(pattern, re.VERBOSE)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def restore_cwd():
+    old_cwd = os.getcwd()
+    yield
+    os.chdir(old_cwd)
 
 
 def assert_in_file(*args):
