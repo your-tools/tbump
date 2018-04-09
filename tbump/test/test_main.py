@@ -19,6 +19,24 @@ def test_replaces(test_repo):
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
+def test_tbump_toml_not_found(test_repo, message_recorder):
+    toml_path = test_repo.joinpath("tbump.toml")
+    toml_path.remove()
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+    assert message_recorder.find("No such file")
+
+
+def test_tbump_toml_bad_syntax(test_repo, message_recorder):
+    toml_path = test_repo.joinpath("tbump.toml")
+    bad_toml = toml.loads(toml_path.text())
+    del bad_toml["git"]
+    toml_path.write_text(toml.dumps(bad_toml))
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+    assert message_recorder.find("Missing keys")
+
+
 def test_new_version_does_not_match(test_repo, message_recorder):
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41a2", "--non-interactive"])
@@ -78,28 +96,42 @@ def test_abort_if_file_does_not_match(test_repo, message_recorder):
     assert_in_file("VERSION", "1.2.41-alpha-1")
 
 
-def test_no_tracked_branch__interactive__ask_to_skip_push(test_repo, mock):
+def test_no_tracked_branch_proceed_and_skip_push(test_repo, mock):
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = True
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
-    tbump.main.run(["-C", test_repo, "1.2.42"])
+    tbump.main.main(["-C", test_repo, "1.2.42"])
 
     ask_mock.assert_called_with("Continue anyway?", default=False)
     assert_in_file("VERSION", "1.2.42")
 
 
-def test_no_tracked_branch__non_interactive__abort(test_repo, mock):
+def test_no_tracked_branch_cancel(test_repo, mock, message_recorder):
+    ask_mock = mock.patch("ui.ask_yes_no")
+    ask_mock.return_value = False
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
-    with pytest.raises(tbump.git_bumper.NoTrackedBranch):
-        tbump.main.run(["-C", test_repo, "1.2.42", "--non-interactive"])
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.42"])
+
+    ask_mock.assert_called_with("Continue anyway?", default=False)
+    assert_in_file("VERSION", "1.2.41")
+    assert message_recorder.find("Cancelled")
+
+
+def test_no_tracked_branch_non_interactive(test_repo,  message_recorder):
+    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+    assert message_recorder.find("Cannot push")
 
 
 def test_interactive_push(test_repo, mock):
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = True
-    tbump.main.run(["-C", test_repo, "1.2.42"])
+    tbump.main.main(["-C", test_repo, "1.2.42"])
     ask_mock.assert_called_with("OK to push", default=False)
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote")
     assert "tags/v1.2.42" in out
@@ -107,11 +139,23 @@ def test_interactive_push(test_repo, mock):
 
 def test_do_not_add_untracked_files(test_repo):
     test_repo.joinpath("untracked.txt").write_text("please don't add me")
-    tbump.main.run(["-C", test_repo, "1.2.42", "--non-interactive"])
+    tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
 
 
 def test_dry_run(test_repo):
-    tbump.main.run(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
     assert_in_file("VERSION", "1.2.41-alpha-1")
+
+
+def test_bad_subsitiution(test_repo, message_recorder):
+    toml_path = test_repo.joinpath("tbump.toml")
+    new_toml = toml.loads(toml_path.text())
+    new_toml["file"][0]["version_template"] = "{release}"
+    toml_path.write_text(toml.dumps(new_toml))
+    tbump.git.run_git(test_repo, "add", ".")
+    tbump.git.run_git(test_repo, "commit", "--message", "update repo")
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.42", "--dry-run"])
+    assert message_recorder.find("refusing to replace by version containing 'None'")

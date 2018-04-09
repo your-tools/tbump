@@ -64,7 +64,7 @@ def should_replace(line, old_string, search=None):
 
 
 def on_version_containing_none(src, verb, version, *, groups, template):
-    raise BadSubstitution(src=src, version=version, groups=groups, template=template)
+    raise BadSubstitution(src=src, verb=verb, version=version, groups=groups, template=template)
 
 
 def find_replacements(file_path, old_string, new_string, search=None):
