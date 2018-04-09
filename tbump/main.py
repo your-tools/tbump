@@ -72,10 +72,6 @@ class Runner(metaclass=abc.ABCMeta):
             raise InvalidConfig(parse_error=parse_error)
         return config
 
-    def handle_working_dir(args):
-        if args.working_dir:
-            os.chdir(args.working_dir)
-
     def setup_git_bumper(self):
         git_bumper = GitBumper(self.working_path)
         git_bumper.set_config(self.config)
