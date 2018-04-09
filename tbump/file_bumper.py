@@ -51,7 +51,7 @@ class SourceFileNotFound(tbump.Error):
 class OldVersionNotFound(tbump.Error):
     def print_error(self):
         message = [" Some files did not match the old version string\n"]
-        for src in self.src:
+        for src in self.sources:
             message.extend([ui.reset, " * ", ui.bold, src, "\n"])
         ui.error(*message, sep="", end="")
 
