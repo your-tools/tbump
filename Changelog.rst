@@ -4,7 +4,7 @@ Changelog
 v1.0.2
 ------
 
-* Fix printing a big ugly stacktrace when the looking for the old version number failed for one or more files.
+* Fix printing a big ugly stacktrace when looking for the old version number failed for one or more files.
 
 v1.0.1
 ------
