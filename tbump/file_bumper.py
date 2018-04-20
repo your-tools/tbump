@@ -1,5 +1,3 @@
-import collections
-
 import attr
 import path
 import ui
@@ -10,17 +8,19 @@ import tbump.git
 
 
 @attr.s
-class Change:
+class ChangeRequest:
     src = attr.ib()
-    old = attr.ib()
-    new = attr.ib()
+    old_string = attr.ib()
+    new_string = attr.ib()
     search = attr.ib(default=None)
 
 
 @attr.s
-class Replacement:
-    old = attr.ib()
-    new = attr.ib()
+class Patch:
+    src = attr.ib()
+    lineno = attr.ib()
+    old_line = attr.ib()
+    new_line = attr.ib()
 
 
 class BadSubstitution(tbump.Error):
@@ -49,11 +49,9 @@ class SourceFileNotFound(tbump.Error):
 
 
 class OldVersionNotFound(tbump.Error):
+    # TODO: raise just once for all errors
     def print_error(self):
-        message = [" Some files did not match the old version string\n"]
-        for src in self.sources:
-            message.extend([ui.reset, " * ", ui.bold, src, "\n"])
-        ui.error(*message, sep="", end="")
+        ui.error("Old version string: (%s)" % self.old_version_string, "not found in", self.src)
 
 
 def should_replace(line, old_string, search=None):
@@ -67,16 +65,6 @@ def on_version_containing_none(src, verb, version, *, groups, template):
     raise BadSubstitution(src=src, verb=verb, version=version, groups=groups, template=template)
 
 
-def find_replacements(file_path, old_string, new_string, search=None):
-    old_lines = file_path.lines()
-    replacements = dict()
-    for i, old_line in enumerate(old_lines):
-        if should_replace(old_line, old_string, search):
-            new_line = old_line.replace(old_string, new_string)
-            replacements[i] = Replacement(old_line, new_line)
-    return replacements
-
-
 class FileBumper():
     def __init__(self, working_path):
         self.working_path = working_path
@@ -86,37 +74,6 @@ class FileBumper():
         self.current_groups = None
         self.new_version = None
         self.new_groups = None
-
-    def replace_in_file(self, file_path, replacements, dry_run=False):
-        self.display_replacements(file_path, replacements, dry_run=dry_run)
-        if dry_run:
-            return
-        new_contents = ""
-        old_lines = file_path.lines()
-        for i, old_line in enumerate(old_lines):
-            replacement = replacements.get(i)
-            if replacement:
-                new_contents += replacement.new
-            else:
-                new_contents += old_line
-        file_path.write_text(new_contents)
-
-    def display_replacements(self, file_path, replacements, dry_run=False):
-        relpath = self.working_path.relpathto(file_path)
-        if dry_run:
-            ui.info_2("Would patch",
-                      ui.reset, ui.bold, relpath)
-        else:
-            ui.info_2("Patching",
-                      ui.reset, ui.bold, relpath)
-        changed = False
-        for replacement in replacements.values():
-            if replacement.old != replacement.new:
-                changed = True
-                ui.info(ui.red, "-", replacement.old, end="")
-                ui.info(ui.green, "+", replacement.new, end="")
-        if not changed:
-            ui.info(ui.brown, "No changes")
 
     def parse_version(self, version):
         match = self.version_regex.fullmatch(version)
@@ -137,18 +94,44 @@ class FileBumper():
             if not expected_path.exists():
                 raise SourceFileNotFound(src=file.src)
 
-    def compute_changes(self, new_version):
+    def compute_patches(self, new_version):
         self.new_version = new_version
         self.new_groups = self.parse_version(self.new_version)
-        res = list()
-        tbump_toml_change = Change("tbump.toml", self.current_version, new_version)
-        res.append(tbump_toml_change)
-        for file in self.files:
-            change = self.compute_changes_for_file(file)
-            res.append(change)
-        return res
+        change_requests = self.compute_change_requests()
+        tbump_toml_change = ChangeRequest("tbump.toml", self.current_version, new_version)
+        change_requests.append(tbump_toml_change)
+        patches = list()
+        for change_request in change_requests:
+            patches_for_request = self.compute_patches_for_change_request(change_request)
+            patches.extend(patches_for_request)
+        return patches
 
-    def compute_changes_for_file(self, file):
+    def compute_patches_for_change_request(self, change_request):
+        old_string = change_request.old_string
+        new_string = change_request.new_string
+        search = change_request.search
+
+        file_path = path.Path(self.working_path).joinpath(change_request.src)
+        old_lines = file_path.lines()
+
+        patches = list()
+        for i, old_line in enumerate(old_lines):
+            if should_replace(old_line, old_string, search):
+                new_line = old_line.replace(old_string, new_string)
+                patch = Patch(change_request.src, i, old_line, new_line)
+                patches.append(patch)
+        if not patches:
+            raise OldVersionNotFound(src=change_request.src, old_version_string=old_string)
+        return patches
+
+    def compute_change_requests(self):
+        change_requests = list()
+        for file in self.files:
+            change_request = self.compute_change_request_for_file(file)
+            change_requests.append(change_request)
+        return change_requests
+
+    def compute_change_request_for_file(self, file):
         if file.version_template:
             current_version = file.version_template.format(**self.current_groups)
             if "None" in current_version:
@@ -176,23 +159,12 @@ class FileBumper():
         if file.search:
             to_search = file.search.format(current_version=current_version)
 
-        return Change(file.src, current_version, new_version, search=to_search)
+        return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
-    def apply_changes(self, changes, dry_run=False):
-        todo = collections.OrderedDict()
-        errors = list()
-        for change in changes:
-            file_path = path.Path(self.working_path).joinpath(change.src)
-            replacements = find_replacements(file_path, change.old, change.new,
-                                             search=change.search)
-            if file_path not in todo:
-                todo[file_path] = dict()
-            todo[file_path].update(replacements)
-            if not replacements:
-                errors.append(change.src)
-
-        if errors:
-            raise OldVersionNotFound(sources=errors)
-
-        for file_path, replacements in todo.items():
-            self.replace_in_file(file_path, replacements, dry_run=dry_run)
+    def apply_patches(self, patches):
+        for patch in patches:
+            file_path = path.Path(self.working_path).joinpath(patch.src)
+            # TODO: read and write each file only once?
+            lines = file_path.lines()
+            lines[patch.lineno] = patch.new_line
+            file_path.write_lines(lines)

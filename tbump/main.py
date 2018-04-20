@@ -55,14 +55,12 @@ def parse_command_line(cmd):
 class Runner(metaclass=abc.ABCMeta):
     def __init__(self, args):
         self.new_version = args.new_version
-        self.dry_run = args.dry_run
 
         working_dir = args.working_dir or os.getcwd()
         self.working_path = path.Path(working_dir)
         os.chdir(self.working_path)
 
         self.config = self.parse_config()
-        self.display_bump()
 
         self.git_bumper = self.setup_git_bumper()
         self.file_bumper = self.setup_file_bumper()
@@ -87,35 +85,21 @@ class Runner(metaclass=abc.ABCMeta):
         file_bumper.set_config(self.config)
         return file_bumper
 
-    def display_bump(self):
-        bumping_message = [
-            "Bumping from",
-            ui.reset, ui.bold, self.config.current_version,
-            ui.reset, "to",
-            ui.reset, ui.bold, self.new_version
-        ]
-        if self.dry_run:
-            bumping_message.extend([ui.reset, ui.brown, "(dry run)"])
-        ui.info_1(*bumping_message)
-
-    @abc.abstractmethod
-    def check(self):
+    def before_bump(self, patches, git_commands):
         pass
 
     def bump(self):
-        changes = self.file_bumper.compute_changes(self.new_version)
-        self.file_bumper.apply_changes(changes, dry_run=self.dry_run)
-        self.git_bumper.bump(self.new_version, dry_run=self.dry_run)
+        patches = self.file_bumper.compute_patches(self.new_version)
+        git_commands = self.git_bumper.compute_commands(self.new_version)
+        self.before_bump(patches, git_commands)
 
-    @abc.abstractmethod
-    def push(self):
-        pass
+        self.file_bumper.apply_patches(patches)
+        self.git_bumper.run_commands(git_commands)
 
 
 class InteractiveRunner(Runner):
     def __init__(self, args):
         super().__init__(args)
-        self.tracked_branch = True
 
     def check(self):
         try:
@@ -123,18 +107,40 @@ class InteractiveRunner(Runner):
         except tbump.git_bumper.NoTrackedBranch as e:
             e.print_error()
             self.tracked_branch = False
+            print("ask_yes_no", "Continue anyway?")
             proceed = ui.ask_yes_no("Continue anyway?", default=False)
             if not proceed:
                 raise Cancelled from None
 
-    def push(self):
-        if self.dry_run:
-            return
-        if not self.tracked_branch:
-            return
-        push_ok = ui.ask_yes_no("OK to push", default=False)
-        if push_ok:
-            self.git_bumper.push(self.new_version)
+    def display_patches(self, patches):
+        # TODO: group patches by filenames
+        for patch in patches:
+            self.display_patch(patch)
+
+    def display_git_commands(self, git_commands):
+        for git_command in git_commands:
+            print("git", *git_command)
+
+    def display_bump(self):
+        bumping_message = [
+            "Bumping from",
+            ui.reset, ui.bold, self.config.current_version,
+            ui.reset, "to",
+            ui.reset, ui.bold, self.new_version
+        ]
+        ui.info_1(*bumping_message)
+
+    def display_patch(self, patch):
+        print(patch)
+
+    def before_bump(self, patches, git_commands):
+        self.display_bump()
+        self.display_patches(patches)
+        self.display_git_commands(git_commands)
+        print("ask_yes_no", "Looking good?")
+        answer = ui.ask_yes_no("Looking good?", default=False)
+        if not answer:
+            raise Cancelled from None
 
 
 class NonInteractiveRunner(Runner):
@@ -142,12 +148,8 @@ class NonInteractiveRunner(Runner):
         self.git_bumper.check_state(self.new_version)
         return True
 
-    def push(self):
-        return
-
 
 def run(cmd=None):
-
     args = parse_command_line(cmd)
     interactive = args.interactive
     if interactive:
@@ -157,4 +159,3 @@ def run(cmd=None):
 
     runner.check()
     runner.bump()
-    runner.push()
