@@ -1,4 +1,3 @@
-import re
 import os
 
 import path
@@ -19,24 +18,6 @@ def tmp_path(tmpdir):
 def test_path():
     this_dir = path.Path(__file__).parent
     return this_dir.abspath()
-
-
-@pytest.fixture
-def complex_version_regex():
-    pattern = r"""\
-  (?P<major>\d+)
-  \.
-  (?P<minor>\d+)
-  \.
-  (?P<patch>\d+)
-  (
-    -
-    (?P<channel>alpha|beta)
-    -
-    (?P<release>\d+)
-  )?
-  """
-    return re.compile(pattern, re.VERBOSE)
 
 
 @pytest.fixture(autouse=True, scope="session")

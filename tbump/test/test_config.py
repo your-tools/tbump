@@ -4,7 +4,7 @@ import schema
 import tbump.config
 
 
-def test_happy_parse(monkeypatch, complex_version_regex):
+def test_happy_parse(monkeypatch):
     this_dir = path.Path(__file__).parent
     monkeypatch.chdir(this_dir)
     config = tbump.config.parse(path.Path("tbump.toml"))
@@ -17,7 +17,20 @@ def test_happy_parse(monkeypatch, complex_version_regex):
         src="pub.js",
         version_template="{major}.{minor}.{patch}")
 
-    assert config.version_regex.pattern == complex_version_regex.pattern
+    expected_pattern = r"""  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (
+    -
+    (?P<channel>alpha|beta)
+    -
+    (?P<release>\d+)
+  )?
+  """
+
+    assert config.version_regex.pattern == expected_pattern
 
     assert config.files == [
         foo_json,
