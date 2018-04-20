@@ -1,7 +1,4 @@
-import re
-
 import path
-import pytest
 import schema
 
 import tbump.config
@@ -44,7 +41,7 @@ def check_error(tmp_path, contents, expected_message):
 def test_invalid_commit_message(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.2'
         regex = ".*"
@@ -63,7 +60,7 @@ def test_invalid_commit_message(tmp_path):
 def test_current_version_does_not_match_expected_regex(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.42a1'
         regex = '(\d+)\.(\d+)\.(\d+)'
@@ -82,7 +79,7 @@ def test_current_version_does_not_match_expected_regex(tmp_path):
 def test_invalid_regex(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.42a1'
         regex = '(unbalanced'
@@ -101,7 +98,7 @@ def test_invalid_regex(tmp_path):
 def test_invalid_custom_template(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'

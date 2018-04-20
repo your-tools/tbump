@@ -23,7 +23,7 @@ def test_path():
 
 @pytest.fixture
 def complex_version_regex():
-    pattern = """\
+    pattern = r"""\
   (?P<major>\d+)
   \.
   (?P<minor>\d+)

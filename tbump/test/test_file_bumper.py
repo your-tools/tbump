@@ -30,7 +30,7 @@ def test_file_bumper(test_repo):
 def test_looking_for_empty_groups(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
-        """
+        r"""
         [version]
         current = "1.2"
         regex = '''
@@ -71,7 +71,7 @@ def test_looking_for_empty_groups(tmp_path):
 def test_replacing_with_empty_groups(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
-        """
+        r"""
         [version]
         current = "1.2.3"
         regex = '''
@@ -112,7 +112,7 @@ def test_replacing_with_empty_groups(tmp_path):
 def test_changing_same_file_twice(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
-        """
+        r"""
         [version]
         current = "1.2.3"
         regex = '''
