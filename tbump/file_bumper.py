@@ -48,10 +48,10 @@ class SourceFileNotFound(tbump.Error):
         ui.error(self.src, "does not exist")
 
 
-class OldVersionNotFound(tbump.Error):
+class CurrentVersionNotFound(tbump.Error):
     # TODO: raise just once for all errors
     def print_error(self):
-        ui.error("Old version string: (%s)" % self.old_version_string, "not found in", self.src)
+        ui.error("Current version string: (%s)" % self.current_version_string, "not found in", self.src)
 
 
 def should_replace(line, old_string, search=None):
@@ -121,7 +121,7 @@ class FileBumper():
                 patch = Patch(change_request.src, i, old_line, new_line)
                 patches.append(patch)
         if not patches:
-            raise OldVersionNotFound(src=change_request.src, old_version_string=old_string)
+            raise CurrentVersionNotFound(src=change_request.src, current_version_string=old_string)
         return patches
 
     def compute_change_requests(self):

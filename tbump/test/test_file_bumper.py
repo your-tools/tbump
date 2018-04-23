@@ -58,7 +58,7 @@ def test_looking_for_empty_groups(tmp_path):
     assert e.value.groups == {"major": "1", "minor": "2", "patch": None}
 
 
-def test_old_version_not_found(tmp_path):
+def test_current_version_not_found(tmp_path):
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         r"""
@@ -80,7 +80,7 @@ def test_old_version_not_found(tmp_path):
 
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config(config)
-    with pytest.raises(tbump.file_bumper.OldVersionNotFound) as e:
+    with pytest.raises(tbump.file_bumper.CurrentVersionNotFound) as e:
         bumper.compute_patches(new_version="1.3.1")
     assert e.value.src == "version.txt"
     e.value.print_error()
