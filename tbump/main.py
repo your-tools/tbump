@@ -8,6 +8,7 @@ import ui
 
 import tbump
 import tbump.config
+import tbump.git
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 
@@ -93,8 +94,12 @@ class Runner(metaclass=abc.ABCMeta):
         git_commands = self.git_bumper.compute_commands(self.new_version)
         self.before_bump(patches, git_commands)
 
+        ui.info_2("Patching files", ui.ellipsis, end="")
         self.file_bumper.apply_patches(patches)
+        ui.info(ui.check)
+        ui.info_2("Running git commands", ui.ellipsis)
         self.git_bumper.run_commands(git_commands)
+        ui.info(ui.green, "Done", ui.check)
 
 
 class InteractiveRunner(Runner):
@@ -106,8 +111,6 @@ class InteractiveRunner(Runner):
             self.git_bumper.check_state(self.new_version)
         except tbump.git_bumper.NoTrackedBranch as e:
             e.print_error()
-            self.tracked_branch = False
-            print("ask_yes_no", "Continue anyway?")
             proceed = ui.ask_yes_no("Continue anyway?", default=False)
             if not proceed:
                 raise Cancelled from None
@@ -119,28 +122,45 @@ class InteractiveRunner(Runner):
 
     def display_git_commands(self, git_commands):
         for git_command in git_commands:
-            print("git", *git_command)
+            tbump.git.print_git_command(git_command)
 
-    def display_bump(self):
-        bumping_message = [
+    def display_bump(self, dry_run=False):
+        ui.info_1(
             "Bumping from",
             ui.reset, ui.bold, self.config.current_version,
             ui.reset, "to",
-            ui.reset, ui.bold, self.new_version
-        ]
-        ui.info_1(*bumping_message)
+            ui.reset, ui.bold, self.new_version, end=""
+        )
+        if dry_run:
+            ui.info(ui.brown, "(dry _run)")
+        else:
+            ui.info()
 
     def display_patch(self, patch):
-        print(patch)
+        ui.info(
+            ui.red, "- ", ui.reset,
+            ui.bold, patch.src, ":", ui.reset,
+            ui.darkgray, patch.lineno + 1, ui.reset,
+            " ", ui.red, patch.old_line.strip(),
+            sep=""
+        )
+        ui.info(
+            ui.green, "+ ", ui.reset,
+            ui.bold, patch.src, ":", ui.reset,
+            ui.darkgray, patch.lineno + 1, ui.reset,
+            " ", ui.green, patch.new_line.strip(), sep=""
+        )
 
     def before_bump(self, patches, git_commands):
         self.display_bump()
+        ui.info_2("Would patch those files")
         self.display_patches(patches)
+        ui.info_2("Would run these commands")
         self.display_git_commands(git_commands)
-        print("ask_yes_no", "Looking good?")
         answer = ui.ask_yes_no("Looking good?", default=False)
         if not answer:
             raise Cancelled from None
+        self.display_bump(dry_run=False)
 
 
 class NonInteractiveRunner(Runner):
