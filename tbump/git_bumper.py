@@ -80,11 +80,11 @@ class GitBumper():
     def check_state(self, new_version):
         self.check_dirty()
         self.get_current_branch()
-        tracking_ref = self.get_tracking_ref()
-        self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
-
         tag_name = self.tag_template.format(new_version=new_version)
         self.check_ref_does_not_exists(tag_name)
+
+        tracking_ref = self.get_tracking_ref()
+        self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
 
     def compute_commands(self, new_version):
         res = list()

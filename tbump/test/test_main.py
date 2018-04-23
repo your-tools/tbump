@@ -123,6 +123,17 @@ def test_no_tracked_branch_proceed_and_skip_push(test_repo, mock):
     assert_in_file("VERSION", "1.2.42")
 
 
+def test_no_tracked_branch_but_ref_exists(test_repo, mock, message_recorder):
+    ask_mock = mock.patch("ui.ask_yes_no")
+
+    ask_mock.return_value = [True]
+    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-1"])
+    assert message_recorder.find("already exists")
+
+
 def test_no_tracked_branch_cancel(test_repo, mock, message_recorder):
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = False
