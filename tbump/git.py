@@ -10,7 +10,13 @@ class GitError(tbump.Error):
 
 
 class GitCommandError(GitError):
-    pass
+    def print_error(self):
+        cmd_str = "git " + " ".join(self.cmd)
+        ui.error("Command", "`%s`" % cmd_str, "failed")
+
+
+def print_git_command(cmd):
+    ui.info(ui.darkgray, "$", ui.reset, "git", *cmd)
 
 
 def run_git(working_path, *cmd, verbose=False):
@@ -20,13 +26,11 @@ def run_git(working_path, *cmd, verbose=False):
 
     Raise GitCommandError if return code is non-zero.
     """
+    if verbose:
+        print_git_command(cmd)
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
 
-    if verbose:
-        ui.info_3(*git_cmd)
-    else:
-        ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
     returncode = subprocess.call(git_cmd, cwd=working_path)
     if returncode != 0:
         raise GitCommandError(cmd=cmd, working_path=working_path)

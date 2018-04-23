@@ -1,10 +1,8 @@
-import os
 import re
 
 import attr
 import schema
 import toml
-import ui
 
 
 @attr.s

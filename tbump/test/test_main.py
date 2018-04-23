@@ -59,7 +59,20 @@ def test_commit_and_tag(test_repo):
     assert "Bump to 1.2.41-alpha-2" in out
 
     _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
-    assert out == "v1.2.41-alpha-2"
+    assert "v1.2.41-alpha-2" in out
+
+
+def test_interactive_abort(test_repo, mock):
+    ask_mock = mock.patch("ui.ask_yes_no")
+    ask_mock.return_value = False
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2"])
+
+    ask_mock.assert_called_with("Looking good?", default=False)
+    assert_in_file("VERSION", "1.2.41-alpha-1")
+    rc, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
+    assert "v1.2.42-alpha-2" not in out
 
 
 def test_abort_if_dirty(test_repo, message_recorder):
@@ -91,20 +104,34 @@ def test_abort_if_file_does_not_match(test_repo, message_recorder):
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
-    assert message_recorder.find("did not match")
-    assert message_recorder.find("foo\.txt")
+    assert message_recorder.find("not found")
     assert_in_file("VERSION", "1.2.41-alpha-1")
 
 
 def test_no_tracked_branch_proceed_and_skip_push(test_repo, mock):
     ask_mock = mock.patch("ui.ask_yes_no")
-    ask_mock.return_value = True
+
+    ask_mock.return_value = [True, True]
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     tbump.main.main(["-C", test_repo, "1.2.42"])
 
-    ask_mock.assert_called_with("Continue anyway?", default=False)
+    ask_mock.assert_has_calls(
+        ask_mock.call("Continue anyway?", default=False),
+        ask_mock.call("Looking good?", default=False),
+    )
     assert_in_file("VERSION", "1.2.42")
+
+
+def test_no_tracked_branch_but_ref_exists(test_repo, mock, message_recorder):
+    ask_mock = mock.patch("ui.ask_yes_no")
+
+    ask_mock.return_value = [True]
+    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-1"])
+    assert message_recorder.find("already exists")
 
 
 def test_no_tracked_branch_cancel(test_repo, mock, message_recorder):
@@ -128,11 +155,12 @@ def test_no_tracked_branch_non_interactive(test_repo,  message_recorder):
     assert message_recorder.find("Cannot push")
 
 
-def test_interactive_push(test_repo, mock):
+def test_interactive_proceed(test_repo, mock):
     ask_mock = mock.patch("ui.ask_yes_no")
-    ask_mock.return_value = True
+
+    ask_mock.return_value = [True]
     tbump.main.main(["-C", test_repo, "1.2.42"])
-    ask_mock.assert_called_with("OK to push", default=False)
+    ask_mock.assert_called_with("Looking good?", default=False)
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote")
     assert "tags/v1.2.42" in out
 
@@ -142,11 +170,6 @@ def test_do_not_add_untracked_files(test_repo):
     tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
-
-
-def test_dry_run(test_repo):
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
-    assert_in_file("VERSION", "1.2.41-alpha-1")
 
 
 def test_bad_subsitiution(test_repo, message_recorder):

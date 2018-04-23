@@ -1,13 +1,10 @@
-import re
-
 import path
-import pytest
 import schema
 
 import tbump.config
 
 
-def test_happy_parse(monkeypatch, complex_version_regex):
+def test_happy_parse(monkeypatch):
     this_dir = path.Path(__file__).parent
     monkeypatch.chdir(this_dir)
     config = tbump.config.parse(path.Path("tbump.toml"))
@@ -20,7 +17,20 @@ def test_happy_parse(monkeypatch, complex_version_regex):
         src="pub.js",
         version_template="{major}.{minor}.{patch}")
 
-    assert config.version_regex.pattern == complex_version_regex.pattern
+    expected_pattern = r"""  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (
+    -
+    (?P<channel>alpha|beta)
+    -
+    (?P<release>\d+)
+  )?
+  """
+
+    assert config.version_regex.pattern == expected_pattern
 
     assert config.files == [
         foo_json,
@@ -44,7 +54,7 @@ def check_error(tmp_path, contents, expected_message):
 def test_invalid_commit_message(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.2'
         regex = ".*"
@@ -63,7 +73,7 @@ def test_invalid_commit_message(tmp_path):
 def test_current_version_does_not_match_expected_regex(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.42a1'
         regex = '(\d+)\.(\d+)\.(\d+)'
@@ -82,7 +92,7 @@ def test_current_version_does_not_match_expected_regex(tmp_path):
 def test_invalid_regex(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = '1.42a1'
         regex = '(unbalanced'
@@ -101,7 +111,7 @@ def test_invalid_regex(tmp_path):
 def test_invalid_custom_template(tmp_path):
     check_error(
         tmp_path,
-        """
+        r"""
         [version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'

@@ -80,33 +80,24 @@ class GitBumper():
     def check_state(self, new_version):
         self.check_dirty()
         self.get_current_branch()
-        tracking_ref = self.get_tracking_ref()
-        self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
-
         tag_name = self.tag_template.format(new_version=new_version)
         self.check_ref_does_not_exists(tag_name)
 
-    def commit(self, message, dry_run=False):
-        if dry_run:
-            ui.info_2("Would commit with message: '%s'" % message)
-        else:
-            ui.info_2("Making bump commit")
-            self.run_git("add", "--update")
-            self.run_git("commit", "--message", message)
+        tracking_ref = self.get_tracking_ref()
+        self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
 
-    def tag(self, tag_name, dry_run=False):
-        if dry_run:
-            ui.info_2("Would create tag:", tag_name)
-        else:
-            ui.info_2("Creating tag", tag_name)
-            self.run_git("tag", "--annotate", "--message", tag_name, tag_name)
-
-    def bump(self, new_version, dry_run=False):
-        message = self.message_template.format(new_version=new_version)
-        self.commit(message, dry_run=dry_run)
+    def compute_commands(self, new_version):
+        res = list()
+        res.append(["add", "--update"])
+        commit_message = self.message_template.format(new_version=new_version)
+        res.append(["commit", "--message", commit_message])
         tag_name = self.tag_template.format(new_version=new_version)
-        self.tag(tag_name, dry_run=dry_run)
+        tag_message = tag_name
+        res.append(["tag", "--annotate", "--message", tag_message, tag_name])
+        if self.remote_branch:
+            res.append(["push", self.remote_name, self.remote_branch, tag_name])
+        return res
 
-    def push(self, new_version):
-        tag_name = self.tag_template.format(new_version=new_version)
-        self.run_git("push", self.remote_name, self.remote_branch, tag_name, verbose=True)
+    def run_commands(self, commands):
+        for command in commands:
+            self.run_git(*command)

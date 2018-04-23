@@ -1,4 +1,3 @@
-import re
 import os
 
 import path
@@ -19,24 +18,6 @@ def tmp_path(tmpdir):
 def test_path():
     this_dir = path.Path(__file__).parent
     return this_dir.abspath()
-
-
-@pytest.fixture
-def complex_version_regex():
-    pattern = """\
-  (?P<major>\d+)
-  \.
-  (?P<minor>\d+)
-  \.
-  (?P<patch>\d+)
-  (
-    -
-    (?P<channel>alpha|beta)
-    -
-    (?P<release>\d+)
-  )?
-  """
-    return re.compile(pattern, re.VERBOSE)
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -69,6 +50,10 @@ def setup_repo(tmp_path, test_path):
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
+    tbump.git.run_git(src_path, "tag",
+                      "--annotate",
+                      "--message", "v1.2.41-alpha-1",
+                      "v1.2.41-alpha-1")
     return src_path
 
 
