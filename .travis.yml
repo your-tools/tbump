@@ -13,5 +13,5 @@ install:
 script:
   - pipenv check
   - pipenv run pyflakes .
-  - pipenv run pycodestlye .
+  - pipenv run pycodestyle .
   - pipenv run pytest --cov . --cov-report term-missing

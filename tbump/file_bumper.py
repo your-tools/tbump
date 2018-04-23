@@ -51,7 +51,10 @@ class SourceFileNotFound(tbump.Error):
 class CurrentVersionNotFound(tbump.Error):
     # TODO: raise just once for all errors
     def print_error(self):
-        ui.error("Current version string: (%s)" % self.current_version_string, "not found in", self.src)
+        ui.error(
+            "Current version string: (%s)" % self.current_version_string,
+            "not found in", self.src
+        )
 
 
 def should_replace(line, old_string, search=None):
