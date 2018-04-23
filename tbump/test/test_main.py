@@ -59,7 +59,7 @@ def test_commit_and_tag(test_repo):
     assert "Bump to 1.2.41-alpha-2" in out
 
     _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
-    assert out == "v1.2.41-alpha-2"
+    assert "v1.2.41-alpha-2" in out
 
 
 def test_interactive_abort(test_repo, mock):
