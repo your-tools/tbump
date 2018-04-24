@@ -47,7 +47,6 @@ def parse_command_line(cmd):
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
     parser.add_argument("--non-interactive", dest="interactive", action="store_false")
-    parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--version", action="version", version=TBUMP_VERSION)
     args = parser.parse_args(args=cmd)
     return args
