@@ -71,7 +71,11 @@ Then run:
 
 * Make an **annotated** tag based on the ``tag_template``
 
-* Ask wether to push the current branch and the tag (unless ``--no-interactive`` is used)
+* Push the current branch and the tag.
+
+Note that by default, ``tbump`` will display all the changes and stop to ask if they are correct before performing any action, allowing you to abort and re-try the bump if something is not right.
+
+You can use ``--non-interactive`` to disable this behavior.
 
 
 Advanced configuration
