@@ -7,7 +7,7 @@ v2.0.0
 * Dry run behavior is now activated by default. We start by computing all the changes and then ask if they look good before doing anything. This also means we no
   longer need to pause right before calling ``git push``. Consequently, the ``--dry-run`` option is gone.
 
-* Fix inconsistency: 'current version' was sometimes called 'old version'
+* Fix inconsistency: 'current version' was sometimes called 'old version'.
 
 v1.0.2
 ------
