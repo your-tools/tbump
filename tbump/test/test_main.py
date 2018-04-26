@@ -180,5 +180,5 @@ def test_bad_subsitiution(test_repo, message_recorder):
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update repo")
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--dry-run"])
+        tbump.main.main(["-C", test_repo, "1.2.42"])
     assert message_recorder.find("refusing to replace by version containing 'None'")
