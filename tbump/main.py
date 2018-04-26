@@ -13,7 +13,7 @@ from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 
 
-TBUMP_VERSION = "1.0.2"
+TBUMP_VERSION = "2.0.0"
 
 
 class InvalidConfig(tbump.Error):
