@@ -7,9 +7,11 @@ import tbump.main
 import tbump.git
 
 
-def test_replaces(test_repo):
+def test_end_to_end(test_repo):
+    # Run tbump
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
+    # Check file contents
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
@@ -17,6 +19,21 @@ def test_replaces(test_repo):
     assert_in_file("package.json", '"version": "1.2.41-alpha-2"')
     assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
+
+    # Check git status
+    _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
+    assert "Bump to 1.2.41-alpha-2" in out
+
+    _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
+    assert "v1.2.41-alpha-2" in out
+
+    # Check remote tag exists
+    tbump.git.run_git(test_repo, "ls-remote", "origin", "refs/tags/v1.2.41-alpha-2")
+
+    _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
+    remote_commit = out.split()[0]
+    assert remote_commit == local_commit
 
 
 def test_tbump_toml_not_found(test_repo, message_recorder):
@@ -50,16 +67,6 @@ def test_abort_if_file_does_not_exist(test_repo, message_recorder):
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("package.json does not exist")
-
-
-def test_commit_and_tag(test_repo):
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
-
-    _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
-    assert "Bump to 1.2.41-alpha-2" in out
-
-    _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
-    assert "v1.2.41-alpha-2" in out
 
 
 def test_interactive_abort(test_repo, mock):
