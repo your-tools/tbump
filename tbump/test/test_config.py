@@ -1,13 +1,11 @@
-import path
 import schema
 
 import tbump.config
 
 
-def test_happy_parse(monkeypatch):
-    this_dir = path.Path(__file__).parent
-    monkeypatch.chdir(this_dir)
-    config = tbump.config.parse(path.Path("tbump.toml"))
+def test_happy_parse(test_data_path, monkeypatch):
+    monkeypatch.chdir(test_data_path)
+    config = tbump.config.parse(test_data_path.joinpath("tbump.toml"))
     foo_json = tbump.config.File(
         src="package.json",
         search='"version": "{current_version}"'

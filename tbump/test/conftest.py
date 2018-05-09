@@ -15,9 +15,9 @@ def tmp_path(tmpdir):
 
 
 @pytest.fixture
-def test_path():
-    this_dir = path.Path(__file__).parent
-    return this_dir.abspath()
+def test_data_path():
+    this_dir = path.Path(__file__).abspath().parent
+    return this_dir.joinpath("data")
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -40,13 +40,9 @@ def assert_in_file(*args):
     assert False, "No line found matching %s in %s" % (expected_line, last)
 
 
-def setup_repo(tmp_path, test_path):
+def setup_repo(tmp_path, test_data_path):
     src_path = tmp_path.joinpath("src")
-    src_path.mkdir()
-    test_path.joinpath("tbump.toml").copy(src_path)
-    test_path.joinpath("VERSION").copy(src_path)
-    test_path.joinpath("package.json").copy(src_path)
-    test_path.joinpath("pub.js").copy(src_path)
+    test_data_path.copytree(src_path)
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
@@ -71,7 +67,7 @@ def setup_remote(tmp_path):
 
 
 @pytest.fixture
-def test_repo(tmp_path, test_path):
-    res = setup_repo(tmp_path, test_path)
+def test_repo(tmp_path, test_data_path):
+    res = setup_repo(tmp_path, test_data_path)
     setup_remote(tmp_path)
     return res
