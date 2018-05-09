@@ -11,6 +11,7 @@ import tbump.config
 import tbump.git
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
+from tbump.hooks import HooksRunner
 
 
 TBUMP_VERSION = "2.0.0"
@@ -64,6 +65,7 @@ class Runner(metaclass=abc.ABCMeta):
 
         self.git_bumper = self.setup_git_bumper()
         self.file_bumper = self.setup_file_bumper()
+        self.hooks_runner = self.setup_hooks_runner()
 
     def parse_config(self):
         tbump_path = self.working_path.joinpath("tbump.toml")
@@ -85,6 +87,12 @@ class Runner(metaclass=abc.ABCMeta):
         file_bumper.set_config(self.config)
         return file_bumper
 
+    def setup_hooks_runner(self):
+        hooks_runner = HooksRunner(self.working_path)
+        for hook in self.config.hooks:
+            hooks_runner.add_hook(hook)
+        return hooks_runner
+
     def before_bump(self, patches, git_commands):
         pass
 
@@ -96,6 +104,9 @@ class Runner(metaclass=abc.ABCMeta):
         ui.info_2("Patching files", ui.ellipsis, end="")
         self.file_bumper.apply_patches(patches)
         ui.info(ui.check)
+        if self.hooks_runner.hooks:
+            ui.info_2("Running hooks")
+            self.hooks_runner.run(self.new_version)
         ui.info_2("Running git commands", ui.ellipsis)
         self.git_bumper.run_commands(git_commands)
         ui.info(ui.green, "Done", ui.check)

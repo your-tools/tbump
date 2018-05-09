@@ -3,6 +3,7 @@ from tbump.test.conftest import assert_in_file
 
 import pytest
 
+import tbump.hooks
 import tbump.main
 import tbump.git
 
@@ -19,6 +20,8 @@ def test_end_to_end(test_repo):
     assert_in_file("package.json", '"version": "1.2.41-alpha-2"')
     assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
+
+    assert_in_file("yarn.lock", 'hello = "1.2.41-alpha-2"')
 
     # Check git status
     _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
