@@ -1,6 +1,19 @@
 Changelog
 =========
 
+
+v3.0.0
+------
+
+* New feature: you can now specify commands to be run after files have been patched and right before git commands are executed.
+
+.. code-block:: toml
+
+      [hook]
+      name = "Update Cargo.lock"
+      cmd = "cargo check"
+
+
 v2.0.0 (2018-04-26)
 -------------------
 
