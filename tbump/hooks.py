@@ -1,13 +1,23 @@
+import subprocess
+
 import attr
 import ui
 
-import subprocess
+import tbump
 
 
 @attr.s
 class Hook:
     name = attr.ib()
     cmd = attr.ib()
+
+
+class HookError(tbump.Error):
+    def print_error(self):
+        ui.error(
+            ui.reset, "`%s`" % self.cmd,
+            "exited with return code", self.rc
+        )
 
 
 def print_hook(hook):
@@ -27,4 +37,6 @@ class HooksRunner:
             hook.cmd = hook.cmd.format(new_version=new_version)
             ui.info_count(i, len(self.hooks), ui.bold, hook.name)
             print_hook(hook)
-            subprocess.run(hook.cmd, shell=True, cwd=self.working_path)
+            rc = subprocess.call(hook.cmd, shell=True, cwd=self.working_path)
+            if rc != 0:
+                raise HookError(name=hook.name, cmd=hook.cmd, rc=rc)
