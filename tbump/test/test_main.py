@@ -17,8 +17,6 @@ def check_file_contents(test_repo):
     assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
 
-    assert_in_file("yarn.lock", 'hello = "1.2.41-alpha-2"')
-
 
 def check_git_status(test_repo):
     check_local_git_status(test_repo)

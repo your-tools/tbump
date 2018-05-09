@@ -28,8 +28,3 @@ src = "VERSION"
 [[file]]
 src = "pub.js"
 version_template = "{major}.{minor}.{patch}"
-
-
-[[hook]]
-name = "fake yarn"
-cmd = "python yarn.py {new_version}"
