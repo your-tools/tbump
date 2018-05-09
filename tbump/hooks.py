@@ -25,6 +25,6 @@ class HooksRunner:
     def run(self, new_version):
         for i, hook in enumerate(self.hooks):
             hook.cmd = hook.cmd.format(new_version=new_version)
-            ui.info_count(i, len(self.hooks), hook.name)
+            ui.info_count(i, len(self.hooks), ui.bold, hook.name)
             print_hook(hook)
             subprocess.run(hook.cmd, shell=True, cwd=self.working_path)
