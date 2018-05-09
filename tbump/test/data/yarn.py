@@ -1,5 +1,5 @@
 """
-Fake yarn used for testsing hookse
+Fake yarn used for testing hooks
 
 Its only job is to update yarn.lock based on the contents of the package.json
 """

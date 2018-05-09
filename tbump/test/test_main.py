@@ -190,7 +190,7 @@ def test_do_not_add_untracked_files(test_repo):
     assert "untracked.txt" not in out
 
 
-def test_bad_subsitiution(test_repo, message_recorder):
+def test_bad_substitution(test_repo, message_recorder):
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     new_toml["file"][0]["version_template"] = "{release}"

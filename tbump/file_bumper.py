@@ -19,7 +19,8 @@ def print_patch(patch):
         ui.green, "+ ", ui.reset,
         ui.bold, patch.src, ":", ui.reset,
         ui.darkgray, patch.lineno + 1, ui.reset,
-        " ", ui.green, patch.new_line.strip(), sep=""
+        " ", ui.green, patch.new_line.strip(),
+        sep=""
     )
 
 
