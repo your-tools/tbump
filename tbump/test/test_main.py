@@ -8,11 +8,7 @@ import tbump.main
 import tbump.git
 
 
-def test_end_to_end(test_repo):
-    # Run tbump
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
-
-    # Check file contents
+def check_file_contents(test_repo):
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
@@ -23,20 +19,34 @@ def test_end_to_end(test_repo):
 
     assert_in_file("yarn.lock", 'hello = "1.2.41-alpha-2"')
 
-    # Check git status
+
+def check_git_status(test_repo):
+    check_local_git_status(test_repo)
+
+
+def check_local_git_status(test_repo):
     _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
     assert "Bump to 1.2.41-alpha-2" in out
 
     _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
     assert "v1.2.41-alpha-2" in out
 
-    # Check remote tag exists
+
+def has_pushed(test_repo, pushed=True):
     tbump.git.run_git(test_repo, "ls-remote", "origin", "refs/tags/v1.2.41-alpha-2")
 
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
-    assert remote_commit == local_commit
+    return remote_commit == local_commit
+
+
+def test_end_to_end(test_repo):
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+
+    check_file_contents(test_repo)
+    check_git_status(test_repo)
+    assert has_pushed(test_repo)
 
 
 def test_tbump_toml_not_found(test_repo, message_recorder):
