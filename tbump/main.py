@@ -14,7 +14,7 @@ from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
 
 
-TBUMP_VERSION = "2.0.0"
+TBUMP_VERSION = "3.0.0"
 
 
 class InvalidConfig(tbump.Error):
