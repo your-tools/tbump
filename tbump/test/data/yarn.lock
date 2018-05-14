@@ -1,0 +1,4 @@
+[dependencies]
+hello = "1.2.41-alpha-1"
+some-dep = "1.2.0-alpha-6"
+other-dep = "1.2.41-alpha1"

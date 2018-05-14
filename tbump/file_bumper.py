@@ -7,6 +7,23 @@ import tbump.config
 import tbump.git
 
 
+def print_patch(patch):
+    ui.info(
+        ui.red, "- ", ui.reset,
+        ui.bold, patch.src, ":", ui.reset,
+        ui.darkgray, patch.lineno + 1, ui.reset,
+        " ", ui.red, patch.old_line.strip(),
+        sep=""
+    )
+    ui.info(
+        ui.green, "+ ", ui.reset,
+        ui.bold, patch.src, ":", ui.reset,
+        ui.darkgray, patch.lineno + 1, ui.reset,
+        " ", ui.green, patch.new_line.strip(),
+        sep=""
+    )
+
+
 @attr.s
 class ChangeRequest:
     src = attr.ib()
@@ -166,6 +183,7 @@ class FileBumper():
 
     def apply_patches(self, patches):
         for patch in patches:
+            print_patch(patch)
             file_path = path.Path(self.working_path).joinpath(patch.src)
             # TODO: read and write each file only once?
             lines = file_path.lines()

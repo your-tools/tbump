@@ -100,4 +100,4 @@ class GitBumper():
 
     def run_commands(self, commands):
         for command in commands:
-            self.run_git(*command)
+            self.run_git(*command, verbose=True)

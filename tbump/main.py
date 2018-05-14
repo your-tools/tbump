@@ -11,6 +11,7 @@ import tbump.config
 import tbump.git
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
+from tbump.hooks import HooksRunner
 
 
 TBUMP_VERSION = "2.0.0"
@@ -64,6 +65,20 @@ class Runner(metaclass=abc.ABCMeta):
 
         self.git_bumper = self.setup_git_bumper()
         self.file_bumper = self.setup_file_bumper()
+        self.hooks_runner = self.setup_hooks_runner()
+
+    def display_bump(self, dry_run=False):
+        ui.info_1(
+            "Bumping from",
+            ui.reset, ui.bold, self.config.current_version,
+            ui.reset, "to",
+            ui.reset, ui.bold, self.new_version, end=""
+        )
+        if dry_run:
+            ui.info(ui.brown, "(dry _run)")
+        else:
+            ui.info()
+        ui.info()
 
     def parse_config(self):
         tbump_path = self.working_path.joinpath("tbump.toml")
@@ -85,19 +100,31 @@ class Runner(metaclass=abc.ABCMeta):
         file_bumper.set_config(self.config)
         return file_bumper
 
+    def setup_hooks_runner(self):
+        hooks_runner = HooksRunner(self.working_path)
+        for hook in self.config.hooks:
+            hooks_runner.add_hook(hook)
+        return hooks_runner
+
     def before_bump(self, patches, git_commands):
         pass
 
     def bump(self):
+        self.display_bump()
         patches = self.file_bumper.compute_patches(self.new_version)
         git_commands = self.git_bumper.compute_commands(self.new_version)
         self.before_bump(patches, git_commands)
 
-        ui.info_2("Patching files", ui.ellipsis, end="")
+        ui.info_2("Patching files")
         self.file_bumper.apply_patches(patches)
-        ui.info(ui.check)
+        if self.hooks_runner.hooks:
+            ui.info()
+            ui.info_2("Running hooks")
+            self.hooks_runner.run(self.new_version)
+        ui.info()
         ui.info_2("Running git commands", ui.ellipsis)
         self.git_bumper.run_commands(git_commands)
+        ui.info()
         ui.info(ui.green, "Done", ui.check)
 
 
@@ -115,51 +142,35 @@ class InteractiveRunner(Runner):
                 raise Cancelled from None
 
     def display_patches(self, patches):
-        # TODO: group patches by filenames
         for patch in patches:
-            self.display_patch(patch)
+            tbump.file_bumper.print_patch(patch)
 
     def display_git_commands(self, git_commands):
         for git_command in git_commands:
             tbump.git.print_git_command(git_command)
 
-    def display_bump(self, dry_run=False):
-        ui.info_1(
-            "Bumping from",
-            ui.reset, ui.bold, self.config.current_version,
-            ui.reset, "to",
-            ui.reset, ui.bold, self.new_version, end=""
-        )
-        if dry_run:
-            ui.info(ui.brown, "(dry _run)")
-        else:
-            ui.info()
-
-    def display_patch(self, patch):
-        ui.info(
-            ui.red, "- ", ui.reset,
-            ui.bold, patch.src, ":", ui.reset,
-            ui.darkgray, patch.lineno + 1, ui.reset,
-            " ", ui.red, patch.old_line.strip(),
-            sep=""
-        )
-        ui.info(
-            ui.green, "+ ", ui.reset,
-            ui.bold, patch.src, ":", ui.reset,
-            ui.darkgray, patch.lineno + 1, ui.reset,
-            " ", ui.green, patch.new_line.strip(), sep=""
-        )
+    def display_hooks(self):
+        hooks = self.hooks_runner.hooks
+        if not hooks:
+            return
+        ui.info_2("Would execute these hooks")
+        for i, hook in enumerate(hooks):
+            ui.info_count(i, len(hooks), ui.bold, hook.name)
+            tbump.hooks.print_hook(hook)
 
     def before_bump(self, patches, git_commands):
-        self.display_bump()
         ui.info_2("Would patch those files")
         self.display_patches(patches)
+        ui.info()
+        self.display_hooks()
+        ui.info()
         ui.info_2("Would run these commands")
         self.display_git_commands(git_commands)
+        ui.info()
         answer = ui.ask_yes_no("Looking good?", default=False)
         if not answer:
             raise Cancelled from None
-        self.display_bump(dry_run=False)
+        ui.info()
 
 
 class NonInteractiveRunner(Runner):

@@ -4,6 +4,8 @@ import attr
 import schema
 import toml
 
+import tbump.hooks
+
 
 @attr.s
 class Config:
@@ -12,6 +14,7 @@ class Config:
     tag_template = attr.ib(default=None)
     message_template = attr.ib(default=None)
     files = attr.ib(default=None)
+    hooks = attr.ib(default=None)
 
 
 @attr.s
@@ -58,6 +61,11 @@ def validate(config):
         schema.Optional("version_template"): str,
     })
 
+    hook_schema = schema.Schema({
+        "name": str,
+        "cmd": str,
+    })
+
     def compile_re(regex):
         return re.compile(regex, re.VERBOSE)
 
@@ -72,6 +80,7 @@ def validate(config):
           "tag_template": ValidTag(),
         },
         "file": [file_schema],
+        schema.Optional("hook"): [hook_schema]
         }
     )
     return tbump_schema.validate(config)
@@ -112,4 +121,10 @@ def parse(cfg_path):
                 current_groups
             )
         config.files.append(file_config)
+
+    config.hooks = list()
+    if "hook" in parsed:
+        for hook_dict in parsed["hook"]:
+            hook = tbump.hooks.Hook(name=hook_dict["name"], cmd=hook_dict["cmd"])
+            config.hooks.append(hook)
     return config
