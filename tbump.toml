@@ -21,3 +21,15 @@ src = "setup.py"
 
 [[file]]
 src = "tbump/main.py"
+
+[[hook]]
+name = "Run CI"
+cmd = "tools/ci.sh"
+
+[[hook]]
+name = "Check Changelog"
+cmd = "grep -q {new_version} Changelog.rst"
+
+[[hook]]
+name = "Publish to pypi"
+cmd = "tools/publish.sh"
