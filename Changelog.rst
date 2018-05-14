@@ -9,7 +9,7 @@ v3.0.0
 
 .. code-block:: toml
 
-      [hook]
+      [[hook]]
       name = "Update Cargo.lock"
       cmd = "cargo check"
 

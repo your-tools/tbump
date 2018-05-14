@@ -138,3 +138,23 @@ To do so, add a ``version_template`` option in te ``file`` section. The names us
       [[file]]
       src = "version.js"
       search = "export FULL_VERSION = '{current_version}'"
+
+
+Running commands before push
+++++++++++++++++++++++++++++
+
+You can specify a list of hooks to be run after the file have changed, but before the commit is made and pushed.
+
+Here's an example:
+
+
+.. code-block:: ini
+
+    [[hook]]
+    name = "Check Changelog"
+    cmd = "grep -q {new_version} Changelog.rst"
+
+
+The name is mandatory. The command will be executed via the shell, after the  ``{new_version}``  placehoder is replaced with the new version.
+
+Any hook that fails will interupt the bump. You may want to run ``git reset --hard`` before trying again to undo the changes made in the files.
