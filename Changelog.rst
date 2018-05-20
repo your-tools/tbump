@@ -2,12 +2,12 @@ Changelog
 =========
 
 
-v3.0.0
-------
+v3.0.0 (2018-05-14)
+--------------------
 
 * New feature: you can now specify commands to be run after files have been patched and right before git commands are executed.
 
-.. code-block:: toml
+.. code-block:: ini
 
       [[hook]]
       name = "Update Cargo.lock"
@@ -35,7 +35,7 @@ v1.0.1 (2018-04-05)
 * When the current branch does not track anything, ask if we should proceed with file replacements and automatic commit and tag (but do not push) instead of aborting immediately.
 
 v1.0.0 (2018-01-16)
-------------------
+-------------------
 
 
 * First stable release.
