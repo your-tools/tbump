@@ -10,7 +10,7 @@ import path
 import toml
 
 
-def main():
+def main() -> None:
     package_json = path.Path("package.json")
     parsed = json.loads(package_json.text())
     current_version = parsed["version"]

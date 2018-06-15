@@ -1,52 +1,57 @@
 import re
+from typing import cast, Any, Dict, List, Optional, Pattern
 
 import attr
 import schema
+from path import Path
 import toml
 
-import tbump.hooks
+from .hooks import Hook
+
+List, Optional
 
 
 @attr.s
 class Config:
-    current_version = attr.ib()
-    version_regex = attr.ib()
-    tag_template = attr.ib(default=None)
-    message_template = attr.ib(default=None)
-    files = attr.ib(default=None)
-    hooks = attr.ib(default=None)
+    current_version = attr.ib()  # type: str
+    version_regex = attr.ib()  # type: Pattern
+    tag_template = attr.ib(default="")  # type: str
+    message_template = attr.ib(default=None)  # type: str
+    files = attr.ib(default=list())  # type: List[File]
+    hooks = attr.ib(default=list())  # type: List[Hook]
 
 
 @attr.s
 class File:
-    src = attr.ib()
-    search = attr.ib(default=None)
-    version_template = attr.ib(default=None)
+    src = attr.ib()  # type: str
+    search = attr.ib(default=None)  # type: Optional[str]
+    version_template = attr.ib(default=None)  # type: Optional[str]
 
 
 class ValidTemplate():
-    def __init__(self, name, pattern):
+    def __init__(self, name: str, pattern: str) -> None:
         self.name = name
         self.pattern = pattern
         self.message = "%s should contain the string %s" % (name, pattern)
 
-    def validate(self, value):
+    def validate(self, value: str) -> str:
         if self.pattern not in value:
             raise schema.SchemaError(self.message)
         return value
 
 
 class ValidTag(ValidTemplate):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("tag_template", "{new_version}")
 
 
 class ValidMessage(ValidTemplate):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("message_template", "{new_version}")
 
 
-def validate_version_template(src, version_template, known_groups):
+def validate_version_template(src: str, version_template: str,
+                              known_groups: Dict[str, str]) -> None:
     try:
         version_template.format(**known_groups)
     except KeyError as e:
@@ -54,7 +59,7 @@ def validate_version_template(src, version_template, known_groups):
         raise schema.SchemaError(message)
 
 
-def validate(config):
+def validate(config: Dict[str, Any]) -> Config:
     file_schema = schema.Schema({
         "src": str,
         schema.Optional("search"): str,
@@ -66,7 +71,7 @@ def validate(config):
         "cmd": str,
     })
 
-    def compile_re(regex):
+    def compile_re(regex: str) -> Pattern:
         return re.compile(regex, re.VERBOSE)
 
     tbump_schema = schema.Schema(
@@ -83,10 +88,10 @@ def validate(config):
         schema.Optional("hook"): [hook_schema]
         }
     )
-    return tbump_schema.validate(config)
+    return cast(Config, tbump_schema.validate(config))
 
 
-def parse(cfg_path):
+def parse(cfg_path: Path) -> Config:
     parsed = None
     with cfg_path.open() as stream:
         parsed = toml.load(stream)
@@ -125,6 +130,6 @@ def parse(cfg_path):
     config.hooks = list()
     if "hook" in parsed:
         for hook_dict in parsed["hook"]:
-            hook = tbump.hooks.Hook(name=hook_dict["name"], cmd=hook_dict["cmd"])
+            hook = Hook(name=hook_dict["name"], cmd=hook_dict["cmd"])
             config.hooks.append(hook)
     return config

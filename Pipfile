@@ -17,6 +17,6 @@ pytest-mock = "*"
 pytest-cov = "*"
 pyflakes = "*"
 pycodestyle = "*"
-
 twine = "*"
 wheel = "*"
+mypy = "*"

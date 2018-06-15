@@ -1,9 +1,11 @@
+from typing import Any
+from path import Path
 import schema
 
 import tbump.config
 
 
-def test_happy_parse(test_data_path, monkeypatch):
+def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
     monkeypatch.chdir(test_data_path)
     config = tbump.config.parse(test_data_path.joinpath("tbump.toml"))
     foo_json = tbump.config.File(
@@ -39,7 +41,7 @@ def test_happy_parse(test_data_path, monkeypatch):
     assert config.current_version == "1.2.41-alpha-1"
 
 
-def check_error(tmp_path, contents, expected_message):
+def check_error(tmp_path: Path, contents: str, expected_message: str) -> None:
     cfg_path = tmp_path.joinpath("tbump.toml")
     cfg_path.write_text(contents)
     try:
@@ -49,7 +51,7 @@ def check_error(tmp_path, contents, expected_message):
         assert expected_message in error.args[0]
 
 
-def test_invalid_commit_message(tmp_path):
+def test_invalid_commit_message(tmp_path: Path) -> None:
     check_error(
         tmp_path,
         r"""
@@ -68,7 +70,7 @@ def test_invalid_commit_message(tmp_path):
     )
 
 
-def test_current_version_does_not_match_expected_regex(tmp_path):
+def test_current_version_does_not_match_expected_regex(tmp_path: Path) -> None:
     check_error(
         tmp_path,
         r"""
@@ -87,7 +89,7 @@ def test_current_version_does_not_match_expected_regex(tmp_path):
     )
 
 
-def test_invalid_regex(tmp_path):
+def test_invalid_regex(tmp_path: Path) -> None:
     check_error(
         tmp_path,
         r"""
@@ -106,7 +108,7 @@ def test_invalid_regex(tmp_path):
     )
 
 
-def test_invalid_custom_template(tmp_path):
+def test_invalid_custom_template(tmp_path: Path) -> None:
     check_error(
         tmp_path,
         r"""
