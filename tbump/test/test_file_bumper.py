@@ -1,10 +1,11 @@
 import pytest
 
+from path import Path
 import tbump.file_bumper
 from tbump.test.conftest import assert_in_file
 
 
-def test_file_bumper_simple(test_repo):
+def test_file_bumper_simple(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
     config = tbump.config.parse(test_repo.joinpath("tbump.toml"))
     assert bumper.working_path == test_repo
@@ -17,7 +18,7 @@ def test_file_bumper_simple(test_repo):
     assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
-def test_looking_for_empty_groups(tmp_path):
+def test_looking_for_empty_groups(tmp_path: Path) -> None:
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         r"""
@@ -58,7 +59,7 @@ def test_looking_for_empty_groups(tmp_path):
     assert e.value.groups == {"major": "1", "minor": "2", "patch": None}
 
 
-def test_current_version_not_found(tmp_path):
+def test_current_version_not_found(tmp_path: Path) -> None:
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         r"""
@@ -86,7 +87,7 @@ def test_current_version_not_found(tmp_path):
     e.value.print_error()
 
 
-def test_replacing_with_empty_groups(tmp_path):
+def test_replacing_with_empty_groups(tmp_path: Path) -> None:
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         r"""
@@ -127,7 +128,7 @@ def test_replacing_with_empty_groups(tmp_path):
     assert e.value.groups == {"major": "1", "minor": "3", "patch": None}
 
 
-def test_changing_same_file_twice(tmp_path):
+def test_changing_same_file_twice(tmp_path: Path) -> None:
     tbump_path = tmp_path.joinpath("tbump.toml")
     tbump_path.write_text(
         r"""

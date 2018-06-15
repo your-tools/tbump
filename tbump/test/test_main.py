@@ -1,6 +1,9 @@
+from typing import Any
 import toml
+from ui.tests.conftest import message_recorder
 from tbump.test.conftest import assert_in_file
 
+from path import Path
 import pytest
 
 import tbump.hooks
@@ -8,7 +11,7 @@ import tbump.main
 import tbump.git
 
 
-def check_file_contents(test_repo):
+def check_file_contents(test_repo: Path) -> None:
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
@@ -18,11 +21,11 @@ def check_file_contents(test_repo):
     assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
-def check_git_status(test_repo):
+def check_git_status(test_repo: Path) -> None:
     check_local_git_status(test_repo)
 
 
-def check_local_git_status(test_repo):
+def check_local_git_status(test_repo: Path) -> None:
     _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
     assert "Bump to 1.2.41-alpha-2" in out
 
@@ -30,7 +33,7 @@ def check_local_git_status(test_repo):
     assert "v1.2.41-alpha-2" in out
 
 
-def has_pushed_tag(test_repo):
+def has_pushed_tag(test_repo: Path) -> bool:
     rc, _ = tbump.git.run_git_captured(
         test_repo, "ls-remote", "--exit-code", "origin", "refs/tags/v1.2.41-alpha-2",
         check=False
@@ -38,14 +41,14 @@ def has_pushed_tag(test_repo):
     return rc == 0
 
 
-def has_pushed_branch(test_repo):
+def has_pushed_branch(test_repo: Path) -> bool:
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
     return remote_commit == local_commit
 
 
-def test_end_to_end(test_repo):
+def test_end_to_end(test_repo: Path) -> None:
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
     check_file_contents(test_repo)
@@ -53,7 +56,7 @@ def test_end_to_end(test_repo):
     assert has_pushed_branch(test_repo) and has_pushed_tag(test_repo)
 
 
-def test_on_outdated_branch(test_repo):
+def test_on_outdated_branch(test_repo: Path) -> None:
     """ Make sure no tag is pushed when running tbump on an outdated branch"""
     # See https://github.com/SuperTanker/tbump/issues/20 ¨ for details
 
@@ -67,7 +70,7 @@ def test_on_outdated_branch(test_repo):
     assert not has_pushed_tag(test_repo)
 
 
-def test_tbump_toml_not_found(test_repo, message_recorder):
+def test_tbump_toml_not_found(test_repo: Path, message_recorder: message_recorder) -> None:
     toml_path = test_repo.joinpath("tbump.toml")
     toml_path.remove()
     with pytest.raises(SystemExit):
@@ -75,7 +78,7 @@ def test_tbump_toml_not_found(test_repo, message_recorder):
     assert message_recorder.find("No such file")
 
 
-def test_tbump_toml_bad_syntax(test_repo, message_recorder):
+def test_tbump_toml_bad_syntax(test_repo: Path, message_recorder: message_recorder) -> None:
     toml_path = test_repo.joinpath("tbump.toml")
     bad_toml = toml.loads(toml_path.text())
     del bad_toml["git"]
@@ -85,13 +88,13 @@ def test_tbump_toml_bad_syntax(test_repo, message_recorder):
     assert message_recorder.find("Missing keys")
 
 
-def test_new_version_does_not_match(test_repo, message_recorder):
+def test_new_version_does_not_match(test_repo: Path, message_recorder: message_recorder) -> None:
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41a2", "--non-interactive"])
     assert message_recorder.find("Could not parse 1.2.41a2")
 
 
-def test_abort_if_file_does_not_exist(test_repo, message_recorder):
+def test_abort_if_file_does_not_exist(test_repo: Path, message_recorder: message_recorder) -> None:
     test_repo.joinpath("package.json").remove()
     tbump.git.run_git(test_repo, "add", "--update")
     tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
@@ -100,7 +103,7 @@ def test_abort_if_file_does_not_exist(test_repo, message_recorder):
     assert message_recorder.find("package.json does not exist")
 
 
-def test_interactive_abort(test_repo, mock):
+def test_interactive_abort(test_repo: Path, mock: Any) -> None:
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = False
 
@@ -113,7 +116,7 @@ def test_interactive_abort(test_repo, mock):
     assert "v1.2.42-alpha-2" not in out
 
 
-def test_abort_if_dirty(test_repo, message_recorder):
+def test_abort_if_dirty(test_repo: Path, message_recorder: message_recorder) -> None:
     test_repo.joinpath("VERSION").write_text("unstaged changes\n", append=True)
 
     with pytest.raises(SystemExit):
@@ -121,7 +124,7 @@ def test_abort_if_dirty(test_repo, message_recorder):
     assert message_recorder.find("dirty")
 
 
-def test_abort_if_tag_exists(test_repo, message_recorder):
+def test_abort_if_tag_exists(test_repo: Path, message_recorder: message_recorder) -> None:
     tbump.git.run_git(test_repo, "tag", "v1.2.42")
 
     with pytest.raises(SystemExit):
@@ -129,7 +132,7 @@ def test_abort_if_tag_exists(test_repo, message_recorder):
     assert message_recorder.find("1.2.42 already exists")
 
 
-def test_abort_if_file_does_not_match(test_repo, message_recorder):
+def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message_recorder) -> None:
     invalid_src = test_repo.joinpath("foo.txt")
     invalid_src.write_text("this is foo")
     tbump_path = test_repo.joinpath("tbump.toml")
@@ -146,7 +149,7 @@ def test_abort_if_file_does_not_match(test_repo, message_recorder):
     assert_in_file("VERSION", "1.2.41-alpha-1")
 
 
-def test_no_tracked_branch_proceed_and_skip_push(test_repo, mock):
+def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> None:
     ask_mock = mock.patch("ui.ask_yes_no")
 
     ask_mock.return_value = [True, True]
@@ -161,7 +164,8 @@ def test_no_tracked_branch_proceed_and_skip_push(test_repo, mock):
     assert_in_file("VERSION", "1.2.42")
 
 
-def test_no_tracked_branch_but_ref_exists(test_repo, mock, message_recorder):
+def test_no_tracked_branch_but_ref_exists(test_repo: Path, mock: Any,
+                                          message_recorder: message_recorder) -> None:
     ask_mock = mock.patch("ui.ask_yes_no")
 
     ask_mock.return_value = [True]
@@ -172,7 +176,8 @@ def test_no_tracked_branch_but_ref_exists(test_repo, mock, message_recorder):
     assert message_recorder.find("already exists")
 
 
-def test_no_tracked_branch_cancel(test_repo, mock, message_recorder):
+def test_no_tracked_branch_cancel(test_repo: Path, mock: Any,
+                                  message_recorder: message_recorder) -> None:
     ask_mock = mock.patch("ui.ask_yes_no")
     ask_mock.return_value = False
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
@@ -185,7 +190,8 @@ def test_no_tracked_branch_cancel(test_repo, mock, message_recorder):
     assert message_recorder.find("Cancelled")
 
 
-def test_no_tracked_branch_non_interactive(test_repo,  message_recorder):
+def test_no_tracked_branch_non_interactive(test_repo: Path,
+                                           message_recorder: message_recorder) -> None:
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(SystemExit):
@@ -193,7 +199,7 @@ def test_no_tracked_branch_non_interactive(test_repo,  message_recorder):
     assert message_recorder.find("Cannot push")
 
 
-def test_interactive_proceed(test_repo, mock):
+def test_interactive_proceed(test_repo: Path, mock: Any) -> None:
     ask_mock = mock.patch("ui.ask_yes_no")
 
     ask_mock.return_value = [True]
@@ -203,14 +209,14 @@ def test_interactive_proceed(test_repo, mock):
     assert "tags/v1.2.42" in out
 
 
-def test_do_not_add_untracked_files(test_repo):
+def test_do_not_add_untracked_files(test_repo: Path) -> None:
     test_repo.joinpath("untracked.txt").write_text("please don't add me")
     tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
 
 
-def test_bad_substitution(test_repo, message_recorder):
+def test_bad_substitution(test_repo: Path, message_recorder: message_recorder) -> None:
     toml_path = test_repo.joinpath("tbump.toml")
     new_toml = toml.loads(toml_path.text())
     new_toml["file"][0]["version_template"] = "{release}"

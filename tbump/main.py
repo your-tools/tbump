@@ -1,3 +1,4 @@
+from typing import List, Optional
 import abc
 import argparse
 import os
@@ -9,7 +10,8 @@ import ui
 import tbump
 import tbump.config
 import tbump.git
-from tbump.file_bumper import FileBumper
+from tbump.config import Config
+from tbump.file_bumper import FileBumper, Patch
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
 
@@ -18,11 +20,13 @@ TBUMP_VERSION = "3.0.1"
 
 
 class InvalidConfig(tbump.Error):
-    def __init__(self, io_error=None, parse_error=None):
+    def __init__(self,
+                 io_error: Optional[IOError] = None,
+                 parse_error: Optional[Exception] = None) -> None:
         self.io_error = io_error
         self.parse_error = parse_error
 
-    def print_error(self):
+    def print_error(self) -> None:
         if self.io_error:
             ui.error("Could not read config file:", self.io_error)
         if self.parse_error:
@@ -30,12 +34,14 @@ class InvalidConfig(tbump.Error):
 
 
 class Cancelled(tbump.Error):
-    def print_error(self):
+    def print_error(self) -> None:
         ui.error("Cancelled by user")
 
 
-def main(args=None):
+def main(args: Optional[List[str]] = None) -> None:
     # Supress backtrace if exception derives from tbump.Error
+    if not args:
+        args = sys.argv
     try:
         run(args)
     except tbump.Error as error:
@@ -43,7 +49,7 @@ def main(args=None):
         sys.exit(1)
 
 
-def parse_command_line(cmd):
+def parse_command_line(cmd: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
     parser.add_argument("-C", "--cwd", dest="working_dir")
@@ -54,7 +60,7 @@ def parse_command_line(cmd):
 
 
 class Runner(metaclass=abc.ABCMeta):
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace) -> None:
         self.new_version = args.new_version
 
         working_dir = args.working_dir or os.getcwd()
@@ -67,7 +73,7 @@ class Runner(metaclass=abc.ABCMeta):
         self.file_bumper = self.setup_file_bumper()
         self.hooks_runner = self.setup_hooks_runner()
 
-    def display_bump(self, dry_run=False):
+    def display_bump(self, dry_run: bool = False) -> None:
         ui.info_1(
             "Bumping from",
             ui.reset, ui.bold, self.config.current_version,
@@ -80,7 +86,7 @@ class Runner(metaclass=abc.ABCMeta):
             ui.info()
         ui.info()
 
-    def parse_config(self):
+    def parse_config(self) -> Config:
         tbump_path = self.working_path.joinpath("tbump.toml")
         try:
             config = tbump.config.parse(tbump_path)
@@ -90,26 +96,26 @@ class Runner(metaclass=abc.ABCMeta):
             raise InvalidConfig(parse_error=parse_error)
         return config
 
-    def setup_git_bumper(self):
+    def setup_git_bumper(self) -> GitBumper:
         git_bumper = GitBumper(self.working_path)
         git_bumper.set_config(self.config)
         return git_bumper
 
-    def setup_file_bumper(self):
+    def setup_file_bumper(self) -> FileBumper:
         file_bumper = FileBumper(self.working_path)
         file_bumper.set_config(self.config)
         return file_bumper
 
-    def setup_hooks_runner(self):
+    def setup_hooks_runner(self) -> HooksRunner:
         hooks_runner = HooksRunner(self.working_path)
         for hook in self.config.hooks:
             hooks_runner.add_hook(hook)
         return hooks_runner
 
-    def before_bump(self, patches, git_commands):
+    def before_bump(self, patches: List[Patch], git_commands: List[List[str]]) -> None:
         pass
 
-    def bump(self):
+    def bump(self) -> None:
         self.display_bump()
         patches = self.file_bumper.compute_patches(self.new_version)
         git_commands = self.git_bumper.compute_commands(self.new_version)
@@ -127,12 +133,16 @@ class Runner(metaclass=abc.ABCMeta):
         ui.info()
         ui.info(ui.green, "Done", ui.check)
 
+    @abc.abstractmethod
+    def check(self) -> None:
+        pass
+
 
 class InteractiveRunner(Runner):
-    def __init__(self, args):
+    def __init__(self, args: argparse.Namespace) -> None:
         super().__init__(args)
 
-    def check(self):
+    def check(self) -> None:
         try:
             self.git_bumper.check_state(self.new_version)
         except tbump.git_bumper.NoTrackedBranch as e:
@@ -141,15 +151,15 @@ class InteractiveRunner(Runner):
             if not proceed:
                 raise Cancelled from None
 
-    def display_patches(self, patches):
+    def display_patches(self, patches: List[Patch]) -> None:
         for patch in patches:
             tbump.file_bumper.print_patch(patch)
 
-    def display_git_commands(self, git_commands):
+    def display_git_commands(self, git_commands: List[List[str]]) -> None:
         for git_command in git_commands:
             tbump.git.print_git_command(git_command)
 
-    def display_hooks(self):
+    def display_hooks(self) -> None:
         hooks = self.hooks_runner.hooks
         if not hooks:
             return
@@ -158,7 +168,7 @@ class InteractiveRunner(Runner):
             ui.info_count(i, len(hooks), ui.bold, hook.name)
             tbump.hooks.print_hook(hook)
 
-    def before_bump(self, patches, git_commands):
+    def before_bump(self, patches: List[Patch], git_commands: List[List[str]]) -> None:
         ui.info_2("Would patch those files")
         self.display_patches(patches)
         ui.info()
@@ -174,16 +184,15 @@ class InteractiveRunner(Runner):
 
 
 class NonInteractiveRunner(Runner):
-    def check(self):
+    def check(self) -> None:
         self.git_bumper.check_state(self.new_version)
-        return True
 
 
-def run(cmd=None):
+def run(cmd: List[str]) -> None:
     args = parse_command_line(cmd)
     interactive = args.interactive
     if interactive:
-        runner = InteractiveRunner(args)
+        runner = InteractiveRunner(args)  # type: Runner
     else:
         runner = NonInteractiveRunner(args)
 

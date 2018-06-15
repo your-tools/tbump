@@ -1,13 +1,35 @@
+from typing import Dict, List, Optional, Pattern
 import attr
-import path
+import re
+
+from path import Path
 import ui
 
 import tbump
-import tbump.config
 import tbump.git
+import tbump.config
 
 
-def print_patch(patch):
+List, Optional, Pattern
+
+
+@attr.s
+class ChangeRequest:
+    src = attr.ib()   # type: str
+    old_string = attr.ib()  # type: str
+    new_string = attr.ib()  # type: str
+    search = attr.ib(default=None)  # type: Optional[str]
+
+
+@attr.s
+class Patch:
+    src = attr.ib()  # type: str
+    lineno = attr.ib()  # type: int
+    old_line = attr.ib()  # type: str
+    new_line = attr.ib()  # type: str
+
+
+def print_patch(patch: Patch) -> None:
     ui.info(
         ui.red, "- ", ui.reset,
         ui.bold, patch.src, ":", ui.reset,
@@ -24,31 +46,23 @@ def print_patch(patch):
     )
 
 
-@attr.s
-class ChangeRequest:
-    src = attr.ib()
-    old_string = attr.ib()
-    new_string = attr.ib()
-    search = attr.ib(default=None)
-
-
-@attr.s
-class Patch:
-    src = attr.ib()
-    lineno = attr.ib()
-    old_line = attr.ib()
-    new_line = attr.ib()
-
-
 class BadSubstitution(tbump.Error):
-    def print_error(self):
+    def __init__(self, *, src: str, verb: str,
+                 groups: Dict[str, str], template: str, version: str) -> None:
+        self.src = src
+        self.verb = verb
+        self.groups = groups
+        self.template = template
+        self.version = version
+
+    def print_error(self) -> None:
         message = [
             " ", self.src + ":",
             " refusing to ", self.verb, " version containing 'None'\n",
         ]
         message += [
             "More info:\n",
-            " * version groups:  ", self.groups, "\n"
+            " * version groups:  ", repr(self.groups), "\n"
             " * template:        ", self.template, "\n",
             " * version:         ", self.version, "\n",
         ]
@@ -56,65 +70,79 @@ class BadSubstitution(tbump.Error):
 
 
 class InvalidVersion(tbump.Error):
-    def print_error(self):
+    def __init__(self, *, version: str, regex: Pattern) -> None:
+        self.version = version
+        self.regex = regex
+
+    def print_error(self) -> None:
         ui.error("Could not parse", self.version, "as a valid version string")
 
 
 class SourceFileNotFound(tbump.Error):
-    def print_error(self):
+    def __init__(self, *, src: str) -> None:
+        self.src = src
+
+    def print_error(self) -> None:
         ui.error(self.src, "does not exist")
 
 
 class CurrentVersionNotFound(tbump.Error):
+    def __init__(self, *, src: str, current_version_string: str) -> None:
+        self.src = src
+        self.current_version_string = current_version_string
+
     # TODO: raise just once for all errors
-    def print_error(self):
+    def print_error(self) -> None:
         ui.error(
             "Current version string: (%s)" % self.current_version_string,
             "not found in", self.src
         )
 
 
-def should_replace(line, old_string, search=None):
+def should_replace(line: str, old_string: str, search: Optional[str] = None) -> bool:
     if not search:
         return old_string in line
     else:
         return (old_string in line) and (search in line)
 
 
-def on_version_containing_none(src, verb, version, *, groups, template):
+def on_version_containing_none(src: str, verb: str, version: str, *,
+                               groups: Dict[str, str], template: str) -> None:
     raise BadSubstitution(src=src, verb=verb, version=version, groups=groups, template=template)
 
 
 class FileBumper():
-    def __init__(self, working_path):
+    def __init__(self, working_path: Path) -> None:
         self.working_path = working_path
-        self.files = None
-        self.version_regex = None
-        self.current_version = None
-        self.current_groups = None
-        self.new_version = None
-        self.new_groups = None
+        self.files = list()  # type: List[tbump.config.File]
+        self.version_regex = re.compile(".")
+        self.current_version = ""
+        self.current_groups = dict()  # type: Dict[str, str]
+        self.new_version = ""
+        self.new_groups = dict()  # type: Dict[str, str]
 
-    def parse_version(self, version):
+    def parse_version(self, version: str) -> Dict[str, str]:
+        assert self.version_regex
         match = self.version_regex.fullmatch(version)
         if match is None:
             raise InvalidVersion(version=version, regex=self.version_regex)
         return match.groupdict()
 
-    def set_config(self, config):
+    def set_config(self, config: tbump.config.Config) -> None:
         self.files = config.files
         self.check_files_exist()
         self.version_regex = config.version_regex
         self.current_version = config.current_version
         self.current_groups = self.parse_version(self.current_version)
 
-    def check_files_exist(self):
+    def check_files_exist(self) -> None:
+        assert self.files
         for file in self.files:
             expected_path = self.working_path.joinpath(file.src)
             if not expected_path.exists():
                 raise SourceFileNotFound(src=file.src)
 
-    def compute_patches(self, new_version):
+    def compute_patches(self, new_version: str) -> List[Patch]:
         self.new_version = new_version
         self.new_groups = self.parse_version(self.new_version)
         change_requests = self.compute_change_requests()
@@ -126,12 +154,12 @@ class FileBumper():
             patches.extend(patches_for_request)
         return patches
 
-    def compute_patches_for_change_request(self, change_request):
+    def compute_patches_for_change_request(self, change_request: ChangeRequest) -> List[Patch]:
         old_string = change_request.old_string
         new_string = change_request.new_string
         search = change_request.search
 
-        file_path = path.Path(self.working_path).joinpath(change_request.src)
+        file_path = Path(self.working_path).joinpath(change_request.src)
         old_lines = file_path.lines()
 
         patches = list()
@@ -144,14 +172,14 @@ class FileBumper():
             raise CurrentVersionNotFound(src=change_request.src, current_version_string=old_string)
         return patches
 
-    def compute_change_requests(self):
+    def compute_change_requests(self) -> List[ChangeRequest]:
         change_requests = list()
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
             change_requests.append(change_request)
         return change_requests
 
-    def compute_change_request_for_file(self, file):
+    def compute_change_request_for_file(self, file: tbump.config.File) -> ChangeRequest:
         if file.version_template:
             current_version = file.version_template.format(**self.current_groups)
             if "None" in current_version:
@@ -181,10 +209,10 @@ class FileBumper():
 
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
-    def apply_patches(self, patches):
+    def apply_patches(self, patches: List[Patch]) -> None:
         for patch in patches:
             print_patch(patch)
-            file_path = path.Path(self.working_path).joinpath(patch.src)
+            file_path = Path(self.working_path).joinpath(patch.src)
             # TODO: read and write each file only once?
             lines = file_path.lines()
             lines[patch.lineno] = patch.new_line
