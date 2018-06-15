@@ -11,4 +11,4 @@ install:
 
 
 script:
-  - ./tools/ci.sh
+  - pipenv run python ci/ci.py

@@ -10,9 +10,11 @@ import tbump.git
 import tbump.config
 
 
+# pylint: disable=pointless-statement
 List, Optional, Pattern
 
 
+# pylint: disable=too-few-public-methods
 @attr.s
 class ChangeRequest:
     src = attr.ib()   # type: str
@@ -21,6 +23,7 @@ class ChangeRequest:
     search = attr.ib(default=None)  # type: Optional[str]
 
 
+# pylint: disable=too-few-public-methods
 @attr.s
 class Patch:
     src = attr.ib()  # type: str
@@ -49,6 +52,7 @@ def print_patch(patch: Patch) -> None:
 class BadSubstitution(tbump.Error):
     def __init__(self, *, src: str, verb: str,
                  groups: Dict[str, str], template: str, version: str) -> None:
+        super().__init__()
         self.src = src
         self.verb = verb
         self.groups = groups
@@ -71,6 +75,7 @@ class BadSubstitution(tbump.Error):
 
 class InvalidVersion(tbump.Error):
     def __init__(self, *, version: str, regex: Pattern) -> None:
+        super().__init__()
         self.version = version
         self.regex = regex
 
@@ -80,6 +85,7 @@ class InvalidVersion(tbump.Error):
 
 class SourceFileNotFound(tbump.Error):
     def __init__(self, *, src: str) -> None:
+        super().__init__()
         self.src = src
 
     def print_error(self) -> None:
@@ -88,6 +94,7 @@ class SourceFileNotFound(tbump.Error):
 
 class CurrentVersionNotFound(tbump.Error):
     def __init__(self, *, src: str, current_version_string: str) -> None:
+        super().__init__()
         self.src = src
         self.current_version_string = current_version_string
 
@@ -154,6 +161,7 @@ class FileBumper():
             patches.extend(patches_for_request)
         return patches
 
+    # pylint: disable=invalid-name
     def compute_patches_for_change_request(self, change_request: ChangeRequest) -> List[Patch]:
         old_string = change_request.old_string
         new_string = change_request.new_string
