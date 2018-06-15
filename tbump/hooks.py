@@ -7,9 +7,11 @@ import ui
 
 import tbump
 
+# pylint: disable=pointless-statement
 List
 
 
+# pylint: disable=too-few-public-methods
 @attr.s
 class Hook:
     name = attr.ib()  # type: str
@@ -18,6 +20,7 @@ class Hook:
 
 class HookError(tbump.Error):
     def __init__(self, *, name: str, cmd: str, rc: int) -> None:
+        super().__init__()
         self.cmd = cmd
         self.rc = rc
         self.name = name

@@ -8,6 +8,7 @@ import tbump.git
 
 class DirtyRepository(tbump.git.GitError):
     def __init__(self, *, git_status_output: str) -> None:
+        super().__init__()
         self.git_status_output = git_status_output
 
     def print_error(self) -> None:
@@ -22,6 +23,7 @@ class NotOnAnyBranch(tbump.git.GitError):
 
 class NoTrackedBranch(tbump.git.GitError):
     def __init__(self, *, branch: str) -> None:
+        super().__init__()
         self.branch = branch
 
     def print_error(self) -> None:
@@ -31,6 +33,7 @@ class NoTrackedBranch(tbump.git.GitError):
 
 class RefAlreadyExists(tbump.git.GitError):
     def __init__(self, *, ref: str) -> None:
+        super().__init__()
         self.ref = ref
 
     def print_error(self) -> None:

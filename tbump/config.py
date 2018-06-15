@@ -8,9 +8,11 @@ import toml
 
 from .hooks import Hook
 
+# pylint: disable=pointless-statement
 List, Optional
 
 
+# pylint: disable=too-few-public-methods
 @attr.s
 class Config:
     current_version = attr.ib()  # type: str
@@ -21,6 +23,7 @@ class Config:
     hooks = attr.ib(default=list())  # type: List[Hook]
 
 
+# pylint: disable=too-few-public-methods
 @attr.s
 class File:
     src = attr.ib()  # type: str
@@ -28,6 +31,7 @@ class File:
     version_template = attr.ib(default=None)  # type: Optional[str]
 
 
+# pylint: disable=too-few-public-methods
 class ValidTemplate():
     def __init__(self, name: str, pattern: str) -> None:
         self.name = name
@@ -40,11 +44,13 @@ class ValidTemplate():
         return value
 
 
+# pylint: disable=too-few-public-methods
 class ValidTag(ValidTemplate):
     def __init__(self) -> None:
         super().__init__("tag_template", "{new_version}")
 
 
+# pylint: disable=too-few-public-methods
 class ValidMessage(ValidTemplate):
     def __init__(self) -> None:
         super().__init__("message_template", "{new_version}")
@@ -75,18 +81,18 @@ def validate(config: Dict[str, Any]) -> Config:
         return re.compile(regex, re.VERBOSE)
 
     tbump_schema = schema.Schema(
-      {
-        "version":  {
-          "current": str,
-          "regex": schema.Use(compile_re),
-        },
-        "git": {
-          "message_template": ValidMessage(),
-          "tag_template": ValidTag(),
-        },
-        "file": [file_schema],
-        schema.Optional("hook"): [hook_schema]
-        }
+        {
+            "version":  {
+                "current": str,
+                "regex": schema.Use(compile_re),
+            },
+            "git": {
+                "message_template": ValidMessage(),
+                "tag_template": ValidTag(),
+            },
+            "file": [file_schema],
+            schema.Optional("hook"): [hook_schema]
+            }
     )
     return cast(Config, tbump_schema.validate(config))
 

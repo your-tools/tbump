@@ -23,6 +23,7 @@ class InvalidConfig(tbump.Error):
     def __init__(self,
                  io_error: Optional[IOError] = None,
                  parse_error: Optional[Exception] = None) -> None:
+        super().__init__()
         self.io_error = io_error
         self.parse_error = parse_error
 
@@ -30,7 +31,7 @@ class InvalidConfig(tbump.Error):
         if self.io_error:
             ui.error("Could not read config file:", self.io_error)
         if self.parse_error:
-            ui.error("Invalid config:",  self.parse_error)
+            ui.error("Invalid config:", self.parse_error)
 
 
 class Cancelled(tbump.Error):
@@ -139,8 +140,6 @@ class Runner(metaclass=abc.ABCMeta):
 
 
 class InteractiveRunner(Runner):
-    def __init__(self, args: argparse.Namespace) -> None:
-        super().__init__(args)
 
     def check(self) -> None:
         try:
@@ -151,10 +150,12 @@ class InteractiveRunner(Runner):
             if not proceed:
                 raise Cancelled from None
 
+    # pylint: disable=no-self-use
     def display_patches(self, patches: List[Patch]) -> None:
         for patch in patches:
             tbump.file_bumper.print_patch(patch)
 
+    # pylint: disable=no-self-use
     def display_git_commands(self, git_commands: List[List[str]]) -> None:
         for git_command in git_commands:
             tbump.git.print_git_command(git_command)
