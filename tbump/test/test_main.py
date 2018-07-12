@@ -30,7 +30,7 @@ def check_local_git_status(test_repo):
     assert "v1.2.41-alpha-2" in out
 
 
-def hash_pushed_tag(test_repo):
+def has_pushed_tag(test_repo):
     rc, _ = tbump.git.run_git_captured(
         test_repo, "ls-remote", "--exit-code", "origin", "refs/tags/v1.2.41-alpha-2",
         check=False
@@ -38,7 +38,7 @@ def hash_pushed_tag(test_repo):
     return rc == 0
 
 
-def hash_pushed_branch(test_repo):
+def has_pushed_branch(test_repo):
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
@@ -50,7 +50,7 @@ def test_end_to_end(test_repo):
 
     check_file_contents(test_repo)
     check_git_status(test_repo)
-    assert hash_pushed_branch(test_repo) and hash_pushed_tag(test_repo)
+    assert has_pushed_branch(test_repo) and has_pushed_tag(test_repo)
 
 
 def test_on_outdated_branch(test_repo):
@@ -64,7 +64,7 @@ def test_on_outdated_branch(test_repo):
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
-    assert not hash_pushed_tag(test_repo)
+    assert not has_pushed_tag(test_repo)
 
 
 def test_tbump_toml_not_found(test_repo, message_recorder):
