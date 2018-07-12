@@ -1,8 +1,8 @@
 Changelog
 =========
 
-v3.0.1
--------
+v3.0.1 (2018-07-12)
+-------------------
 
 * Bug fix: make sure to push the tag *after* the branch. See `#20 <https://github.com/SuperTanker/tbump/issues/20>`_ for the details.
 
