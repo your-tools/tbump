@@ -95,7 +95,8 @@ class GitBumper():
         tag_message = tag_name
         res.append(["tag", "--annotate", "--message", tag_message, tag_name])
         if self.remote_branch:
-            res.append(["push", self.remote_name, self.remote_branch, tag_name])
+            res.append(["push", self.remote_name, self.remote_branch])
+            res.append(["push", self.remote_name, tag_name])
         return res
 
     def run_commands(self, commands):

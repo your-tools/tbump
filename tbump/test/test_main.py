@@ -30,9 +30,15 @@ def check_local_git_status(test_repo):
     assert "v1.2.41-alpha-2" in out
 
 
-def has_pushed(test_repo, pushed=True):
-    tbump.git.run_git(test_repo, "ls-remote", "origin", "refs/tags/v1.2.41-alpha-2")
+def hash_pushed_tag(test_repo):
+    rc, _ = tbump.git.run_git_captured(
+        test_repo, "ls-remote", "--exit-code", "origin", "refs/tags/v1.2.41-alpha-2",
+        check=False
+    )
+    return rc == 0
 
+
+def hash_pushed_branch(test_repo):
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
@@ -44,7 +50,21 @@ def test_end_to_end(test_repo):
 
     check_file_contents(test_repo)
     check_git_status(test_repo)
-    assert has_pushed(test_repo)
+    assert hash_pushed_branch(test_repo) and hash_pushed_tag(test_repo)
+
+
+def test_on_outdated_branch(test_repo):
+    """ Make sure no tag is pushed when running tbump on an outdated branch"""
+    # See https://github.com/SuperTanker/tbump/issues/20 ¨ for details
+
+    # Make sure the branch is out of date
+    tbump.git.run_git(test_repo, "commit", "--message", "commit I did not make", "--allow-empty")
+    tbump.git.run_git(test_repo, "push", "origin", "master")
+    tbump.git.run_git(test_repo, "reset", "--hard", "HEAD~1")
+
+    with pytest.raises(SystemExit):
+        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+    assert not hash_pushed_tag(test_repo)
 
 
 def test_tbump_toml_not_found(test_repo, message_recorder):
