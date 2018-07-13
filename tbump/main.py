@@ -4,12 +4,13 @@ import argparse
 import os
 import sys
 
-import path
+from path import Path
 import ui
 
 import tbump
 import tbump.config
 import tbump.git
+import tbump.init
 from tbump.config import Config
 from tbump.file_bumper import FileBumper, Patch
 from tbump.git_bumper import GitBumper
@@ -53,7 +54,7 @@ def main(args: Optional[List[str]] = None) -> None:
 def parse_command_line(cmd: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
-    parser.add_argument("-C", "--cwd", dest="working_dir")
+    parser.add_argument("-C", "--cwd", dest="working_path")
     parser.add_argument("--non-interactive", dest="interactive", action="store_false")
     parser.add_argument("--version", action="version", version=TBUMP_VERSION)
     args = parser.parse_args(args=cmd)
@@ -61,11 +62,9 @@ def parse_command_line(cmd: List[str]) -> argparse.Namespace:
 
 
 class Runner(metaclass=abc.ABCMeta):
-    def __init__(self, args: argparse.Namespace) -> None:
-        self.new_version = args.new_version
-
-        working_dir = args.working_dir or os.getcwd()
-        self.working_path = path.Path(working_dir)
+    def __init__(self, working_path: Path, new_version: str) -> None:
+        self.new_version = new_version
+        self.working_path = working_path
         os.chdir(self.working_path)
 
         self.config = self.parse_config()
@@ -191,11 +190,21 @@ class NonInteractiveRunner(Runner):
 
 def run(cmd: List[str]) -> None:
     args = parse_command_line(cmd)
+    if args.working_path:
+        working_path = Path(args.working_path)
+    else:
+        working_path = Path(os.getcwd())
+
+    new_version = args.new_version
+    if new_version == "init":
+        tbump.init.init(working_path)
+        return
+
     interactive = args.interactive
     if interactive:
-        runner = InteractiveRunner(args)  # type: Runner
+        runner = InteractiveRunner(working_path, new_version)  # type: Runner
     else:
-        runner = NonInteractiveRunner(args)
+        runner = NonInteractiveRunner(working_path, new_version)
 
     runner.check()
     runner.bump()
