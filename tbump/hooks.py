@@ -12,6 +12,7 @@ import tbump
 class Hook:
     name = attr.ib()  # type: str
     cmd = attr.ib()  # type: str
+    after_push = attr.ib(default=False)  # type: bool
 
 
 class HookError(tbump.Error):
@@ -40,11 +41,26 @@ class HooksRunner:
     def add_hook(self, hook: Hook) -> None:
         self.hooks.append(hook)
 
-    def run(self, new_version: str) -> None:
-        for i, hook in enumerate(self.hooks):
+    def run_hooks_before_push(self, new_version: str) -> None:
+        self._run(new_version, after_push=False)
+
+    def run_hooks_after_push(self, new_version: str) -> None:
+        self._run(new_version, after_push=True)
+
+    def _run(self, new_version: str, *, after_push: bool = False) -> None:
+        matching_hooks = [hook for hook in self.hooks if hook.after_push == after_push]
+        if not matching_hooks:
+            return
+        if after_push:
+            desc = "after push"
+        else:
+            desc = "before push"
+        ui.info_2("Running hooks", desc)
+        for i, hook in enumerate(matching_hooks):
             hook.cmd = hook.cmd.format(new_version=new_version)
-            ui.info_count(i, len(self.hooks), ui.bold, hook.name)
+            ui.info_count(i, len(matching_hooks), ui.bold, hook.name)
             print_hook(hook)
             rc = subprocess.call(hook.cmd, shell=True, cwd=self.working_path)
             if rc != 0:
                 raise HookError(name=hook.name, cmd=hook.cmd, rc=rc)
+        ui.info()

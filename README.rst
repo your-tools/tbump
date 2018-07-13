@@ -145,6 +145,8 @@ Running commands before push
 
 You can specify a list of hooks to be run after the file have changed, but before the commit is made and pushed.
 
+This is useful if some of the files under version controlled are generated through an external program.
+
 Here's an example:
 
 
@@ -158,3 +160,17 @@ Here's an example:
 The name is mandatory. The command will be executed via the shell, after the  ``{new_version}``  placehoder is replaced with the new version.
 
 Any hook that fails will interupt the bump. You may want to run ``git reset --hard`` before trying again to undo the changes made in the files.
+
+Running commands after push
++++++++++++++++++++++++++++
+
+You can specify a list of hooks to be run right after the tag has been pushed, by adding ``after_push=true`` to the configuration file.
+
+This is useful if you need the command to run on a clean repository, without un-committed changes, for instance to publish ``rust`` packages:
+
+.. code-block:: ini
+
+    [[hook]]
+    name = "Publish to crates.io"
+    cmd = "cargo publish"
+    after_push = true

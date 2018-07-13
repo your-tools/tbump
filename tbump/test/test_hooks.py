@@ -8,17 +8,7 @@ import tbump.main
 from tbump.test.conftest import file_contains
 
 
-@pytest.fixture  # type: ignore
-def working_hook(test_repo: Path) -> None:
-    return add_hook(test_repo, "fake yarn", "python yarn.py")
-
-
-@pytest.fixture  # type: ignore
-def crashing_hook(test_repo: Path) -> None:
-    return add_hook(test_repo, "crash", "python nosuchfile.py")
-
-
-def add_hook(test_repo: Path, name: str, cmd: str) -> None:
+def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
     """ Patch the configuration file so that we can also test hooks.
 
     """
@@ -26,18 +16,39 @@ def add_hook(test_repo: Path, name: str, cmd: str) -> None:
     parsed = toml.loads(cfg_path.text())
     if "hook" not in parsed:
         parsed["hook"] = list()
-    parsed["hook"].append({"cmd": cmd, "name": name})
+    parsed["hook"].append({"cmd": cmd, "name": name, "after_push": after_push})
     cfg_path.write_text(toml.dumps(parsed))
     tbump.git.run_git(test_repo, "add", ".")
-    tbump.git.run_git(test_repo, "commit", "--message", "add yarn hook")
+    tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
 
 
-def test_working_hook(test_repo: Path, working_hook: None) -> None:
+def add_working_hook(test_repo: Path) -> None:
+    add_hook(test_repo, "fake yarn", "python yarn.py")
+
+
+def add_crashing_hook(test_repo: Path) -> None:
+    add_hook(test_repo, "crashing hook", "python nosuchfile.py")
+
+
+def add_after_hook(test_repo: Path) -> None:
+    add_hook(test_repo, "after hook", "python after.py", after_push=True)
+
+
+def test_working_hook(test_repo: Path) -> None:
+    add_working_hook(test_repo)
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
     assert file_contains(test_repo / "yarn.lock", "1.2.41-alpha-2")
 
 
-def test_hook_fails(test_repo: Path, working_hook: None, crashing_hook: None) -> None:
+def test_hook_fails(test_repo: Path) -> None:
+    add_working_hook(test_repo)
+    add_crashing_hook(test_repo)
     with pytest.raises(tbump.hooks.HookError):
         tbump.main.run(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+
+
+def test_hooks_after_push(test_repo: Path) -> None:
+    add_working_hook(test_repo)
+    add_after_hook(test_repo)
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
