@@ -9,7 +9,7 @@ import tbump.git
 
 def find_files(working_path: Path, current_version: str) -> List[str]:
     ui.info_2("Looking for files matching", ui.bold, current_version)
-    cmd = ["grep", "--files-with-matches", current_version]
+    cmd = ["grep", "--fixed-strings", "--files-with-matches", current_version]
     _, out = tbump.git.run_git_captured(working_path, *cmd, check=True)
     res = list()  # type: List[str]
     ui.info("Found following matching files")
