@@ -40,17 +40,6 @@ class Cancelled(tbump.Error):
         ui.error("Cancelled by user")
 
 
-def main(args: Optional[List[str]] = None) -> None:
-    # Supress backtrace if exception derives from tbump.Error
-    if not args:
-        args = sys.argv[1:]
-    try:
-        run(args)
-    except tbump.Error as error:
-        error.print_error()
-        sys.exit(1)
-
-
 def parse_command_line(cmd: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
@@ -207,3 +196,14 @@ def run(cmd: List[str]) -> None:
 
     runner.check()
     runner.bump()
+
+
+def main(args: Optional[List[str]] = None) -> None:
+    # Supress backtrace if exception derives from tbump.Error
+    if not args:
+        args = sys.argv[1:]
+    try:
+        run(args)
+    except tbump.Error as error:
+        error.print_error()
+        sys.exit(1)
