@@ -145,7 +145,7 @@ class FileBumper():
     def check_files_exist(self) -> None:
         assert self.files
         for file in self.files:
-            expected_path = self.working_path.joinpath(file.src)
+            expected_path = self.working_path / file.src
             if not expected_path.exists():
                 raise SourceFileNotFound(src=file.src)
 
@@ -167,7 +167,7 @@ class FileBumper():
         new_string = change_request.new_string
         search = change_request.search
 
-        file_path = Path(self.working_path).joinpath(change_request.src)
+        file_path = self.working_path / change_request.src
         old_lines = file_path.lines()
 
         patches = list()
@@ -220,7 +220,7 @@ class FileBumper():
     def apply_patches(self, patches: List[Patch]) -> None:
         for patch in patches:
             print_patch(patch)
-            file_path = Path(self.working_path).joinpath(patch.src)
+            file_path = self.working_path / patch.src
             # TODO: read and write each file only once?
             lines = file_path.lines()
             lines[patch.lineno] = patch.new_line

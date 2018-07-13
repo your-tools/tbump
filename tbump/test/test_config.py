@@ -7,7 +7,7 @@ import tbump.config
 
 def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
     monkeypatch.chdir(test_data_path)
-    config = tbump.config.parse(test_data_path.joinpath("tbump.toml"))
+    config = tbump.config.parse(test_data_path / "tbump.toml")
     foo_json = tbump.config.File(
         src="package.json",
         search='"version": "{current_version}"'
@@ -42,7 +42,7 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
 
 
 def check_error(tmp_path: Path, contents: str, expected_message: str) -> None:
-    cfg_path = tmp_path.joinpath("tbump.toml")
+    cfg_path = tmp_path / "tbump.toml"
     cfg_path.write_text(contents)
     try:
         tbump.config.parse(cfg_path)

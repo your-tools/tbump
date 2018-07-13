@@ -88,7 +88,7 @@ class Runner(metaclass=abc.ABCMeta):
         ui.info()
 
     def parse_config(self) -> Config:
-        tbump_path = self.working_path.joinpath("tbump.toml")
+        tbump_path = self.working_path / "tbump.toml"
         try:
             config = tbump.config.parse(tbump_path)
         except IOError as io_error:

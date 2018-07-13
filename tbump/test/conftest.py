@@ -18,7 +18,7 @@ def tmp_path(tmpdir: Any) -> Path:
 @pytest.fixture  # type: ignore
 def test_data_path() -> Path:
     this_dir = Path(__file__).abspath().parent
-    return this_dir.joinpath("data")
+    return this_dir / "data"
 
 
 @pytest.fixture(autouse=True, scope="session")  # type: ignore
@@ -42,7 +42,7 @@ def assert_in_file(*args: str) -> None:
 
 
 def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
-    src_path = tmp_path.joinpath("src")
+    src_path = tmp_path / "src"
     test_data_path.copytree(src_path)
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
@@ -55,13 +55,13 @@ def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
 
 
 def setup_remote(tmp_path: Path) -> Path:
-    git_path = tmp_path.joinpath("git")
+    git_path = tmp_path / "git"
     git_path.mkdir()
-    remote_path = git_path.joinpath("repo.git")
+    remote_path = git_path / "repo.git"
     remote_path.mkdir()
     tbump.git.run_git(remote_path, "init", "--bare")
 
-    src_path = tmp_path.joinpath("src")
+    src_path = tmp_path / "src"
     tbump.git.run_git(src_path, "remote", "add", "origin", remote_path)
     tbump.git.run_git(src_path, "push", "-u", "origin", "master")
     return src_path
