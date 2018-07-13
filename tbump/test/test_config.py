@@ -126,3 +126,35 @@ def test_invalid_custom_template(tmp_path: Path) -> None:
         """,
         "version template for 'pub.js' contains unknown group: 'no_such_group'"
     )
+
+
+def test_parse_hooks(tmp_path: Path) -> None:
+    toml_path = tmp_path / "tbump.toml"
+    toml_path.write_text(r"""
+        [version]
+        current = "1.2.3"
+        regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
+
+        [git]
+        message_template = "Bump to  {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "pub.js"
+
+        [[hook]]
+        name = "Check changelog"
+        cmd = "grep -q {new_version} Changelog.md"
+
+        [[hook]]
+        name = "After push"
+        cmd = "cargo publish"
+        after_push = true
+    """)
+    config = tbump.config.parse(toml_path)
+    first_hook = config.hooks[0]
+    assert first_hook.name == "Check changelog"
+    assert first_hook.cmd == "grep -q {new_version} Changelog.md"
+
+    second_hook = config.hooks[1]
+    assert second_hook.after_push is True

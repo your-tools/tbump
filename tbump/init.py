@@ -58,6 +58,9 @@ def init(working_path: Path) -> None:
         # [[hook]]
         #  name = "check changelog"
         #  cmd = "grep -q {current_version} Changelog.md"
+
+        # Or use after_push = true to run the commands
+        # after the push
     """)
 
     current_version = ui.ask_string("Please enter current version")

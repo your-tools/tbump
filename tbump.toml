@@ -33,3 +33,4 @@ cmd = "grep -q {new_version} Changelog.rst"
 [[hook]]
 name = "Publish to pypi"
 cmd = "tools/publish.sh"
+after_push = true

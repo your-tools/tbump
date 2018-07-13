@@ -117,13 +117,14 @@ class Runner(metaclass=abc.ABCMeta):
             return
 
         self.file_bumper.apply_patches(patches)
-        if self.hooks_runner.hooks:
-            ui.info()
-            ui.info_2("Running hooks")
-            self.hooks_runner.run(self.new_version)
         ui.info()
+
+        self.hooks_runner.run_hooks_before_push(self.new_version)
         self.git_bumper.run_commands(git_commands)
+
         ui.info()
+        self.hooks_runner.run_hooks_after_push(self.new_version)
+
         ui.info(ui.green, "Done", ui.check)
 
     @abc.abstractmethod
@@ -156,7 +157,10 @@ class InteractiveRunner(Runner):
             return
         ui.info_2("Would execute these hooks")
         for i, hook in enumerate(hooks):
-            ui.info_count(i, len(hooks), ui.bold, hook.name)
+            desc = [ui.bold, hook.name]
+            if hook.after_push:
+                desc += [ui.reset, ui.brown, "(after push)"]
+            ui.info_count(i, len(hooks), *desc)
             tbump.hooks.print_hook(hook)
 
     def before_bump(self, patches: List[Patch], git_commands: List[List[str]]) -> None:
