@@ -114,5 +114,6 @@ class GitBumper():
         return res
 
     def run_commands(self, commands: List[List[str]]) -> None:
+        ui.info_2("Running git commands", ui.ellipsis)
         for command in commands:
             self.run_git(*command, verbose=True)

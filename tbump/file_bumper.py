@@ -211,6 +211,7 @@ class FileBumper():
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
     def apply_patches(self, patches: List[Patch]) -> None:
+        ui.info_2("Patching files")
         for patch in patches:
             print_patch(patch)
             file_path = self.working_path / patch.src
