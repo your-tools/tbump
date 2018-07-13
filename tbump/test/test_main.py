@@ -16,9 +16,9 @@ def check_file_contents(test_repo: Path) -> None:
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
 
-    assert_in_file("package.json", '"version": "1.2.41-alpha-2"')
-    assert_in_file("package.json", '"other-dep": "1.2.41-alpha-1"')
-    assert_in_file("pub.js", "PUBLIC_VERSION = '1.2.41'")
+    assert_in_file(test_repo, "package.json", '"version": "1.2.41-alpha-2"')
+    assert_in_file(test_repo, "package.json", '"other-dep": "1.2.41-alpha-1"')
+    assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
 def check_git_status(test_repo: Path) -> None:
@@ -111,7 +111,7 @@ def test_interactive_abort(test_repo: Path, mock: Any) -> None:
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2"])
 
     ask_mock.assert_called_with("Looking good?", default=False)
-    assert_in_file("VERSION", "1.2.41-alpha-1")
+    assert_in_file(test_repo, "VERSION", "1.2.41-alpha-1")
     rc, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
     assert "v1.2.42-alpha-2" not in out
 
@@ -146,7 +146,7 @@ def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("not found")
-    assert_in_file("VERSION", "1.2.41-alpha-1")
+    assert_in_file(test_repo, "VERSION", "1.2.41-alpha-1")
 
 
 def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> None:
@@ -161,7 +161,7 @@ def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> 
         ask_mock.call("Continue anyway?", default=False),
         ask_mock.call("Looking good?", default=False),
     )
-    assert_in_file("VERSION", "1.2.42")
+    assert_in_file(test_repo, "VERSION", "1.2.42")
 
 
 def test_no_tracked_branch_but_ref_exists(test_repo: Path, mock: Any,
@@ -186,7 +186,7 @@ def test_no_tracked_branch_cancel(test_repo: Path, mock: Any,
         tbump.main.main(["-C", test_repo, "1.2.42"])
 
     ask_mock.assert_called_with("Continue anyway?", default=False)
-    assert_in_file("VERSION", "1.2.41")
+    assert_in_file(test_repo, "VERSION", "1.2.41")
     assert message_recorder.find("Cancelled")
 
 

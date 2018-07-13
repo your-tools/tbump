@@ -173,5 +173,5 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
     patches = bumper.compute_patches(new_version="1.3.0")
     bumper.apply_patches(patches)
 
-    assert_in_file(foo_c, '#define FULL_VERSION "1.3.0"')
-    assert_in_file(foo_c, '#define PUBLIC_VERSION "1.3"')
+    assert_in_file(tmp_path, foo_c, '#define FULL_VERSION "1.3.0"')
+    assert_in_file(tmp_path, foo_c, '#define PUBLIC_VERSION "1.3"')
