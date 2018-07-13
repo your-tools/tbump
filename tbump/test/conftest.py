@@ -28,17 +28,11 @@ def restore_cwd() -> None:
     os.chdir(old_cwd)
 
 
-def assert_in_file(*args: str) -> None:
-    parts = args[0:-1]
-    first = parts[0]
-    rest = parts[1:]
-    last = parts[-1]
-    expected_line = args[-1]
-    file_path = Path(first).joinpath(*rest)
-    for line in file_path.lines():
-        if expected_line in line:
-            return
-    assert False, "No line found matching %s in %s" % (expected_line, last)
+def file_contains(path: Path, text: str) -> bool:
+    for line in path.lines():
+        if text in line:
+            return True
+    return False
 
 
 def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:

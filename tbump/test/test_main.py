@@ -1,7 +1,7 @@
 from typing import Any
 import toml
 from ui.tests.conftest import message_recorder
-from tbump.test.conftest import assert_in_file
+from tbump.test.conftest import file_contains
 
 from path import Path
 import pytest
@@ -11,29 +11,41 @@ import tbump.main
 import tbump.git
 
 
-def check_file_contents(test_repo: Path) -> None:
+def files_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
 
-    assert_in_file(test_repo, "package.json", '"version": "1.2.41-alpha-2"')
-    assert_in_file(test_repo, "package.json", '"other-dep": "1.2.41-alpha-1"')
-    assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
+    return all((
+        file_contains(test_repo / "package.json", '"version": "1.2.41-alpha-2"'),
+        file_contains(test_repo / "package.json", '"other-dep": "1.2.41-alpha-1"'),
+        file_contains(test_repo / "pub.js", "PUBLIC_VERSION = '1.2.41'"),
+        ))
 
 
-def check_git_status(test_repo: Path) -> None:
-    check_local_git_status(test_repo)
+def files_not_bumped(test_repo: Path) -> bool:
+    toml_path = test_repo / "tbump.toml"
+    new_toml = toml.loads(toml_path.text())
+    assert new_toml["version"]["current"] == "1.2.41-alpha-1"
+
+    return all((
+        file_contains(test_repo / "package.json", '"version": "1.2.41-alpha-1"'),
+        file_contains(test_repo / "package.json", '"other-dep": "1.2.41-alpha-1"'),
+        file_contains(test_repo / "pub.js", "PUBLIC_VERSION = '1.2.41'"),
+    ))
 
 
-def check_local_git_status(test_repo: Path) -> None:
+def commit_created(test_repo: Path) -> bool:
     _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
-    assert "Bump to 1.2.41-alpha-2" in out
+    return "Bump to 1.2.41-alpha-2" in out
 
+
+def tag_created(test_repo: Path) -> bool:
     _, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
-    assert "v1.2.41-alpha-2" in out
+    return "v1.2.41-alpha-2" in out
 
 
-def has_pushed_tag(test_repo: Path) -> bool:
+def tag_pushed(test_repo: Path) -> bool:
     rc, _ = tbump.git.run_git_captured(
         test_repo, "ls-remote", "--exit-code", "origin", "refs/tags/v1.2.41-alpha-2",
         check=False
@@ -41,7 +53,7 @@ def has_pushed_tag(test_repo: Path) -> bool:
     return rc == 0
 
 
-def has_pushed_branch(test_repo: Path) -> bool:
+def branch_pushed(test_repo: Path) -> bool:
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
@@ -51,9 +63,11 @@ def has_pushed_branch(test_repo: Path) -> bool:
 def test_end_to_end(test_repo: Path) -> None:
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
-    check_file_contents(test_repo)
-    check_git_status(test_repo)
-    assert has_pushed_branch(test_repo) and has_pushed_tag(test_repo)
+    assert files_bumped(test_repo)
+    assert commit_created(test_repo)
+    assert tag_created(test_repo)
+    assert branch_pushed(test_repo)
+    assert tag_pushed(test_repo)
 
 
 def test_on_outdated_branch(test_repo: Path) -> None:
@@ -67,7 +81,7 @@ def test_on_outdated_branch(test_repo: Path) -> None:
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
-    assert not has_pushed_tag(test_repo)
+    assert not tag_pushed(test_repo)
 
 
 def test_tbump_toml_not_found(test_repo: Path, message_recorder: message_recorder) -> None:
@@ -111,7 +125,7 @@ def test_interactive_abort(test_repo: Path, mock: Any) -> None:
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2"])
 
     ask_mock.assert_called_with("Looking good?", default=False)
-    assert_in_file(test_repo, "VERSION", "1.2.41-alpha-1")
+    assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
     rc, out = tbump.git.run_git_captured(test_repo, "tag", "--list")
     assert "v1.2.42-alpha-2" not in out
 
@@ -146,7 +160,7 @@ def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("not found")
-    assert_in_file(test_repo, "VERSION", "1.2.41-alpha-1")
+    assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
 
 
 def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> None:
@@ -161,7 +175,7 @@ def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> 
         ask_mock.call("Continue anyway?", default=False),
         ask_mock.call("Looking good?", default=False),
     )
-    assert_in_file(test_repo, "VERSION", "1.2.42")
+    assert file_contains(test_repo / "VERSION", "1.2.42")
 
 
 def test_no_tracked_branch_but_ref_exists(test_repo: Path, mock: Any,
@@ -186,7 +200,7 @@ def test_no_tracked_branch_cancel(test_repo: Path, mock: Any,
         tbump.main.main(["-C", test_repo, "1.2.42"])
 
     ask_mock.assert_called_with("Continue anyway?", default=False)
-    assert_in_file(test_repo, "VERSION", "1.2.41")
+    assert file_contains(test_repo / "VERSION", "1.2.41")
     assert message_recorder.find("Cancelled")
 
 
