@@ -2,7 +2,7 @@ import pytest
 
 from path import Path
 import tbump.file_bumper
-from tbump.test.conftest import assert_in_file
+from tbump.test.conftest import file_contains
 
 
 def test_file_bumper_simple(test_repo: Path) -> None:
@@ -13,9 +13,9 @@ def test_file_bumper_simple(test_repo: Path) -> None:
     patches = bumper.compute_patches(new_version="1.2.41-alpha-2")
     bumper.apply_patches(patches)
 
-    assert_in_file(test_repo, "package.json", '"version": "1.2.41-alpha-2"')
-    assert_in_file(test_repo, "package.json", '"other-dep": "1.2.41-alpha-1"')
-    assert_in_file(test_repo, "pub.js", "PUBLIC_VERSION = '1.2.41'")
+    assert file_contains(test_repo / "package.json", '"version": "1.2.41-alpha-2"')
+    assert file_contains(test_repo / "package.json", '"other-dep": "1.2.41-alpha-1"')
+    assert file_contains(test_repo / "pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
 def test_looking_for_empty_groups(tmp_path: Path) -> None:
@@ -173,5 +173,5 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
     patches = bumper.compute_patches(new_version="1.3.0")
     bumper.apply_patches(patches)
 
-    assert_in_file(tmp_path, foo_c, '#define FULL_VERSION "1.3.0"')
-    assert_in_file(tmp_path, foo_c, '#define PUBLIC_VERSION "1.3"')
+    assert file_contains(tmp_path / foo_c, '#define FULL_VERSION "1.3.0"')
+    assert file_contains(tmp_path / foo_c, '#define PUBLIC_VERSION "1.3"')

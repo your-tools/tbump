@@ -5,7 +5,7 @@ import pytest
 import tbump.git
 import tbump.hooks
 import tbump.main
-from tbump.test.conftest import assert_in_file
+from tbump.test.conftest import file_contains
 
 
 @pytest.fixture  # type: ignore
@@ -35,7 +35,7 @@ def add_hook(test_repo: Path, name: str, cmd: str) -> None:
 def test_working_hook(test_repo: Path, working_hook: None) -> None:
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
-    assert_in_file(test_repo, "yarn.lock", "1.2.41-alpha-2")
+    assert file_contains(test_repo / "yarn.lock", "1.2.41-alpha-2")
 
 
 def test_hook_fails(test_repo: Path, working_hook: None, crashing_hook: None) -> None:
