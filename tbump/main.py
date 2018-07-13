@@ -65,7 +65,6 @@ class Runner(metaclass=abc.ABCMeta):
     def __init__(self, working_path: Path, new_version: str) -> None:
         self.new_version = new_version
         self.working_path = working_path
-        os.chdir(self.working_path)
 
         self.config = self.parse_config()
 
