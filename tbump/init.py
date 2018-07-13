@@ -26,40 +26,39 @@ def init(working_path: Path) -> None:
     if tbump_path.exists():
         ui.fatal(tbump_path, "already exists")
     template = textwrap.dedent(r"""
-[version]
-current = "@current_version@"
+        [version]
+        current = "@current_version@"
 
-# Example of a semver regexp.
-# Make sure this matches current_version before
-# using tbump
-regex = '''
-  (?P<major>\d+)
-  \.
-  (?P<minor>\d+)
-  \.
-  (?P<patch>\d+)
-  '''
+        # Example of a semver regexp.
+        # Make sure this matches current_version before
+        # using tbump
+        regex = '''
+          (?P<major>\d+)
+          \.
+          (?P<minor>\d+)
+          \.
+          (?P<patch>\d+)
+          '''
 
-[git]
-message_template = "Bump to {new_version}"
-tag_template = "v{new_version}"
-
-""")
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+     """)
 
     file_template = textwrap.dedent("""
-[[file]]
-src = "@src@"
-""")
+        [[file]]
+        src = "@src@"
+    """)
 
     hooks_template = textwrap.dedent("""
-# You can specify a list of commands to
-# run after the files have been patched
-# and before the git commit is made
+        # You can specify a list of commands to
+        # run after the files have been patched
+        # and before the git commit is made
 
-# [[hook]]
-#  name = "check changelog"
-#  cmd = "grep -q {current_version} Changelog.md
-""")
+        # [[hook]]
+        #  name = "check changelog"
+        #  cmd = "grep -q {current_version} Changelog.md"
+    """)
 
     current_version = ui.ask_string("Please enter current version")
     to_write = template.replace("@current_version@", current_version)
