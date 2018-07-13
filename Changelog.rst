@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v4.0.0 (2018-07-13)
+-------------------
+
+* Re-add ``--dry-run``
+* Add ``tbump init`` to interactively create the ``tbump.toml`` configuration file
+
 v3.0.1 (2018-07-12)
 -------------------
 
