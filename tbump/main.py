@@ -42,7 +42,7 @@ class Cancelled(tbump.Error):
 def main(args: Optional[List[str]] = None) -> None:
     # Supress backtrace if exception derives from tbump.Error
     if not args:
-        args = sys.argv
+        args = sys.argv[1:]
     try:
         run(args)
     except tbump.Error as error:
