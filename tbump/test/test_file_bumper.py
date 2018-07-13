@@ -7,7 +7,7 @@ from tbump.test.conftest import assert_in_file
 
 def test_file_bumper_simple(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
-    config = tbump.config.parse(test_repo.joinpath("tbump.toml"))
+    config = tbump.config.parse(test_repo / "tbump.toml")
     assert bumper.working_path == test_repo
     bumper.set_config(config)
     patches = bumper.compute_patches(new_version="1.2.41-alpha-2")
@@ -19,7 +19,7 @@ def test_file_bumper_simple(test_repo: Path) -> None:
 
 
 def test_looking_for_empty_groups(tmp_path: Path) -> None:
-    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path = tmp_path / "tbump.toml"
     tbump_path.write_text(
         r"""
         [version]
@@ -44,7 +44,7 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
 
         """
     )
-    foo_path = tmp_path.joinpath("foo")
+    foo_path = tmp_path / "foo"
     foo_path.write_text(
         """
         version = "1.2"
@@ -60,7 +60,7 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
 
 
 def test_current_version_not_found(tmp_path: Path) -> None:
-    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path = tmp_path / "tbump.toml"
     tbump_path.write_text(
         r"""
         [version]
@@ -75,7 +75,7 @@ def test_current_version_not_found(tmp_path: Path) -> None:
         src = "version.txt"
         """
     )
-    version_txt_path = tmp_path.joinpath("version.txt")
+    version_txt_path = tmp_path / "version.txt"
     version_txt_path.write_text("nope")
     config = tbump.config.parse(tbump_path)
 
@@ -88,7 +88,7 @@ def test_current_version_not_found(tmp_path: Path) -> None:
 
 
 def test_replacing_with_empty_groups(tmp_path: Path) -> None:
-    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path = tmp_path / "tbump.toml"
     tbump_path.write_text(
         r"""
         [version]
@@ -113,7 +113,7 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
 
         """
     )
-    foo_path = tmp_path.joinpath("foo")
+    foo_path = tmp_path / "foo"
     foo_path.write_text(
         """
         version = "1.2.3"
@@ -129,7 +129,7 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
 
 
 def test_changing_same_file_twice(tmp_path: Path) -> None:
-    tbump_path = tmp_path.joinpath("tbump.toml")
+    tbump_path = tmp_path / "tbump.toml"
     tbump_path.write_text(
         r"""
         [version]
@@ -160,7 +160,7 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
         """
     )
 
-    foo_c = tmp_path.joinpath("foo.c")
+    foo_c = tmp_path / "foo.c"
     foo_c.write_text(
         """
         #define FULL_VERSION "1.2.3"

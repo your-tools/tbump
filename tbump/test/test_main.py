@@ -12,7 +12,7 @@ import tbump.git
 
 
 def check_file_contents(test_repo: Path) -> None:
-    toml_path = test_repo.joinpath("tbump.toml")
+    toml_path = test_repo / "tbump.toml"
     new_toml = toml.loads(toml_path.text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
 
@@ -71,7 +71,7 @@ def test_on_outdated_branch(test_repo: Path) -> None:
 
 
 def test_tbump_toml_not_found(test_repo: Path, message_recorder: message_recorder) -> None:
-    toml_path = test_repo.joinpath("tbump.toml")
+    toml_path = test_repo / "tbump.toml"
     toml_path.remove()
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
@@ -79,7 +79,7 @@ def test_tbump_toml_not_found(test_repo: Path, message_recorder: message_recorde
 
 
 def test_tbump_toml_bad_syntax(test_repo: Path, message_recorder: message_recorder) -> None:
-    toml_path = test_repo.joinpath("tbump.toml")
+    toml_path = test_repo / "tbump.toml"
     bad_toml = toml.loads(toml_path.text())
     del bad_toml["git"]
     toml_path.write_text(toml.dumps(bad_toml))
@@ -95,7 +95,7 @@ def test_new_version_does_not_match(test_repo: Path, message_recorder: message_r
 
 
 def test_abort_if_file_does_not_exist(test_repo: Path, message_recorder: message_recorder) -> None:
-    test_repo.joinpath("package.json").remove()
+    (test_repo / "package.json").remove()
     tbump.git.run_git(test_repo, "add", "--update")
     tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
     with pytest.raises(SystemExit):
@@ -117,7 +117,7 @@ def test_interactive_abort(test_repo: Path, mock: Any) -> None:
 
 
 def test_abort_if_dirty(test_repo: Path, message_recorder: message_recorder) -> None:
-    test_repo.joinpath("VERSION").write_text("unstaged changes\n", append=True)
+    (test_repo / "VERSION").write_text("unstaged changes\n", append=True)
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
@@ -133,9 +133,9 @@ def test_abort_if_tag_exists(test_repo: Path, message_recorder: message_recorder
 
 
 def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message_recorder) -> None:
-    invalid_src = test_repo.joinpath("foo.txt")
+    invalid_src = test_repo / "foo.txt"
     invalid_src.write_text("this is foo")
-    tbump_path = test_repo.joinpath("tbump.toml")
+    tbump_path = test_repo / "tbump.toml"
     tbump_path.write_text("""\
     [[file]]
     src = "foo.txt"
@@ -210,14 +210,14 @@ def test_interactive_proceed(test_repo: Path, mock: Any) -> None:
 
 
 def test_do_not_add_untracked_files(test_repo: Path) -> None:
-    test_repo.joinpath("untracked.txt").write_text("please don't add me")
+    (test_repo / "untracked.txt").write_text("please don't add me")
     tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
 
 
 def test_bad_substitution(test_repo: Path, message_recorder: message_recorder) -> None:
-    toml_path = test_repo.joinpath("tbump.toml")
+    toml_path = test_repo / "tbump.toml"
     new_toml = toml.loads(toml_path.text())
     new_toml["file"][0]["version_template"] = "{release}"
     toml_path.write_text(toml.dumps(new_toml))
