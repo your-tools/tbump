@@ -116,14 +116,12 @@ class Runner(metaclass=abc.ABCMeta):
         if self.dry_run:
             return
 
-        ui.info_2("Patching files")
         self.file_bumper.apply_patches(patches)
         if self.hooks_runner.hooks:
             ui.info()
             ui.info_2("Running hooks")
             self.hooks_runner.run(self.new_version)
         ui.info()
-        ui.info_2("Running git commands", ui.ellipsis)
         self.git_bumper.run_commands(git_commands)
         ui.info()
         ui.info(ui.green, "Done", ui.check)
