@@ -28,7 +28,7 @@ Here's what a typical usage of ``tbump`` looks like:
 Usage
 ------
 
-Create a ``tbump.toml`` file looking like:
+Frist, run ``tbump init``. This will create a ``tbump.toml`` file looking like this:
 
 .. code-block:: ini
 
