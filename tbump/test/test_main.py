@@ -53,21 +53,52 @@ def tag_pushed(test_repo: Path) -> bool:
     return rc == 0
 
 
-def branch_pushed(test_repo: Path) -> bool:
+def branch_pushed(test_repo: Path, previous_commit: str) -> bool:
     _, local_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote", "origin", "refs/heads/master")
     remote_commit = out.split()[0]
+    return remote_commit != previous_commit
     return remote_commit == local_commit
 
 
+def bump_done(test_repo: Path, previous_commit: str) -> bool:
+    return all((
+        files_bumped(test_repo),
+        commit_created(test_repo),
+        tag_created(test_repo),
+        branch_pushed(test_repo, previous_commit),
+        tag_pushed(test_repo),
+    ))
+
+
+def bump_not_done(test_repo: Path, previous_commit: str) -> bool:
+    return all((
+        files_not_bumped(test_repo),
+        not commit_created(test_repo),
+        not tag_created(test_repo),
+        not branch_pushed(test_repo, previous_commit),
+        not tag_pushed(test_repo),
+    ))
+
+
 def test_end_to_end(test_repo: Path) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
-    assert files_bumped(test_repo)
-    assert commit_created(test_repo)
-    assert tag_created(test_repo)
-    assert branch_pushed(test_repo)
-    assert tag_pushed(test_repo)
+    assert bump_done(test_repo, previous_commit)
+
+
+def test_dry_run_interactive(test_repo: Path, message_recorder: message_recorder) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
+    assert bump_not_done(test_repo, previous_commit)
+
+
+def test_dry_run_non_interactive(test_repo: Path, message_recorder: message_recorder) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run", "--non-interactive"])
+
+    assert bump_not_done(test_repo, previous_commit)
 
 
 def test_on_outdated_branch(test_repo: Path) -> None:

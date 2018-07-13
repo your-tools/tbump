@@ -43,15 +43,19 @@ class Cancelled(tbump.Error):
 def parse_command_line(cmd: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version")
+    parser.add_argument("-n", "--dry-run", dest="dry_run", action="store_true")
     parser.add_argument("-C", "--cwd", dest="working_path")
     parser.add_argument("--non-interactive", dest="interactive", action="store_false")
     parser.add_argument("--version", action="version", version=TBUMP_VERSION)
+    parser.set_defaults(dry_run=False)
     args = parser.parse_args(args=cmd)
     return args
 
 
 class Runner(metaclass=abc.ABCMeta):
-    def __init__(self, working_path: Path, new_version: str) -> None:
+    def __init__(self, working_path: Path, new_version: str, *,
+                 dry_run: bool = False) -> None:
+        self.dry_run = dry_run
         self.new_version = new_version
         self.working_path = working_path
 
@@ -61,15 +65,15 @@ class Runner(metaclass=abc.ABCMeta):
         self.file_bumper = self.setup_file_bumper()
         self.hooks_runner = self.setup_hooks_runner()
 
-    def display_bump(self, dry_run: bool = False) -> None:
+    def display_bump(self) -> None:
         ui.info_1(
             "Bumping from",
             ui.reset, ui.bold, self.config.current_version,
             ui.reset, "to",
             ui.reset, ui.bold, self.new_version, end=""
         )
-        if dry_run:
-            ui.info(ui.brown, "(dry _run)")
+        if self.dry_run:
+            ui.info(ui.brown, " (dry run)")
         else:
             ui.info()
         ui.info()
@@ -108,6 +112,9 @@ class Runner(metaclass=abc.ABCMeta):
         patches = self.file_bumper.compute_patches(self.new_version)
         git_commands = self.git_bumper.compute_commands(self.new_version)
         self.before_bump(patches, git_commands)
+
+        if self.dry_run:
+            return
 
         ui.info_2("Patching files")
         self.file_bumper.apply_patches(patches)
@@ -165,6 +172,8 @@ class InteractiveRunner(Runner):
         ui.info_2("Would run these commands")
         self.display_git_commands(git_commands)
         ui.info()
+        if self.dry_run:
+            return
         answer = ui.ask_yes_no("Looking good?", default=False)
         if not answer:
             raise Cancelled from None
@@ -182,6 +191,7 @@ def run(cmd: List[str]) -> None:
         working_path = Path(args.working_path)
     else:
         working_path = Path(os.getcwd())
+    dry_run = args.dry_run
 
     new_version = args.new_version
     if new_version == "init":
@@ -190,9 +200,9 @@ def run(cmd: List[str]) -> None:
 
     interactive = args.interactive
     if interactive:
-        runner = InteractiveRunner(working_path, new_version)  # type: Runner
+        runner = InteractiveRunner(working_path, new_version, dry_run=dry_run)  # type: Runner
     else:
-        runner = NonInteractiveRunner(working_path, new_version)
+        runner = NonInteractiveRunner(working_path, new_version, dry_run=dry_run)
 
     runner.check()
     runner.bump()
