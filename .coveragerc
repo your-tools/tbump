@@ -1,4 +1,4 @@
 [run]
 source = tbump
-omit = tbump/test/*,setup.py
+omit = tbump/test/*,setup.py,*/pytest-*
 branch = True
