@@ -2,6 +2,7 @@ from typing import List, Tuple
 from path import Path
 import ui
 
+import tbump.action
 from tbump.config import Config
 import tbump.git
 
@@ -40,6 +41,24 @@ class RefAlreadyExists(tbump.git.GitError):
         ui.error("git ref", self.ref, "already exists")
 
 
+class Command(tbump.action.Action):
+    def __init__(self, repo_path: Path, cmd: List[str]) -> None:
+        super().__init__()
+        self.repo_path = repo_path
+        self.cmd = list(cmd)
+        self.verbose = True
+
+    def print_self(self) -> None:
+        tbump.git.print_git_command(self.cmd)
+
+    def do(self) -> None:
+        self.run()
+
+    def run(self) -> None:
+        full_args = [self.repo_path] + self.cmd
+        return tbump.git.run_git(*full_args, verbose=True)
+
+
 class GitBumper():
     def __init__(self, repo_path: Path) -> None:
         self.repo_path = repo_path
@@ -47,6 +66,7 @@ class GitBumper():
         self.message_template = ""
         self.remote_name = ""
         self.remote_branch = ""
+        self.commands = list()  # type: List[Command]
 
     def set_config(self, config: Config) -> None:
         self.tag_template = config.tag_template
@@ -100,20 +120,18 @@ class GitBumper():
         tracking_ref = self.get_tracking_ref()
         self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
 
-    def compute_commands(self, new_version: str) -> List[List[str]]:
-        res = list()
-        res.append(["add", "--update"])
+    def add_command(self, commands: List[Command], *cmd: str) -> None:
+        command = Command(self.repo_path, list(cmd))
+        commands.append(command)
+
+    def get_commands(self, new_version: str) -> List[Command]:
+        res = list()  # type: List[Command]
+        self.add_command(res, "add", "--update")
         commit_message = self.message_template.format(new_version=new_version)
-        res.append(["commit", "--message", commit_message])
+        self.add_command(res, "commit", "--message", commit_message)
         tag_name = self.tag_template.format(new_version=new_version)
         tag_message = tag_name
-        res.append(["tag", "--annotate", "--message", tag_message, tag_name])
-        if self.remote_branch:
-            res.append(["push", self.remote_name, self.remote_branch])
-            res.append(["push", self.remote_name, tag_name])
+        self.add_command(res, "tag", "--annotate", "--message", tag_message, tag_name)
+        self.add_command(res, "push", self.remote_name, self.remote_branch)
+        self.add_command(res, "push", self.remote_name, tag_name)
         return res
-
-    def run_commands(self, commands: List[List[str]]) -> None:
-        ui.info_2("Running git commands", ui.ellipsis)
-        for command in commands:
-            self.run_git(*command, verbose=True)

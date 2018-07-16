@@ -22,8 +22,9 @@ def test_git_bumper_happy_path(test_repo: Path, test_git_bumper: GitBumper) -> N
     # Make sure git add does not fail:
     # we could use file_bumper here instead
     (test_repo / "VERSION").write_text(new_version)
-    commands = test_git_bumper.compute_commands(new_version)
-    test_git_bumper.run_commands(commands)
+    commands = test_git_bumper.get_commands(new_version)
+    for command in commands:
+        command.run()
     _, out = tbump.git.run_git_captured(test_repo, "log", "--oneline")
     assert "Bump to %s" % new_version in out
 

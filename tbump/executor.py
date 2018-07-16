@@ -1,0 +1,77 @@
+from typing import List, Sequence
+
+import ui
+
+from tbump.action import Action
+from tbump.git_bumper import GitBumper
+from tbump.file_bumper import FileBumper
+from tbump.hooks import HooksRunner
+
+_ = List
+
+
+class ActionGroup():
+    def __init__(self, dry_run_desc: str, desc: str, actions: Sequence[Action]) -> None:
+        self.desc = desc
+        self.dry_run_desc = dry_run_desc
+        self.actions = actions
+
+    def print_group(self, dry_run: bool = False) -> None:
+        if not self.actions:
+            return
+        if dry_run:
+            ui.info_2(self.dry_run_desc)
+        else:
+            ui.info_2(self.desc)
+        for action in self.actions:
+            action.print_self()
+
+    def execute(self) -> None:
+        for action in self.actions:
+            action.do()
+
+
+class Executor:
+    def __init__(self,
+                 new_version: str,
+                 git_bumper: GitBumper,
+                 file_bumper: FileBumper,
+                 hooks_runner: HooksRunner) -> None:
+        self.work = list()  # type: List[ActionGroup]
+
+        patches = ActionGroup(
+            "Would patch these files",
+            "Patching files",
+            file_bumper.get_patches(new_version),
+        )
+        self.work.append(patches)
+
+        before_hooks = ActionGroup(
+            "Would run these hooks before push",
+            "Running hooks before push",
+            hooks_runner.get_before_hooks(new_version),
+        )
+        self.work.append(before_hooks)
+
+        git_commands = ActionGroup(
+            "Would run these commands",
+            "Making bump commit and push matching tag",
+            git_bumper.get_commands(new_version)
+        )
+        self.work.append(git_commands)
+
+        after_hooks = ActionGroup(
+            "Would run these hooks after push",
+            "Running hooks after push",
+            hooks_runner.get_after_hooks(new_version)
+        )
+        self.work.append(after_hooks)
+
+    def print_self(self, *, dry_run: bool = False) -> None:
+        for action_group in self.work:
+            action_group.print_group(dry_run=dry_run)
+
+    def run(self) -> None:
+        for action_group in self.work:
+            action_group.print_group(dry_run=False)
+            action_group.execute()

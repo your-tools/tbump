@@ -194,45 +194,13 @@ def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message
     assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
 
 
-def test_no_tracked_branch_proceed_and_skip_push(test_repo: Path, mock: Any) -> None:
-    ask_mock = mock.patch("ui.ask_yes_no")
-
-    ask_mock.return_value = [True, True]
-    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
-
-    tbump.main.main(["-C", test_repo, "1.2.42"])
-
-    ask_mock.assert_has_calls(
-        ask_mock.call("Continue anyway?", default=False),
-        ask_mock.call("Looking good?", default=False),
-    )
-    assert file_contains(test_repo / "VERSION", "1.2.42")
-
-
 def test_no_tracked_branch_but_ref_exists(test_repo: Path, mock: Any,
                                           message_recorder: message_recorder) -> None:
-    ask_mock = mock.patch("ui.ask_yes_no")
-
-    ask_mock.return_value = [True]
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.41-alpha-1"])
     assert message_recorder.find("already exists")
-
-
-def test_no_tracked_branch_cancel(test_repo: Path, mock: Any,
-                                  message_recorder: message_recorder) -> None:
-    ask_mock = mock.patch("ui.ask_yes_no")
-    ask_mock.return_value = False
-    tbump.git.run_git(test_repo, "checkout", "-b", "devel")
-
-    with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42"])
-
-    ask_mock.assert_called_with("Continue anyway?", default=False)
-    assert file_contains(test_repo / "VERSION", "1.2.41")
-    assert message_recorder.find("Cancelled")
 
 
 def test_no_tracked_branch_non_interactive(test_repo: Path,
