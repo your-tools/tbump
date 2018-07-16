@@ -6,6 +6,7 @@ from path import Path
 import ui
 
 import tbump
+import tbump.action
 import tbump.git
 import tbump.config
 
@@ -18,29 +19,41 @@ class ChangeRequest:
     search = attr.ib(default=None)  # type: Optional[str]
 
 
-@attr.s
-class Patch:
-    src = attr.ib()  # type: str
-    lineno = attr.ib()  # type: int
-    old_line = attr.ib()  # type: str
-    new_line = attr.ib()  # type: str
+class Patch(tbump.action.Action):
+    # pylint: disable=too-many-arguments
+    def __init__(self, working_path: Path, src: str,
+                 lineno: int, old_line: str, new_line: str) -> None:
+        super().__init__()
+        self.working_path = working_path
+        self.src = src
+        self.lineno = lineno
+        self.old_line = old_line
+        self.new_line = new_line
 
+    def print_self(self) -> None:
+        ui.info(
+            ui.red, "- ", ui.reset,
+            ui.bold, self.src, ":", ui.reset,
+            ui.darkgray, self.lineno + 1, ui.reset,
+            " ", ui.red, self.old_line.strip(),
+            sep=""
+        )
+        ui.info(
+            ui.green, "+ ", ui.reset,
+            ui.bold, self.src, ":", ui.reset,
+            ui.darkgray, self.lineno + 1, ui.reset,
+            " ", ui.green, self.new_line.strip(),
+            sep=""
+        )
 
-def print_patch(patch: Patch) -> None:
-    ui.info(
-        ui.red, "- ", ui.reset,
-        ui.bold, patch.src, ":", ui.reset,
-        ui.darkgray, patch.lineno + 1, ui.reset,
-        " ", ui.red, patch.old_line.strip(),
-        sep=""
-    )
-    ui.info(
-        ui.green, "+ ", ui.reset,
-        ui.bold, patch.src, ":", ui.reset,
-        ui.darkgray, patch.lineno + 1, ui.reset,
-        " ", ui.green, patch.new_line.strip(),
-        sep=""
-    )
+    def do(self) -> None:
+        self.apply()
+
+    def apply(self) -> None:
+        file_path = self.working_path / self.src
+        lines = file_path.lines()
+        lines[self.lineno] = self.new_line
+        file_path.write_lines(lines)
 
 
 class BadSubstitution(tbump.Error):
@@ -143,7 +156,7 @@ class FileBumper():
             if not expected_path.exists():
                 raise SourceFileNotFound(src=file.src)
 
-    def compute_patches(self, new_version: str) -> List[Patch]:
+    def get_patches(self, new_version: str) -> List[Patch]:
         self.new_version = new_version
         self.new_groups = self.parse_version(self.new_version)
         change_requests = self.compute_change_requests()
@@ -167,7 +180,7 @@ class FileBumper():
         for i, old_line in enumerate(old_lines):
             if should_replace(old_line, old_string, search):
                 new_line = old_line.replace(old_string, new_string)
-                patch = Patch(change_request.src, i, old_line, new_line)
+                patch = Patch(self.working_path, change_request.src, i, old_line, new_line)
                 patches.append(patch)
         if not patches:
             raise CurrentVersionNotFound(src=change_request.src, current_version_string=old_string)
@@ -209,13 +222,3 @@ class FileBumper():
             to_search = file.search.format(current_version=current_version)
 
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
-
-    def apply_patches(self, patches: List[Patch]) -> None:
-        ui.info_2("Patching files")
-        for patch in patches:
-            print_patch(patch)
-            file_path = self.working_path / patch.src
-            # TODO: read and write each file only once?
-            lines = file_path.lines()
-            lines[patch.lineno] = patch.new_line
-            file_path.write_lines(lines)

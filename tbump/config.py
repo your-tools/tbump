@@ -130,6 +130,6 @@ def parse(cfg_path: Path) -> Config:
     if "hook" in parsed:
         for hook_dict in parsed["hook"]:
             after_push = hook_dict.get("after_push", False)
-            hook = Hook(name=hook_dict["name"], cmd=hook_dict["cmd"], after_push=after_push)
+            hook = Hook(hook_dict["name"], hook_dict["cmd"], after_push=after_push)
             config.hooks.append(hook)
     return config

@@ -10,8 +10,9 @@ def test_file_bumper_simple(test_repo: Path) -> None:
     config = tbump.config.parse(test_repo / "tbump.toml")
     assert bumper.working_path == test_repo
     bumper.set_config(config)
-    patches = bumper.compute_patches(new_version="1.2.41-alpha-2")
-    bumper.apply_patches(patches)
+    patches = bumper.get_patches(new_version="1.2.41-alpha-2")
+    for patch in patches:
+        patch.apply()
 
     assert file_contains(test_repo / "package.json", '"version": "1.2.41-alpha-2"')
     assert file_contains(test_repo / "package.json", '"other-dep": "1.2.41-alpha-1"')
@@ -54,7 +55,7 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config(config)
     with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
-        bumper.compute_patches(new_version="1.3.1")
+        bumper.get_patches(new_version="1.3.1")
     assert e.value.src == "foo"
     assert e.value.groups == {"major": "1", "minor": "2", "patch": None}
 
@@ -82,9 +83,8 @@ def test_current_version_not_found(tmp_path: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config(config)
     with pytest.raises(tbump.file_bumper.CurrentVersionNotFound) as e:
-        bumper.compute_patches(new_version="1.3.1")
+        bumper.get_patches(new_version="1.3.1")
     assert e.value.src == "version.txt"
-    e.value.print_error()
 
 
 def test_replacing_with_empty_groups(tmp_path: Path) -> None:
@@ -124,7 +124,7 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
     config = tbump.config.parse(tbump_path)
     bumper.set_config(config)
     with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
-        bumper.compute_patches(new_version="1.3")
+        bumper.get_patches(new_version="1.3")
     assert e.value.groups == {"major": "1", "minor": "3", "patch": None}
 
 
@@ -170,8 +170,9 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     config = tbump.config.parse(tbump_path)
     bumper.set_config(config)
-    patches = bumper.compute_patches(new_version="1.3.0")
-    bumper.apply_patches(patches)
+    patches = bumper.get_patches(new_version="1.3.0")
+    for patch in patches:
+        patch.do()
 
     assert file_contains(tmp_path / foo_c, '#define FULL_VERSION "1.3.0"')
     assert file_contains(tmp_path / foo_c, '#define PUBLIC_VERSION "1.3"')
