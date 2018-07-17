@@ -67,6 +67,9 @@ def bump(working_path: Path, new_version: str, *,
          interactive: bool = True, dry_run: bool = False) -> None:
     config = parse_config(working_path)
 
+    ui.info_1("Bumping from", ui.bold, config.current_version,
+              ui.reset, "to", ui.bold, new_version)
+
     git_bumper = GitBumper(working_path)
     git_bumper.set_config(config)
     git_bumper.check_state(new_version)
