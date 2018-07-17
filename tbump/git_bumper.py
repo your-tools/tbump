@@ -56,7 +56,7 @@ class Command(tbump.action.Action):
 
     def run(self) -> None:
         full_args = [self.repo_path] + self.cmd
-        return tbump.git.run_git(*full_args, verbose=True)
+        return tbump.git.run_git(*full_args, verbose=False)
 
 
 class GitBumper():

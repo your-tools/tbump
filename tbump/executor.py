@@ -11,7 +11,11 @@ _ = List
 
 
 class ActionGroup():
-    def __init__(self, dry_run_desc: str, desc: str, actions: Sequence[Action]) -> None:
+
+    def __init__(self, dry_run_desc: str, desc: str,
+                 actions: Sequence[Action],
+                 *, should_enumerate: bool = False) -> None:
+        self.should_enumerate = should_enumerate
         self.desc = desc
         self.dry_run_desc = dry_run_desc
         self.actions = actions
@@ -23,7 +27,9 @@ class ActionGroup():
             ui.info_2(self.dry_run_desc)
         else:
             ui.info_2(self.desc)
-        for action in self.actions:
+        for i, action in enumerate(self.actions):
+            if self.should_enumerate:
+                ui.info_count(i, len(self.actions), end="")
             action.print_self()
 
     def execute(self) -> None:
@@ -37,6 +43,7 @@ class Executor:
                  git_bumper: GitBumper,
                  file_bumper: FileBumper,
                  hooks_runner: HooksRunner) -> None:
+        self.new_version = new_version
         self.work = list()  # type: List[ActionGroup]
 
         patches = ActionGroup(
@@ -50,11 +57,12 @@ class Executor:
             "Would run these hooks before push",
             "Running hooks before push",
             hooks_runner.get_before_hooks(new_version),
+            should_enumerate=True,
         )
         self.work.append(before_hooks)
 
         git_commands = ActionGroup(
-            "Would run these commands",
+            "Would run these git commands",
             "Making bump commit and push matching tag",
             git_bumper.get_commands(new_version)
         )
@@ -63,7 +71,8 @@ class Executor:
         after_hooks = ActionGroup(
             "Would run these hooks after push",
             "Running hooks after push",
-            hooks_runner.get_after_hooks(new_version)
+            hooks_runner.get_after_hooks(new_version),
+            should_enumerate=True,
         )
         self.work.append(after_hooks)
 
