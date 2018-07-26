@@ -9,6 +9,7 @@ attrs = "*"
 python-cli-ui = "*"
 schema = "*"
 toml = "*"
+docopt = "*"
 
 [dev-packages]
 scandir = { version = "*", markers="python_version <= '3.4'" }

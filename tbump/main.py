@@ -1,8 +1,9 @@
 from typing import List, Optional
-import argparse
-import os
 import sys
+import textwrap
 
+import attr
+import docopt
 from path import Path
 import ui
 
@@ -18,6 +19,21 @@ from tbump.hooks import HooksRunner
 
 
 TBUMP_VERSION = "4.0.0"
+
+USAGE = textwrap.dedent("""
+Usage:
+  tbump [options] <new_version>
+  tbump [options] init <current_version>
+  tbump --help
+  tbump --version
+
+Options:
+   -h --help          Show this screen.
+   -v --version       Show version.
+   -C --cwd=<path>    Set working directory to <path>.
+   --non-interactive  Never prompt for confirmation. Useful for automated scripts.
+   --dry-run          Only display the changes that would be made.
+""")
 
 
 class InvalidConfig(tbump.Error):
@@ -40,16 +56,44 @@ class Cancelled(tbump.Error):
         ui.error("Cancelled by user")
 
 
-def parse_command_line(cmd: List[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("new_version")
-    parser.add_argument("-n", "--dry-run", dest="dry_run", action="store_true")
-    parser.add_argument("-C", "--cwd", dest="working_path")
-    parser.add_argument("--non-interactive", dest="interactive", action="store_false")
-    parser.add_argument("--version", action="version", version=TBUMP_VERSION)
-    parser.set_defaults(dry_run=False)
-    args = parser.parse_args(args=cmd)
-    return args
+# pylint: disable=too-few-public-methods
+@attr.s
+class BumpOptions:
+    working_path = attr.ib()  # type: Path
+    new_version = attr.ib()  # type: str
+    interactive = attr.ib(default=True)  # type: bool
+    dry_run = attr.ib(default=False)  # type: bool
+
+
+def run(cmd: List[str]) -> None:
+    opt_dict = docopt.docopt(USAGE, argv=cmd)
+    if opt_dict["--version"]:
+        print("tbump", TBUMP_VERSION)
+        return
+
+    # when running `tbump init` (with current_version missing),
+    # docopt thinks we are runnig `tbump` with new_version = "init"
+    # bail out early in this case
+    if opt_dict["<new_version>"] == "init":
+        sys.exit(USAGE)
+
+    if opt_dict["--cwd"]:
+        working_path = Path(opt_dict["--cwd"])
+    else:
+        working_path = Path.getcwd()
+
+    if opt_dict["init"]:
+        current_version = opt_dict["<current_version>"]
+        tbump.init.init(working_path, current_version)
+        return
+
+    new_version = opt_dict["<new_version>"]
+    bump_options = BumpOptions(working_path=working_path, new_version=new_version)
+    if opt_dict["--dry-run"]:
+        bump_options.dry_run = True
+    if opt_dict["--non-interactive"]:
+        bump_options.interactive = False
+    bump(bump_options)
 
 
 def parse_config(working_path: Path) -> Config:
@@ -63,9 +107,13 @@ def parse_config(working_path: Path) -> Config:
     return config
 
 
-def bump(working_path: Path, new_version: str, *,
-         interactive: bool = True, dry_run: bool = False) -> None:
-    config = parse_config(working_path)
+def bump(options: BumpOptions) -> None:
+    working_path = options.working_path
+    new_version = options.new_version
+    interactive = options.interactive
+    dry_run = options.dry_run
+
+    config = parse_config(options.working_path)
 
     ui.info_1("Bumping from", ui.bold, config.current_version,
               ui.reset, "to", ui.bold, new_version)
@@ -95,23 +143,6 @@ def bump(working_path: Path, new_version: str, *,
 
     executor.print_self(dry_run=False)
     executor.run()
-
-
-def run(cmd: List[str]) -> None:
-    args = parse_command_line(cmd)
-    if args.working_path:
-        working_path = Path(args.working_path)
-    else:
-        working_path = Path(os.getcwd())
-
-    new_version = args.new_version
-    if new_version == "init":
-        tbump.init.init(working_path)
-        return
-
-    dry_run = args.dry_run
-    interactive = args.interactive
-    bump(working_path, new_version, interactive=interactive, dry_run=dry_run)
 
 
 def main(args: Optional[List[str]] = None) -> None:

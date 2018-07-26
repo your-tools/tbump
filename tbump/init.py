@@ -19,7 +19,7 @@ def find_files(working_path: Path, current_version: str) -> List[str]:
     return res
 
 
-def init(working_path: Path) -> None:
+def init(working_path: Path, current_version: str) -> None:
     """ Interactively creates a new tbump.toml """
     ui.info_1("Generating tbump config file")
     tbump_path = working_path / "tbump.toml"
@@ -63,7 +63,6 @@ def init(working_path: Path) -> None:
         # after the push
     """)
 
-    current_version = ui.ask_string("Please enter current version")
     to_write = template.replace("@current_version@", current_version)
     files = find_files(working_path, current_version)
     for file in files:

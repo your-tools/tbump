@@ -11,14 +11,12 @@ from ui.tests.conftest import message_recorder
 from tbump.test.conftest import file_contains
 
 
-def test_creates_config_interactively(test_repo: Path, mock: Any) -> None:
+def test_creates_config(test_repo: Path, mock: Any) -> None:
     tbump_path = test_repo / "tbump.toml"
     tbump_path.remove()
     current_version = "1.2.41-alpha1"
 
-    ask_mock = mock.patch("ui.ask_string")
-    ask_mock.return_value = current_version
-    tbump.main.main(["-C", test_repo, "init"])
+    tbump.main.main(["-C", test_repo, "init", current_version])
 
     assert tbump_path.exists()
     config = toml.loads(tbump_path.text())
@@ -29,5 +27,5 @@ def test_creates_config_interactively(test_repo: Path, mock: Any) -> None:
 
 def test_abort_if_tbump_toml_exists(test_repo: Path, message_recorder: message_recorder) -> None:
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "init"])
+        tbump.main.main(["-C", test_repo, "init", "1.2.41-alpha1"])
     assert message_recorder.find("already exists")
