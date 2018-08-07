@@ -1,4 +1,4 @@
-from typing import List
+from typing import List  # noqa
 import subprocess
 
 import attr
@@ -7,11 +7,7 @@ import ui
 
 import tbump
 
-# pylint: disable=pointless-statement
-List
 
-
-# pylint: disable=too-few-public-methods
 @attr.s
 class Hook:
     name = attr.ib()  # type: str
