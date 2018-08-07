@@ -1,5 +1,5 @@
 import re
-from typing import cast, Any, Dict, List, Optional, Pattern
+from typing import cast, Any, Dict, List, Optional, Pattern  # noqa
 
 import attr
 import schema
@@ -8,11 +8,7 @@ import toml
 
 from .hooks import Hook
 
-# pylint: disable=pointless-statement
-List, Optional
 
-
-# pylint: disable=too-few-public-methods
 @attr.s
 class Config:
     current_version = attr.ib()  # type: str
@@ -23,7 +19,6 @@ class Config:
     hooks = attr.ib(default=list())  # type: List[Hook]
 
 
-# pylint: disable=too-few-public-methods
 @attr.s
 class File:
     src = attr.ib()  # type: str
@@ -31,7 +26,6 @@ class File:
     version_template = attr.ib(default=None)  # type: Optional[str]
 
 
-# pylint: disable=too-few-public-methods
 class ValidTemplate():
     def __init__(self, name: str, pattern: str) -> None:
         self.name = name
@@ -44,13 +38,11 @@ class ValidTemplate():
         return value
 
 
-# pylint: disable=too-few-public-methods
 class ValidTag(ValidTemplate):
     def __init__(self) -> None:
         super().__init__("tag_template", "{new_version}")
 
 
-# pylint: disable=too-few-public-methods
 class ValidMessage(ValidTemplate):
     def __init__(self) -> None:
         super().__init__("message_template", "{new_version}")

@@ -144,12 +144,10 @@ class InteractiveRunner(Runner):
             if not proceed:
                 raise Cancelled from None
 
-    # pylint: disable=no-self-use
     def display_patches(self, patches: List[Patch]) -> None:
         for patch in patches:
             tbump.file_bumper.print_patch(patch)
 
-    # pylint: disable=no-self-use
     def display_git_commands(self, git_commands: List[List[str]]) -> None:
         for git_command in git_commands:
             tbump.git.print_git_command(git_command)
