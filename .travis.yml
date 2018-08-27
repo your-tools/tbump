@@ -13,8 +13,7 @@ matrix:
 install:
   - pip install pipenv
   - pipenv install --dev
-  - pipenv run python setup.py develop
 
 
 script:
-  - pipenv run python ci/ci.py
+  - tools/ci.sh
