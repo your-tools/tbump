@@ -2,6 +2,7 @@ from typing import Any
 from path import Path
 import schema
 
+from tbump.hooks import HOOKS_CLASSES
 import tbump.config
 
 
@@ -142,19 +143,21 @@ def test_parse_hooks(tmp_path: Path) -> None:
         [[file]]
         src = "pub.js"
 
-        [[hook]]
+        [[before_push]]
         name = "Check changelog"
         cmd = "grep -q {new_version} Changelog.md"
 
-        [[hook]]
+        [[after_push]]
         name = "After push"
         cmd = "cargo publish"
-        after_push = true
     """)
     config = tbump.config.parse(toml_path)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
     assert first_hook.cmd == "grep -q {new_version} Changelog.md"
+    expected_class = HOOKS_CLASSES["before_push"]
+    assert isinstance(first_hook, expected_class)
 
     second_hook = config.hooks[1]
-    assert second_hook.after_push is True
+    expected_class = HOOKS_CLASSES["after_push"]
+    assert isinstance(second_hook, expected_class)

@@ -152,25 +152,24 @@ Here's an example:
 
 .. code-block:: ini
 
-    [[hook]]
+    [[before_push]]
     name = "Check Changelog"
     cmd = "grep -q {new_version} Changelog.rst"
 
 
-The name is mandatory. The command will be executed via the shell, after the  ``{new_version}``  placehoder is replaced with the new version.
+The name is mandatory. The command will be executed via the shell, after the  ``{new_version}``  placeholder is replaced with the new version.
 
-Any hook that fails will interupt the bump. You may want to run ``git reset --hard`` before trying again to undo the changes made in the files.
+Any hook that fails will interrupt the bump. You may want to run ``git reset --hard`` before trying again to undo the changes made in the files.
 
 Running commands after push
 +++++++++++++++++++++++++++
 
-You can specify a list of hooks to be run right after the tag has been pushed, by adding ``after_push=true`` to the configuration file.
+You can specify a list of hooks to be run right after the tag has been pushed, using an `[[after_push]]` section.
 
 This is useful if you need the command to run on a clean repository, without un-committed changes, for instance to publish ``rust`` packages:
 
 .. code-block:: ini
 
-    [[hook]]
+    [[after_push]]
     name = "Publish to crates.io"
     cmd = "cargo publish"
-    after_push = true

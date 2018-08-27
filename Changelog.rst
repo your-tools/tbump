@@ -1,6 +1,33 @@
 Changelog
 =========
 
+v5.0.0 (2018-08-27)
+-------------------
+
+* **Breaking change**: tbump can now run hooks *after* the push is made. Thus
+  ``[[hook]]`` sections should be renamed to ``[before_push]]``  or
+  ``[[after_push]]``:
+
+.. code-block:: ini
+
+  # Before (< 5.0.0), running before push by default:
+  [[hook]]
+  name = "some hook"
+  cmd = "some command"
+
+  # After (>= 5.00), more explicit syntax:
+  [[before_push]]
+  name = "some hook"
+  cmd = "some command"
+
+  # New feature: running after push is made:
+  [[before_push]]
+  name = "some other hook"
+  cmd = "some other command"
+
+* ``tbump init`` now takes the current version directly on the command line instead of interactively asking for it
+
+
 v4.0.0 (2018-07-13)
 -------------------
 

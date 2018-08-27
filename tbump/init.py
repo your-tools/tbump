@@ -55,12 +55,15 @@ def init(working_path: Path, current_version: str) -> None:
         # run after the files have been patched
         # and before the git commit is made
 
-        # [[hook]]
+        #  [[before_push]]
         #  name = "check changelog"
         #  cmd = "grep -q {current_version} Changelog.md"
 
-        # Or use after_push = true to run the commands
-        # after the push
+        # Or run some commands after the git tag and the branch
+        # have been pushed:
+        #  [[after_push]]
+        #  name = "check changelog"
+        #  cmd = "grep -q {current_version} Changelog.md"
     """)
 
     to_write = template.replace("@current_version@", current_version)

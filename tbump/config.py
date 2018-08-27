@@ -6,7 +6,7 @@ import schema
 from path import Path
 import toml
 
-from .hooks import Hook
+from .hooks import HOOKS_CLASSES, Hook, BeforePushHook, AfterPushHook  # noqa
 
 
 @attr.s
@@ -67,7 +67,6 @@ def validate(config: Dict[str, Any]) -> Config:
     hook_schema = schema.Schema({
         "name": str,
         "cmd": str,
-        schema.Optional("after_push"):  bool,
     })
 
     def compile_re(regex: str) -> Pattern:
@@ -84,7 +83,8 @@ def validate(config: Dict[str, Any]) -> Config:
                 "tag_template": ValidTag(),
             },
             "file": [file_schema],
-            schema.Optional("hook"): [hook_schema]
+            schema.Optional("before_push"): [hook_schema],
+            schema.Optional("after_push"): [hook_schema],
             }
     )
     return cast(Config, tbump_schema.validate(config))
@@ -127,9 +127,10 @@ def parse(cfg_path: Path) -> Config:
         config.files.append(file_config)
 
     config.hooks = list()
-    if "hook" in parsed:
-        for hook_dict in parsed["hook"]:
-            after_push = hook_dict.get("after_push", False)
-            hook = Hook(hook_dict["name"], hook_dict["cmd"], after_push=after_push)
-            config.hooks.append(hook)
+    for hook_type in ("before_push", "after_push"):
+        cls = HOOKS_CLASSES[hook_type]
+        if hook_type in parsed:
+            for hook_dict in parsed[hook_type]:
+                hook = cls(hook_dict["name"], hook_dict["cmd"])
+                config.hooks.append(hook)
     return config

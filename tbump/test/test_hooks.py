@@ -14,9 +14,14 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     """
     cfg_path = test_repo / "tbump.toml"
     parsed = toml.loads(cfg_path.text())
-    if "hook" not in parsed:
-        parsed["hook"] = list()
-    parsed["hook"].append({"cmd": cmd, "name": name, "after_push": after_push})
+    if after_push:
+        key = "after_push"
+    else:
+        key = "before_push"
+    if key not in parsed:
+        parsed[key] = list()
+    parsed[key].append({"cmd": cmd, "name": name})
+
     cfg_path.write_text(toml.dumps(parsed))
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
