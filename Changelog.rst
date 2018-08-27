@@ -21,7 +21,7 @@ v5.0.0 (2018-08-27)
   cmd = "some command"
 
   # New feature: running after push is made:
-  [[before_push]]
+  [[after_push]]
   name = "some other hook"
   cmd = "some other command"
 
