@@ -222,3 +222,13 @@ class FileBumper():
             to_search = file.search.format(current_version=current_version)
 
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
+
+
+def bump_files(new_version: str, repo_path: Path=None) -> None:
+    repo_path = repo_path or Path(".")
+    bumper = FileBumper(repo_path)
+    cfg = tbump.config.parse(repo_path / "tbump.toml")
+    bumper.set_config(cfg)
+    patches = bumper.get_patches(new_version=new_version)
+    for patch in patches:
+        patch.apply()
