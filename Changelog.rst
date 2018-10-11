@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v5.0.1 (2018-10-11)
+-------------------
+
+* Expose ``tbump.bump_files()`` convenience function.
+
+
 v5.0.0 (2018-08-27)
 -------------------
 
