@@ -230,5 +230,8 @@ def bump_files(new_version: str, repo_path: Path=None) -> None:
     cfg = tbump.config.parse(repo_path / "tbump.toml")
     bumper.set_config(cfg)
     patches = bumper.get_patches(new_version=new_version)
-    for patch in patches:
+    n = len(patches)
+    for i, patch in enumerate(patches):
+        ui.info_count(i, n, patch.src)
+        patch.print_self()
         patch.apply()
