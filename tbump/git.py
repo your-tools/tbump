@@ -12,7 +12,7 @@ class GitError(tbump.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, cmd: List[str], working_path: Path, output: Optional[str] = None) -> None:
+    def __init__(self, cmd: List[str], working_path: Path, output: Optional[str] = None):
         super().__init__()
         self.cmd = cmd
         self.output = output

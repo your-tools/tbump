@@ -35,7 +35,7 @@ setup(name="tbump",
               "pytest-cov",
 
               # linters
-              "mypy==0.620",
+              "mypy==0.641",
               "flake8==3.5.0",
 
               # distribution
