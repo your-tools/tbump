@@ -38,6 +38,8 @@ class AfterPushHook(Hook):
 HOOKS_CLASSES = {
     "after_push": AfterPushHook,
     "before_commit": BeforeCommitHook,
+    "before_push": BeforeCommitHook,  # retro-compat name
+    "hook": BeforeCommitHook,  # retro-compat name
 }
 
 

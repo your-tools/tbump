@@ -83,6 +83,8 @@ def validate(config: Dict[str, Any]) -> Config:
                 "tag_template": ValidTag(),
             },
             "file": [file_schema],
+            schema.Optional("hook"): [hook_schema],    # retro-compat
+            schema.Optional("before_push"): [hook_schema],    # retro-compat
             schema.Optional("before_commit"): [hook_schema],
             schema.Optional("after_push"): [hook_schema],
             }
@@ -127,7 +129,7 @@ def parse(cfg_path: Path) -> Config:
         config.files.append(file_config)
 
     config.hooks = list()
-    for hook_type in ("before_commit", "after_push"):
+    for hook_type in ("hook", "before_push", "before_commit", "after_push"):
         cls = HOOKS_CLASSES[hook_type]
         if hook_type in parsed:
             for hook_dict in parsed[hook_type]:
