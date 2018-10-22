@@ -55,7 +55,7 @@ def init(working_path: Path, current_version: str) -> None:
         # run after the files have been patched
         # and before the git commit is made
 
-        #  [[before_push]]
+        #  [[before_commit]]
         #  name = "check changelog"
         #  cmd = "grep -q {current_version} Changelog.md"
 

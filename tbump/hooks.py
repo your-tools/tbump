@@ -27,7 +27,7 @@ class Hook(tbump.action.Action):
             raise HookError(name=self.name, cmd=self.cmd, rc=rc)
 
 
-class BeforePushHook(Hook):
+class BeforeCommitHook(Hook):
     pass
 
 
@@ -37,7 +37,7 @@ class AfterPushHook(Hook):
 
 HOOKS_CLASSES = {
     "after_push": AfterPushHook,
-    "before_push": BeforePushHook,
+    "before_commit": BeforeCommitHook,
 }
 
 
@@ -65,7 +65,7 @@ class HooksRunner:
         self.hooks.append(hook)
 
     def get_before_hooks(self, new_version: str) -> List[Hook]:
-        return self._get_hooks_for_new_version_by_type(new_version, "before_push")
+        return self._get_hooks_for_new_version_by_type(new_version, "before_commit")
 
     def get_after_hooks(self, new_version: str) -> List[Hook]:
         return self._get_hooks_for_new_version_by_type(new_version, "after_push")

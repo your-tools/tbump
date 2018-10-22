@@ -54,8 +54,8 @@ class Executor:
         self.work.append(patches)
 
         before_hooks = ActionGroup(
-            "Would run these hooks before push",
-            "Running hooks before push",
+            "Would run these hooks before commit",
+            "Running hooks before commit",
             hooks_runner.get_before_hooks(new_version),
             should_enumerate=True,
         )

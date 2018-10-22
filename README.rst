@@ -140,19 +140,19 @@ To do so, add a ``version_template`` option in te ``file`` section. The names us
       search = "export FULL_VERSION = '{current_version}'"
 
 
-Running commands before push
-++++++++++++++++++++++++++++
+Running commands before commit
+++++++++++++++++++++++++++++++
 
 You can specify a list of hooks to be run after the file have changed, but before the commit is made and pushed.
 
-This is useful if some of the files under version controlled are generated through an external program.
+This is useful if some of the files under version control are generated through an external program.
 
 Here's an example:
 
 
 .. code-block:: ini
 
-    [[before_push]]
+    [[before_commit]]
     name = "Check Changelog"
     cmd = "grep -q {new_version} Changelog.rst"
 
