@@ -143,7 +143,7 @@ def test_parse_hooks(tmp_path: Path) -> None:
         [[file]]
         src = "pub.js"
 
-        [[before_push]]
+        [[before_commit]]
         name = "Check changelog"
         cmd = "grep -q {new_version} Changelog.md"
 
@@ -155,7 +155,7 @@ def test_parse_hooks(tmp_path: Path) -> None:
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
     assert first_hook.cmd == "grep -q {new_version} Changelog.md"
-    expected_class = HOOKS_CLASSES["before_push"]
+    expected_class = HOOKS_CLASSES["before_commit"]
     assert isinstance(first_hook, expected_class)
 
     second_hook = config.hooks[1]

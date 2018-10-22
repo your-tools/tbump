@@ -22,11 +22,11 @@ src = "setup.py"
 [[file]]
 src = "tbump/main.py"
 
-[[before_push]]
+[[before_commit]]
 name = "Run CI"
 cmd = "tools/ci.sh"
 
-[[before_push]]
+[[before_commit]]
 name = "Check Changelog"
 cmd = "grep -q {new_version} Changelog.rst"
 

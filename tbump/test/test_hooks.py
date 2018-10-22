@@ -17,7 +17,7 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     if after_push:
         key = "after_push"
     else:
-        key = "before_push"
+        key = "before_commit"
     if key not in parsed:
         parsed[key] = list()
     parsed[key].append({"cmd": cmd, "name": name})

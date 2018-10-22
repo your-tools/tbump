@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v5.0.2 (2018-10-11)
+-------------------
+
+* Rename ``before_push`` section to ``before_commit``: it better reflets at which
+  moment the hook runs.
+
 v5.0.1 (2018-10-11)
 -------------------
 
@@ -16,7 +22,7 @@ v5.0.0 (2018-08-27)
 
 .. code-block:: ini
 
-  # Before (< 5.0.0), running before push by default:
+  # Before (< 5.0.0), running before commit by default:
   [[hook]]
   name = "some hook"
   cmd = "some command"
