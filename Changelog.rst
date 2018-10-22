@@ -5,7 +5,8 @@ v5.0.2 (2018-10-11)
 -------------------
 
 * Rename ``before_push`` section to ``before_commit``: it better reflets at which
-  moment the hook runs.
+  moment the hook runs. Note that you can still use ``before_push`` or even ``hook`` if
+  you want.
 
 v5.0.1 (2018-10-11)
 -------------------
