@@ -9,7 +9,7 @@ import tbump.action
 
 
 class Hook(tbump.action.Action):
-    def __init__(self, name: str, cmd: str) -> None:
+    def __init__(self, name: str, cmd: str):
         super().__init__()
         self.working_path = None  # type: Optional[Path]
         self.name = name
@@ -44,7 +44,7 @@ HOOKS_CLASSES = {
 
 
 class HookError(tbump.Error):
-    def __init__(self, *, name: str, cmd: str, rc: int) -> None:
+    def __init__(self, *, name: str, cmd: str, rc: int):
         super().__init__()
         self.cmd = cmd
         self.rc = rc
@@ -58,7 +58,7 @@ class HookError(tbump.Error):
 
 
 class HooksRunner:
-    def __init__(self, working_path: Path) -> None:
+    def __init__(self, working_path: Path):
         self.hooks = list()  # type: List[Hook]
         self.working_path = working_path
 

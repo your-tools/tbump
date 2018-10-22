@@ -8,7 +8,7 @@ import tbump.git
 
 
 class DirtyRepository(tbump.git.GitError):
-    def __init__(self, *, git_status_output: str) -> None:
+    def __init__(self, *, git_status_output: str):
         super().__init__()
         self.git_status_output = git_status_output
 
@@ -23,7 +23,7 @@ class NotOnAnyBranch(tbump.git.GitError):
 
 
 class NoTrackedBranch(tbump.git.GitError):
-    def __init__(self, *, branch: str) -> None:
+    def __init__(self, *, branch: str):
         super().__init__()
         self.branch = branch
 
@@ -33,7 +33,7 @@ class NoTrackedBranch(tbump.git.GitError):
 
 
 class RefAlreadyExists(tbump.git.GitError):
-    def __init__(self, *, ref: str) -> None:
+    def __init__(self, *, ref: str):
         super().__init__()
         self.ref = ref
 
@@ -42,7 +42,7 @@ class RefAlreadyExists(tbump.git.GitError):
 
 
 class Command(tbump.action.Action):
-    def __init__(self, repo_path: Path, cmd: List[str]) -> None:
+    def __init__(self, repo_path: Path, cmd: List[str]):
         super().__init__()
         self.repo_path = repo_path
         self.cmd = list(cmd)
@@ -60,7 +60,7 @@ class Command(tbump.action.Action):
 
 
 class GitBumper():
-    def __init__(self, repo_path: Path) -> None:
+    def __init__(self, repo_path: Path):
         self.repo_path = repo_path
         self.tag_template = ""
         self.message_template = ""

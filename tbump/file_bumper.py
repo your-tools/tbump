@@ -22,7 +22,7 @@ class ChangeRequest:
 class Patch(tbump.action.Action):
     # pylint: disable=too-many-arguments
     def __init__(self, working_path: Path, src: str,
-                 lineno: int, old_line: str, new_line: str) -> None:
+                 lineno: int, old_line: str, new_line: str):
         super().__init__()
         self.working_path = working_path
         self.src = src
@@ -58,7 +58,7 @@ class Patch(tbump.action.Action):
 
 class BadSubstitution(tbump.Error):
     def __init__(self, *, src: str, verb: str,
-                 groups: Dict[str, str], template: str, version: str) -> None:
+                 groups: Dict[str, str], template: str, version: str):
         super().__init__()
         self.src = src
         self.verb = verb
@@ -81,7 +81,7 @@ class BadSubstitution(tbump.Error):
 
 
 class InvalidVersion(tbump.Error):
-    def __init__(self, *, version: str, regex: Pattern) -> None:
+    def __init__(self, *, version: str, regex: Pattern):
         super().__init__()
         self.version = version
         self.regex = regex
@@ -91,7 +91,7 @@ class InvalidVersion(tbump.Error):
 
 
 class SourceFileNotFound(tbump.Error):
-    def __init__(self, *, src: str) -> None:
+    def __init__(self, *, src: str):
         super().__init__()
         self.src = src
 
@@ -100,7 +100,7 @@ class SourceFileNotFound(tbump.Error):
 
 
 class CurrentVersionNotFound(tbump.Error):
-    def __init__(self, *, src: str, current_version_string: str) -> None:
+    def __init__(self, *, src: str, current_version_string: str):
         super().__init__()
         self.src = src
         self.current_version_string = current_version_string
@@ -126,7 +126,7 @@ def on_version_containing_none(src: str, verb: str, version: str, *,
 
 
 class FileBumper():
-    def __init__(self, working_path: Path) -> None:
+    def __init__(self, working_path: Path):
         self.working_path = working_path
         self.files = list()  # type: List[tbump.config.File]
         self.version_regex = re.compile(".")

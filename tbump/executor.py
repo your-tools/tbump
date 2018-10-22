@@ -14,7 +14,7 @@ class ActionGroup():
 
     def __init__(self, dry_run_desc: str, desc: str,
                  actions: Sequence[Action],
-                 *, should_enumerate: bool = False) -> None:
+                 *, should_enumerate: bool = False):
         self.should_enumerate = should_enumerate
         self.desc = desc
         self.dry_run_desc = dry_run_desc
@@ -42,7 +42,7 @@ class Executor:
                  new_version: str,
                  git_bumper: GitBumper,
                  file_bumper: FileBumper,
-                 hooks_runner: HooksRunner) -> None:
+                 hooks_runner: HooksRunner):
         self.new_version = new_version
         self.work = list()  # type: List[ActionGroup]
 

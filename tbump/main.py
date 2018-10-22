@@ -39,7 +39,7 @@ Options:
 class InvalidConfig(tbump.Error):
     def __init__(self,
                  io_error: Optional[IOError] = None,
-                 parse_error: Optional[Exception] = None) -> None:
+                 parse_error: Optional[Exception] = None):
         super().__init__()
         self.io_error = io_error
         self.parse_error = parse_error

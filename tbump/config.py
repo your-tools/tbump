@@ -27,7 +27,7 @@ class File:
 
 
 class ValidTemplate():
-    def __init__(self, name: str, pattern: str) -> None:
+    def __init__(self, name: str, pattern: str):
         self.name = name
         self.pattern = pattern
         self.message = "%s should contain the string %s" % (name, pattern)
@@ -97,7 +97,7 @@ def parse(cfg_path: Path) -> Config:
     with cfg_path.open() as stream:
         parsed = toml.load(stream)
 
-    parsed = validate(parsed)
+    parsed = validate(parsed)  # type: ignore
     current_version = parsed["version"]["current"]
     version_regex = parsed["version"]["regex"]
     match = version_regex.fullmatch(current_version)
