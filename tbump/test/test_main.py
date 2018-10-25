@@ -103,7 +103,7 @@ def test_dry_run_non_interactive(test_repo: Path, message_recorder: message_reco
 
 def test_on_outdated_branch(test_repo: Path) -> None:
     """ Make sure no tag is pushed when running tbump on an outdated branch"""
-    # See https://github.com/SuperTanker/tbump/issues/20 ¨ for details
+    # See https://github.com/TankerHQ/tbump/issues/20 ¨ for details
 
     # Make sure the branch is out of date
     tbump.git.run_git(test_repo, "commit", "--message", "commit I did not make", "--allow-empty")

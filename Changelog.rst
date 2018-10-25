@@ -43,7 +43,7 @@ v4.0.0 (2018-07-13)
 v3.0.1 (2018-07-12)
 -------------------
 
-* Bug fix: make sure to push the tag *after* the branch. See `#20 <https://github.com/SuperTanker/tbump/issues/20>`_ for the details.
+* Bug fix: make sure to push the tag *after* the branch. See `#20 <https://github.com/TankerHQ/tbump/issues/20>`_ for the details.
 
 v3.0.0 (2018-05-14)
 --------------------
@@ -74,7 +74,7 @@ v1.0.1 (2018-04-05)
 -------------------
 
 
-* Use annotated tags instead of lightweight tags. Patch by @tux3. See `PR #7 <https://github.com/SuperTanker/tbump/pull/7>`_ for the rationale.
+* Use annotated tags instead of lightweight tags. Patch by @tux3. See `PR #7 <https://github.com/TankerHQ/tbump/pull/7>`_ for the rationale.
 * When the current branch does not track anything, ask if we should proceed with file replacements and automatic commit and tag (but do not push) instead of aborting immediately.
 
 v1.0.0 (2018-01-16)
