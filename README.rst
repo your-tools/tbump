@@ -2,14 +2,14 @@ tbump: bump software releases
 =============================
 
 
-.. image:: https://img.shields.io/travis/SuperTanker/tbump.svg?branch=master
-  :target: https://travis-ci.org/SuperTanker/tbump
+.. image:: https://img.shields.io/travis/TankerHQ/tbump.svg?branch=master
+  :target: https://travis-ci.org/TankerHQ/tbump
 
 .. image:: https://img.shields.io/pypi/v/tbump.svg
   :target: https://pypi.org/project/tbump/
 
-.. image:: https://img.shields.io/github/license/SuperTanker/tbump.svg
-  :target: https://github.com/SuperTanker/tbump/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
+  :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
 
 
 Installation
@@ -23,7 +23,7 @@ Screenshot
 
 Here's what a typical usage of ``tbump`` looks like:
 
-.. image:: https://raw.githubusercontent.com/SuperTanker/tbump/master/scrot.png
+.. image:: https://raw.githubusercontent.com/TankerHQ/tbump/master/scrot.png
 
 Usage
 ------
