@@ -1,4 +1,10 @@
 [run]
 source = tbump
-omit = tbump/test/*,setup.py,*/pytest-*
+
+omit =
+  tbump/test/*
+  setup.py
+  */pytest-*
+  .venv/*
+
 branch = True

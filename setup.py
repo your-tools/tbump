@@ -20,15 +20,34 @@ setup(name="tbump",
       include_package_data=True,
       install_requires=[
         "attrs",
+        "docopt",
         "path.py",
         "python-cli-ui",
         "schema",
         "toml",
       ],
+      extras_require={
+          "dev": [
+              # tests
+              "pytest==3.8.1",
+              "pytest-sugar",
+              "pytest-mock",
+              "pytest-cov",
+
+              # linters
+              "mypy==0.620",
+              "flake8==3.5.0",
+
+              # distribution
+              "wheel",
+              "twine",
+          ]
+      },
       classifiers=[
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
       ],
       entry_points={
         "console_scripts": [
