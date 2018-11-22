@@ -1,5 +1,3 @@
-from typing import Any
-
 from path import Path
 import toml
 
@@ -11,7 +9,7 @@ from ui.tests.conftest import message_recorder
 from tbump.test.conftest import file_contains
 
 
-def test_creates_config(test_repo: Path, mock: Any) -> None:
+def test_creates_config(test_repo: Path) -> None:
     tbump_path = test_repo / "tbump.toml"
     tbump_path.remove()
     current_version = "1.2.41-alpha1"
