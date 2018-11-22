@@ -148,8 +148,8 @@ def test_abort_if_file_does_not_exist(test_repo: Path, message_recorder: message
     assert message_recorder.find("package.json does not exist")
 
 
-def test_interactive_abort(test_repo: Path, mock: Any) -> None:
-    ask_mock = mock.patch("ui.ask_yes_no")
+def test_interactive_abort(test_repo: Path, mocker: Any) -> None:
+    ask_mock = mocker.patch("ui.ask_yes_no")
     ask_mock.return_value = False
 
     with pytest.raises(SystemExit):
@@ -194,7 +194,7 @@ def test_abort_if_file_does_not_match(test_repo: Path, message_recorder: message
     assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
 
 
-def test_no_tracked_branch_but_ref_exists(test_repo: Path, mock: Any,
+def test_no_tracked_branch_but_ref_exists(test_repo: Path,
                                           message_recorder: message_recorder) -> None:
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
@@ -212,8 +212,8 @@ def test_no_tracked_branch_non_interactive(test_repo: Path,
     assert message_recorder.find("Cannot push")
 
 
-def test_interactive_proceed(test_repo: Path, mock: Any) -> None:
-    ask_mock = mock.patch("ui.ask_yes_no")
+def test_interactive_proceed(test_repo: Path, mocker: Any) -> None:
+    ask_mock = mocker.patch("ui.ask_yes_no")
 
     ask_mock.return_value = [True]
     tbump.main.main(["-C", test_repo, "1.2.42"])
