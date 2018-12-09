@@ -5,7 +5,7 @@ import tbump.config
 import tbump.main
 
 import pytest
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder
 from tbump.test.conftest import file_contains
 
 

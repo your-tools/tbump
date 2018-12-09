@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from path import Path
-import ui
+import cli_ui as ui
 
 import tbump.action
 from tbump.config import Config

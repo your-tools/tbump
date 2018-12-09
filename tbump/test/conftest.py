@@ -6,8 +6,6 @@ import pytest
 
 import tbump.git
 
-from ui.tests.conftest import message_recorder # noqa
-
 
 @pytest.fixture()  # type: ignore
 def tmp_path(tmpdir: Any) -> Path:

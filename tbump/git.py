@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 import subprocess
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tbump
 

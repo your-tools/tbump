@@ -1,6 +1,6 @@
 from typing import Any
 import toml
-from ui.tests.conftest import message_recorder
+from cli_ui.tests import message_recorder
 from tbump.test.conftest import file_contains
 
 from path import Path
@@ -149,7 +149,7 @@ def test_abort_if_file_does_not_exist(test_repo: Path, message_recorder: message
 
 
 def test_interactive_abort(test_repo: Path, mocker: Any) -> None:
-    ask_mock = mocker.patch("ui.ask_yes_no")
+    ask_mock = mocker.patch("cli_ui.ask_yes_no")
     ask_mock.return_value = False
 
     with pytest.raises(SystemExit):
@@ -213,7 +213,7 @@ def test_no_tracked_branch_non_interactive(test_repo: Path,
 
 
 def test_interactive_proceed(test_repo: Path, mocker: Any) -> None:
-    ask_mock = mocker.patch("ui.ask_yes_no")
+    ask_mock = mocker.patch("cli_ui.ask_yes_no")
 
     ask_mock.return_value = [True]
     tbump.main.main(["-C", test_repo, "1.2.42"])
