@@ -9,19 +9,19 @@ import tbump.git
 from ui.tests.conftest import message_recorder # noqa
 
 
-@pytest.fixture()  # type: ignore
+@pytest.fixture()
 def tmp_path(tmpdir: Any) -> Path:
     return Path(tmpdir)
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_data_path() -> Path:
     this_dir = Path(__file__).abspath().parent
     return this_dir / "data"
 
 
-@pytest.fixture(autouse=True, scope="session")  # type: ignore
-def restore_cwd() -> None:
+@pytest.fixture(autouse=True, scope="session")
+def restore_cwd() -> Iterator[None]:
     old_cwd = os.getcwd()
     yield
     os.chdir(old_cwd)
@@ -60,7 +60,7 @@ def setup_remote(tmp_path: Path) -> Path:
     return src_path
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_repo(tmp_path: Path, test_data_path: Path) -> Path:
     res = setup_repo(tmp_path, test_data_path)
     setup_remote(tmp_path)
