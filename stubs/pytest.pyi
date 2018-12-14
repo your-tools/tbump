@@ -1,0 +1,16 @@
+from typing import Any, Callable, Type, NoReturn
+
+AnyFunc = Callable[..., Any]
+
+class Marker:
+    @classmethod
+    def xfail(cls, condition: bool, reason: str) -> AnyFunc: ...
+
+    @staticmethod
+    def asyncio(func: AnyFunc) -> AnyFunc: ...
+
+mark = Marker()
+
+def fixture(*args: Any, **kwargs: Any) -> AnyFunc: ...
+def raises(error: Type[BaseException]) -> Any: ...
+def fail(message: str) -> NoReturn: ...
