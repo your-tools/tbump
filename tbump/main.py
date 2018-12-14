@@ -5,7 +5,7 @@ import textwrap
 import attr
 import docopt
 from path import Path
-import ui
+import cli_ui as ui
 
 import tbump
 import tbump.config

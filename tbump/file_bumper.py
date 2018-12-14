@@ -3,7 +3,7 @@ import attr
 import re
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tbump
 import tbump.action

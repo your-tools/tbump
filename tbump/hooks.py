@@ -2,7 +2,7 @@ from typing import List, Optional  # noqa
 import subprocess
 
 from path import Path
-import ui
+import cli_ui as ui
 
 import tbump
 import tbump.action

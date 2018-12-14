@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-import ui
+import cli_ui as ui
 
 
 class Check:
