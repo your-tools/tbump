@@ -1,6 +1,6 @@
 from typing import List, Sequence
 
-import ui
+import cli_ui as ui
 
 from tbump.action import Action
 from tbump.git_bumper import GitBumper
