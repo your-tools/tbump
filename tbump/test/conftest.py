@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Iterator
 import os
 
 from path import Path
@@ -6,7 +6,15 @@ import pytest
 
 import tbump.git
 
-from ui.tests.conftest import message_recorder # noqa
+from cli_ui.tests import MessageRecorder
+
+
+@pytest.fixture()
+def message_recorder() -> Iterator[MessageRecorder]:
+    res = MessageRecorder()
+    res.start()
+    yield res
+    res.stop()
 
 
 @pytest.fixture()
