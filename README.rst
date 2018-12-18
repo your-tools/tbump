@@ -7,6 +7,10 @@ tbump: bump software releases
 
 .. image:: https://img.shields.io/pypi/v/tbump.svg
   :target: https://pypi.org/project/tbump/
+  
+.. image:: https://img.shields.io/pypi/pyversions/tbump.svg
+  :target: https://pypi.org/project/tbump
+  
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
   :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
