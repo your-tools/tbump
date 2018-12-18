@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v5.0.3 (2018-12-18)
+-------------------
+
+* Use new and shiny `cli-ui <https://pypi.org/project/cli-ui/>`_ package instead of old `python-cli-ui`
+
 v5.0.2 (2018-10-11)
 -------------------
 
