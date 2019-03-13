@@ -49,11 +49,20 @@ class Patch(tbump.action.Action):
     def do(self) -> None:
         self.apply()
 
+    @staticmethod
+    def get_ending(line: bytes) -> bytes:
+        if line.endswith(b"\r\n"):
+            return b"\r\n"
+        else:
+            return b"\n"
+
     def apply(self) -> None:
         file_path = self.working_path / self.src
-        lines = file_path.lines()
-        lines[self.lineno] = self.new_line
-        file_path.write_lines(lines)
+        contents = file_path.bytes()
+        lines = contents.splitlines(keepends=True)
+        old_line = lines[self.lineno]
+        lines[self.lineno] = self.new_line.encode() + Patch.get_ending(old_line)
+        file_path.write_lines(lines, linesep=None)
 
 
 class BadSubstitution(tbump.Error):
@@ -174,7 +183,7 @@ class FileBumper():
         search = change_request.search
 
         file_path = self.working_path / change_request.src
-        old_lines = file_path.lines()
+        old_lines = file_path.lines(retain=False)
 
         patches = list()
         for i, old_line in enumerate(old_lines):

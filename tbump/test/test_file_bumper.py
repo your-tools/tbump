@@ -19,6 +19,30 @@ def test_file_bumper_simple(test_repo: Path) -> None:
     assert file_contains(test_repo / "pub.js", "PUBLIC_VERSION = '1.2.41'")
 
 
+def test_patcher_preserve_endings(tmp_path: Path) -> None:
+    foo_txt = tmp_path / "foo.txt"
+    old_contents = b"line 1\r\nv=42\r\nline3\r\n"
+    foo_txt.write_bytes(old_contents)
+    patch = tbump.file_bumper.Patch(tmp_path, "foo.txt", 1, "v=42", "v=43")
+    patch.apply()
+    actual_contents = foo_txt.bytes()
+    expected_contents = old_contents.replace(b"42", b"43")
+    assert actual_contents == expected_contents
+
+
+def test_file_bumper_preserve_endings(test_repo: Path) -> None:
+    bumper = tbump.file_bumper.FileBumper(test_repo)
+    config = tbump.config.parse(test_repo / "tbump.toml")
+    package_json = test_repo / "package.json"
+    package_json.write_bytes(package_json.bytes().replace(b"\n", b"\r\n"))
+    bumper.set_config(config)
+    patches = bumper.get_patches(new_version="1.2.41-alpha-2")
+    for patch in patches:
+        patch.apply()
+    actual = package_json.bytes()
+    assert b'version": "1.2.41-alpha-2",\r\n' in actual
+
+
 def test_looking_for_empty_groups(tmp_path: Path) -> None:
     tbump_path = tmp_path / "tbump.toml"
     tbump_path.write_text(
