@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v5.0.4 (2019-03-13)
+-------------------
+* Preserve line endings when patching files.
+
 v5.0.3 (2018-12-18)
 -------------------
 
