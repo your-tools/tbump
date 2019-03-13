@@ -18,7 +18,7 @@ from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
 
 
-TBUMP_VERSION = "5.0.3"
+TBUMP_VERSION = "5.0.4"
 
 USAGE = textwrap.dedent("""
 Usage:
