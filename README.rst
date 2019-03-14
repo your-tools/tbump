@@ -14,6 +14,9 @@ tbump: bump software releases
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
   :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
+  
+.. image:: https://img.shields.io/codecov/c/github/TankerHQ/tbump.svg?label=Coverage
+   :target: https://codecov.io/gh/TankerHQ/tbump
 
 
 Installation
