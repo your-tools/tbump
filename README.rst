@@ -27,7 +27,39 @@ Screenshot
 
 Here's what a typical usage of ``tbump`` looks like:
 
-.. image:: https://raw.githubusercontent.com/TankerHQ/tbump/master/scrot.png
+.. code-block:: console
+
+    $ tbump 5.0.5
+    :: Bumping from 5.0.4 to 5.0.5
+    => Would patch these files
+    - setup.py:14 version="5.0.4",
+    + setup.py:14 version="5.0.5",
+    - tbump.toml:2 current = "5.0.4"
+    + tbump.toml:2 current = "5.0.5"
+    => Would run these hooks before commit
+    * (1/2) $ python ci/ci.py
+    * (2/2) $ grep -q 5.0.5 Changelog.rst
+    => Would run these git commands
+     * git add --update
+     * git commit --message Bump to 5.0.5
+     * git tag --annotate --message v5.0.5 v5.0.5
+     * git push origin master
+     * git push origin v5.0.5
+    => Would run these hooks after push
+    * (1/1) $ tools/publish.sh
+    :: Looking good? (y/N)
+    y
+    => Patching files
+    ...
+    => Running hooks before commit
+    ...
+    => Making bump commit and push matching files
+    ...
+    => Running hooks after push
+    ...
+    Done ✓
+
+
 
 Usage
 ------
