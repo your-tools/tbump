@@ -33,6 +33,7 @@ setup(name="tbump",
               "pytest-sugar",
               "pytest-mock",
               "pytest-cov",
+              "codecov==2.0.15",
 
               # linters
               "mypy==0.641",
