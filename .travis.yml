@@ -10,11 +10,11 @@ matrix:
       sudo: true
 
 install:
-  - curl -L https://github.com/TankerHQ/dmenv/releases/download/v0.5.0/dmenv-linux -o dmenv
+  - curl -L https://github.com/TankerHQ/dmenv/releases/download/v0.16.1/dmenv-linux -o dmenv
   - chmod u+x dmenv
   - ./dmenv install
 
 
 script:
   - python ci/ci.py
-  - ./dmenv run codecov
+  - codecov
