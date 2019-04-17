@@ -12,7 +12,7 @@ from .hooks import HOOKS_CLASSES, Hook, BeforeCommitHook, AfterPushHook  # noqa
 @attr.s
 class Config:
     current_version = attr.ib()  # type: str
-    version_regex = attr.ib()  # type: Pattern
+    version_regex = attr.ib()  # type: Pattern[str]
     tag_template = attr.ib(default="")  # type: str
     message_template = attr.ib(default=None)  # type: str
     files = attr.ib(default=list())  # type: List[File]
@@ -69,7 +69,7 @@ def validate(config: Dict[str, Any]) -> Config:
 
     hook_schema = schema.Schema({"name": str, "cmd": str})
 
-    def compile_re(regex: str) -> Pattern:
+    def compile_re(regex: str) -> Pattern[str]:
         return re.compile(regex, re.VERBOSE)
 
     tbump_schema = schema.Schema(

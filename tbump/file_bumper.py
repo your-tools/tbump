@@ -125,7 +125,7 @@ class BadSubstitution(tbump.Error):
 
 
 class InvalidVersion(tbump.Error):
-    def __init__(self, *, version: str, regex: Pattern):
+    def __init__(self, *, version: str, regex: Pattern[str]):
         super().__init__()
         self.version = version
         self.regex = regex
