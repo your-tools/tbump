@@ -30,7 +30,7 @@ setup(
             "pytest-cov",
             "codecov==2.0.15",
             # linters
-            "mypy==0.641",
+            "mypy==0.700",
             "flake8==3.5.0",
             # distribution
             "wheel",

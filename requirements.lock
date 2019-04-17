@@ -20,7 +20,7 @@ importlib-metadata==0.7
 mccabe==0.6.1
 more-itertools==4.3.0
 mypy-extensions==0.4.1
-mypy==0.641
+mypy==0.700
 packaging==18.0
 path.py==11.5.0
 pip==19.1.1
@@ -46,7 +46,7 @@ termcolor==1.1.0
 toml==0.10.0
 tqdm==4.28.1
 twine==1.12.1
-typed-ast==1.1.0
+typed-ast==1.3.1
 Unidecode==1.0.23
 urllib3==1.24.1
 webencodings==0.5.1
