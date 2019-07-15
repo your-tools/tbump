@@ -151,6 +151,8 @@ In this case, you can set a ``search`` option in the ``file`` section:
     src = "package.json"
     search = '"version": "{current_version}"'
 
+Note that the search string is actually a full regular expression, except for the ``{current_version}`` marker which is substituted as plain text.
+
 
 Using a custom version template
 +++++++++++++++++++++++++++++++

@@ -31,4 +31,4 @@ version_template = "{major}.{minor}.{patch}"
 
 [[file]]
 src = "glob*.?"
-search = 'version = "{current_version}"'
+search = 'version_[a-z]+ = "{current_version}"'
