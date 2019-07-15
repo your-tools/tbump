@@ -51,10 +51,7 @@ class HookError(tbump.Error):
         self.name = name
 
     def print_error(self) -> None:
-        ui.error(
-            ui.reset, "`%s`" % self.cmd,
-            "exited with return code", self.rc
-        )
+        ui.error(ui.reset, "`%s`" % self.cmd, "exited with return code", self.rc)
 
 
 class HooksRunner:
@@ -72,7 +69,9 @@ class HooksRunner:
     def get_after_hooks(self, new_version: str) -> List[Hook]:
         return self._get_hooks_for_new_version_by_type(new_version, "after_push")
 
-    def _get_hooks_for_new_version_by_type(self, new_version: str, type_: str) -> List[Hook]:
+    def _get_hooks_for_new_version_by_type(
+        self, new_version: str, type_: str
+    ) -> List[Hook]:
         cls = HOOKS_CLASSES[type_]
         matching_hooks = [hook for hook in self.hooks if isinstance(hook, cls)]
         res = list()

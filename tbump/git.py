@@ -12,7 +12,9 @@ class GitError(tbump.Error):
 
 
 class GitCommandError(GitError):
-    def __init__(self, cmd: List[str], working_path: Path, output: Optional[str] = None):
+    def __init__(
+        self, cmd: List[str], working_path: Path, output: Optional[str] = None
+    ):
         super().__init__()
         self.cmd = cmd
         self.output = output
@@ -45,7 +47,9 @@ def run_git(working_path: Path, *cmd: str, verbose: bool = False) -> None:
         raise GitCommandError(cmd=git_cmd, working_path=working_path)
 
 
-def run_git_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple[int, str]:
+def run_git_captured(
+    working_path: Path, *cmd: str, check: bool = True
+) -> Tuple[int, str]:
     """ Run git `cmd` in given `working_path`, capturing the output
 
     Return a tuple (returncode, output).
@@ -62,8 +66,8 @@ def run_git_captured(working_path: Path, *cmd: str, check: bool = True) -> Tuple
     process = subprocess.Popen(git_cmd, cwd=working_path, **options)  # type: ignore
     output, _ = process.communicate()
     output = output.decode("utf-8")
-    if output.endswith('\n'):
-        output = output.strip('\n')
+    if output.endswith("\n"):
+        output = output.strip("\n")
     returncode = process.returncode
     ui.debug(ui.lightgray, "[%i]" % returncode, ui.reset, output)
     if check and returncode != 0:

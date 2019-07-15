@@ -10,16 +10,13 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
     monkeypatch.chdir(test_data_path)
     config = tbump.config.parse(test_data_path / "tbump.toml")
     foo_json = tbump.config.File(
-        src="package.json",
-        search='"version": "{current_version}"'
+        src="package.json", search='"version": "{current_version}"'
     )
     version_txt = tbump.config.File(src="VERSION")
-    pub_js = tbump.config.File(
-        src="pub.js",
-        version_template="{major}.{minor}.{patch}")
+    pub_js = tbump.config.File(src="pub.js", version_template="{major}.{minor}.{patch}")
     glob = tbump.config.File(
-        src="glob*.?",
-        search='version_[a-z]+ = "{current_version}"')
+        src="glob*.?", search='version_[a-z]+ = "{current_version}"'
+    )
 
     expected_pattern = r"""  (?P<major>\d+)
   \.
@@ -36,12 +33,7 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
 
     assert config.version_regex.pattern == expected_pattern
 
-    assert config.files == [
-        foo_json,
-        version_txt,
-        pub_js,
-        glob,
-    ]
+    assert config.files == [foo_json, version_txt, pub_js, glob]
 
     assert config.current_version == "1.2.41-alpha-1"
 
@@ -71,7 +63,7 @@ def test_invalid_commit_message(tmp_path: Path) -> None:
         [[file]]
         src = "VERSION"
         """,
-        "message_template should contain the string {new_version}"
+        "message_template should contain the string {new_version}",
     )
 
 
@@ -90,7 +82,7 @@ def test_current_version_does_not_match_expected_regex(tmp_path: Path) -> None:
         [[file]]
         src = "VERSION"
         """,
-        "Current version: 1.42a1 does not match version regex"
+        "Current version: 1.42a1 does not match version regex",
     )
 
 
@@ -109,7 +101,7 @@ def test_invalid_regex(tmp_path: Path) -> None:
         [[file]]
         src = "VERSION"
         """,
-        "Key 'regex' error"
+        "Key 'regex' error",
     )
 
 
@@ -129,13 +121,14 @@ def test_invalid_custom_template(tmp_path: Path) -> None:
         src = "pub.js"
         version_template = "{major}.{minor}.{no_such_group}"
         """,
-        "version template for 'pub.js' contains unknown group: 'no_such_group'"
+        "version template for 'pub.js' contains unknown group: 'no_such_group'",
     )
 
 
 def test_parse_hooks(tmp_path: Path) -> None:
     toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(r"""
+    toml_path.write_text(
+        r"""
         [version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
@@ -154,7 +147,8 @@ def test_parse_hooks(tmp_path: Path) -> None:
         [[after_push]]
         name = "After push"
         cmd = "cargo publish"
-    """)
+    """
+    )
     config = tbump.config.parse(toml_path)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
@@ -169,7 +163,8 @@ def test_parse_hooks(tmp_path: Path) -> None:
 
 def test_retro_compat_hooks(tmp_path: Path) -> None:
     toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(r"""
+    toml_path.write_text(
+        r"""
         [version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
@@ -188,7 +183,8 @@ def test_retro_compat_hooks(tmp_path: Path) -> None:
         [[before_push]]
         name = "deprecated name"
         cmd = "deprecated command"
-      """)
+      """
+    )
     config = tbump.config.parse(toml_path)
     first_hook = config.hooks[0]
     assert isinstance(first_hook, tbump.hooks.BeforeCommitHook)

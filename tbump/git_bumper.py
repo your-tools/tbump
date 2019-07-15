@@ -28,8 +28,9 @@ class NoTrackedBranch(tbump.git.GitError):
         self.branch = branch
 
     def print_error(self) -> None:
-        ui.error("Current branch (%s)" % self.branch,
-                 "does not track anything. Cannot push.")
+        ui.error(
+            "Current branch (%s)" % self.branch, "does not track anything. Cannot push."
+        )
 
 
 class RefAlreadyExists(tbump.git.GitError):
@@ -59,7 +60,7 @@ class Command(tbump.action.Action):
         return tbump.git.run_git(*full_args, verbose=False)
 
 
-class GitBumper():
+class GitBumper:
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
         self.tag_template = ""
@@ -100,8 +101,8 @@ class GitBumper():
     def get_tracking_ref(self) -> str:
         branch_name = self.get_current_branch()
         rc, out = self.run_git_captured(
-            "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
-            check=False)
+            "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}", check=False
+        )
         if rc != 0:
             raise NoTrackedBranch(branch=branch_name)
         return out

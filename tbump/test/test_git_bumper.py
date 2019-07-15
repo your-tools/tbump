@@ -29,7 +29,9 @@ def test_git_bumper_happy_path(test_repo: Path, test_git_bumper: GitBumper) -> N
     assert "Bump to %s" % new_version in out
 
 
-def test_git_bumper_no_tracking_ref(test_repo: Path, test_git_bumper: GitBumper) -> None:
+def test_git_bumper_no_tracking_ref(
+    test_repo: Path, test_git_bumper: GitBumper
+) -> None:
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(tbump.git_bumper.NoTrackedBranch):

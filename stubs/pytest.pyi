@@ -5,7 +5,6 @@ AnyFunc = Callable[..., Any]
 class Marker:
     @classmethod
     def xfail(cls, condition: bool, reason: str) -> AnyFunc: ...
-
     @staticmethod
     def asyncio(func: AnyFunc) -> AnyFunc: ...
 

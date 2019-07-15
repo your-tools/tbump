@@ -14,7 +14,7 @@ import tbump.config
 
 @attr.s
 class ChangeRequest:
-    src = attr.ib()   # type: str
+    src = attr.ib()  # type: str
     old_string = attr.ib()  # type: str
     new_string = attr.ib()  # type: str
     search = attr.ib(default=None)  # type: Optional[str]
@@ -22,8 +22,9 @@ class ChangeRequest:
 
 class Patch(tbump.action.Action):
     # pylint: disable=too-many-arguments
-    def __init__(self, working_path: Path, src: str,
-                 lineno: int, old_line: str, new_line: str):
+    def __init__(
+        self, working_path: Path, src: str, lineno: int, old_line: str, new_line: str
+    ):
         super().__init__()
         self.working_path = working_path
         self.src = src
@@ -33,18 +34,36 @@ class Patch(tbump.action.Action):
 
     def print_self(self) -> None:
         ui.info(
-            ui.red, "- ", ui.reset,
-            ui.bold, self.src, ":", ui.reset,
-            ui.darkgray, self.lineno + 1, ui.reset,
-            " ", ui.red, self.old_line.strip(),
-            sep=""
+            ui.red,
+            "- ",
+            ui.reset,
+            ui.bold,
+            self.src,
+            ":",
+            ui.reset,
+            ui.darkgray,
+            self.lineno + 1,
+            ui.reset,
+            " ",
+            ui.red,
+            self.old_line.strip(),
+            sep="",
         )
         ui.info(
-            ui.green, "+ ", ui.reset,
-            ui.bold, self.src, ":", ui.reset,
-            ui.darkgray, self.lineno + 1, ui.reset,
-            " ", ui.green, self.new_line.strip(),
-            sep=""
+            ui.green,
+            "+ ",
+            ui.reset,
+            ui.bold,
+            self.src,
+            ":",
+            ui.reset,
+            ui.darkgray,
+            self.lineno + 1,
+            ui.reset,
+            " ",
+            ui.green,
+            self.new_line.strip(),
+            sep="",
         )
 
     def do(self) -> None:
@@ -67,8 +86,15 @@ class Patch(tbump.action.Action):
 
 
 class BadSubstitution(tbump.Error):
-    def __init__(self, *, src: str, verb: str,
-                 groups: Dict[str, str], template: str, version: str):
+    def __init__(
+        self,
+        *,
+        src: str,
+        verb: str,
+        groups: Dict[str, str],
+        template: str,
+        version: str
+    ):
         super().__init__()
         self.src = src
         self.verb = verb
@@ -78,14 +104,22 @@ class BadSubstitution(tbump.Error):
 
     def print_error(self) -> None:
         message = [
-            " ", self.src + ":",
-            " refusing to ", self.verb, " version containing 'None'\n",
+            " ",
+            self.src + ":",
+            " refusing to ",
+            self.verb,
+            " version containing 'None'\n",
         ]
         message += [
             "More info:\n",
-            " * version groups:  ", repr(self.groups), "\n"
-            " * template:        ", self.template, "\n",
-            " * version:         ", self.version, "\n",
+            " * version groups:  ",
+            repr(self.groups),
+            "\n" " * template:        ",
+            self.template,
+            "\n",
+            " * version:         ",
+            self.version,
+            "\n",
         ]
         ui.error(*message, end="", sep="")
 
@@ -119,7 +153,8 @@ class CurrentVersionNotFound(tbump.Error):
     def print_error(self) -> None:
         ui.error(
             "Current version string: (%s)" % self.current_version_string,
-            "not found in", self.src
+            "not found in",
+            self.src,
         )
 
 
@@ -130,12 +165,15 @@ def should_replace(line: str, old_string: str, search: Optional[str] = None) -> 
         return (old_string in line) and (re.search(search, line) is not None)
 
 
-def on_version_containing_none(src: str, verb: str, version: str, *,
-                               groups: Dict[str, str], template: str) -> None:
-    raise BadSubstitution(src=src, verb=verb, version=version, groups=groups, template=template)
+def on_version_containing_none(
+    src: str, verb: str, version: str, *, groups: Dict[str, str], template: str
+) -> None:
+    raise BadSubstitution(
+        src=src, verb=verb, version=version, groups=groups, template=template
+    )
 
 
-class FileBumper():
+class FileBumper:
     def __init__(self, working_path: Path):
         self.working_path = working_path
         self.files = list()  # type: List[tbump.config.File]
@@ -171,15 +209,21 @@ class FileBumper():
         self.new_version = new_version
         self.new_groups = self.parse_version(self.new_version)
         change_requests = self.compute_change_requests()
-        tbump_toml_change = ChangeRequest("tbump.toml", self.current_version, new_version)
+        tbump_toml_change = ChangeRequest(
+            "tbump.toml", self.current_version, new_version
+        )
         change_requests.append(tbump_toml_change)
         patches = list()
         for change_request in change_requests:
-            patches_for_request = self.compute_patches_for_change_request(change_request)
+            patches_for_request = self.compute_patches_for_change_request(
+                change_request
+            )
             patches.extend(patches_for_request)
         return patches
 
-    def compute_patches_for_change_request(self, change_request: ChangeRequest) -> List[Patch]:
+    def compute_patches_for_change_request(
+        self, change_request: ChangeRequest
+    ) -> List[Patch]:
         old_string = change_request.old_string
         new_string = change_request.new_string
         search = change_request.search
@@ -194,10 +238,14 @@ class FileBumper():
             for i, old_line in enumerate(old_lines):
                 if should_replace(old_line, old_string, search):
                     new_line = old_line.replace(old_string, new_string)
-                    patch = Patch(self.working_path, expanded_src, i, old_line, new_line)
+                    patch = Patch(
+                        self.working_path, expanded_src, i, old_line, new_line
+                    )
                     patches.append(patch)
         if not patches:
-            raise CurrentVersionNotFound(src=change_request.src, current_version_string=old_string)
+            raise CurrentVersionNotFound(
+                src=change_request.src, current_version_string=old_string
+            )
         return patches
 
     def compute_change_requests(self) -> List[ChangeRequest]:
@@ -216,7 +264,7 @@ class FileBumper():
                     "look for",
                     current_version,
                     groups=self.current_groups,
-                    template=file.version_template
+                    template=file.version_template,
                 )
             new_version = file.version_template.format(**self.new_groups)
             if "None" in new_version:
@@ -225,7 +273,7 @@ class FileBumper():
                     "replace by",
                     new_version,
                     groups=self.new_groups,
-                    template=file.version_template
+                    template=file.version_template,
                 )
         else:
             current_version = self.current_version
@@ -238,7 +286,7 @@ class FileBumper():
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
 
-def bump_files(new_version: str, repo_path: Path=None) -> None:
+def bump_files(new_version: str, repo_path: Path = None) -> None:
     repo_path = repo_path or Path(".")
     bumper = FileBumper(repo_path)
     cfg = tbump.config.parse(repo_path / "tbump.toml")

@@ -26,7 +26,7 @@ class File:
     version_template = attr.ib(default=None)  # type: Optional[str]
 
 
-class ValidTemplate():
+class ValidTemplate:
     def __init__(self, name: str, pattern: str):
         self.name = name
         self.pattern = pattern
@@ -48,8 +48,9 @@ class ValidMessage(ValidTemplate):
         super().__init__("message_template", "{new_version}")
 
 
-def validate_version_template(src: str, version_template: str,
-                              known_groups: Dict[str, str]) -> None:
+def validate_version_template(
+    src: str, version_template: str, known_groups: Dict[str, str]
+) -> None:
     try:
         version_template.format(**known_groups)
     except KeyError as e:
@@ -58,36 +59,29 @@ def validate_version_template(src: str, version_template: str,
 
 
 def validate(config: Dict[str, Any]) -> Config:
-    file_schema = schema.Schema({
-        "src": str,
-        schema.Optional("search"): str,
-        schema.Optional("version_template"): str,
-    })
+    file_schema = schema.Schema(
+        {
+            "src": str,
+            schema.Optional("search"): str,
+            schema.Optional("version_template"): str,
+        }
+    )
 
-    hook_schema = schema.Schema({
-        "name": str,
-        "cmd": str,
-    })
+    hook_schema = schema.Schema({"name": str, "cmd": str})
 
     def compile_re(regex: str) -> Pattern:
         return re.compile(regex, re.VERBOSE)
 
     tbump_schema = schema.Schema(
         {
-            "version":  {
-                "current": str,
-                "regex": schema.Use(compile_re),
-            },
-            "git": {
-                "message_template": ValidMessage(),
-                "tag_template": ValidTag(),
-            },
+            "version": {"current": str, "regex": schema.Use(compile_re)},
+            "git": {"message_template": ValidMessage(), "tag_template": ValidTag()},
             "file": [file_schema],
-            schema.Optional("hook"): [hook_schema],    # retro-compat
-            schema.Optional("before_push"): [hook_schema],    # retro-compat
+            schema.Optional("hook"): [hook_schema],  # retro-compat
+            schema.Optional("before_push"): [hook_schema],  # retro-compat
             schema.Optional("before_commit"): [hook_schema],
             schema.Optional("after_push"): [hook_schema],
-            }
+        }
     )
     return cast(Config, tbump_schema.validate(config))
 
@@ -105,10 +99,7 @@ def parse(cfg_path: Path) -> Config:
         message = "Current version: %s does not match version regex" % current_version
         raise schema.SchemaError(message)
     current_groups = match.groupdict()
-    config = Config(
-        current_version=current_version,
-        version_regex=version_regex
-    )
+    config = Config(current_version=current_version, version_regex=version_regex)
 
     config.tag_template = parsed["git"]["tag_template"]
     config.message_template = parsed["git"]["message_template"]
@@ -122,9 +113,7 @@ def parse(cfg_path: Path) -> Config:
         )
         if file_config.version_template:
             validate_version_template(
-                file_config.src,
-                file_config.version_template,
-                current_groups
+                file_config.src, file_config.version_template, current_groups
             )
         config.files.append(file_config)
 
