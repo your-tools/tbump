@@ -1,4 +1,5 @@
 from path import Path
+import sys
 import toml
 import pytest
 
@@ -28,15 +29,15 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
 
 
 def add_working_hook(test_repo: Path) -> None:
-    add_hook(test_repo, "fake yarn", "python yarn.py")
+    add_hook(test_repo, "fake yarn", sys.executable+" yarn.py")
 
 
 def add_crashing_hook(test_repo: Path) -> None:
-    add_hook(test_repo, "crashing hook", "python nosuchfile.py")
+    add_hook(test_repo, "crashing hook", sys.executable+" nosuchfile.py")
 
 
 def add_after_hook(test_repo: Path) -> None:
-    add_hook(test_repo, "after hook", "python after.py", after_push=True)
+    add_hook(test_repo, "after hook", sys.executable+" after.py", after_push=True)
 
 
 def test_working_hook(test_repo: Path) -> None:
