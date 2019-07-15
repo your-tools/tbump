@@ -10,11 +10,15 @@ from tbump.hooks import HooksRunner
 _ = List
 
 
-class ActionGroup():
-
-    def __init__(self, dry_run_desc: str, desc: str,
-                 actions: Sequence[Action],
-                 *, should_enumerate: bool = False):
+class ActionGroup:
+    def __init__(
+        self,
+        dry_run_desc: str,
+        desc: str,
+        actions: Sequence[Action],
+        *,
+        should_enumerate: bool = False
+    ):
         self.should_enumerate = should_enumerate
         self.desc = desc
         self.dry_run_desc = dry_run_desc
@@ -38,11 +42,13 @@ class ActionGroup():
 
 
 class Executor:
-    def __init__(self,
-                 new_version: str,
-                 git_bumper: GitBumper,
-                 file_bumper: FileBumper,
-                 hooks_runner: HooksRunner):
+    def __init__(
+        self,
+        new_version: str,
+        git_bumper: GitBumper,
+        file_bumper: FileBumper,
+        hooks_runner: HooksRunner,
+    ):
         self.new_version = new_version
         self.work = list()  # type: List[ActionGroup]
 
@@ -64,7 +70,7 @@ class Executor:
         git_commands = ActionGroup(
             "Would run these git commands",
             "Making bump commit and push matching tag",
-            git_bumper.get_commands(new_version)
+            git_bumper.get_commands(new_version),
         )
         self.work.append(git_commands)
 

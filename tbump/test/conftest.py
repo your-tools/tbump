@@ -48,10 +48,9 @@ def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
-    tbump.git.run_git(src_path, "tag",
-                      "--annotate",
-                      "--message", "v1.2.41-alpha-1",
-                      "v1.2.41-alpha-1")
+    tbump.git.run_git(
+        src_path, "tag", "--annotate", "--message", "v1.2.41-alpha-1", "v1.2.41-alpha-1"
+    )
     return src_path
 
 

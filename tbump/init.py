@@ -25,7 +25,8 @@ def init(working_path: Path, current_version: str) -> None:
     tbump_path = working_path / "tbump.toml"
     if tbump_path.exists():
         ui.fatal(tbump_path, "already exists")
-    template = textwrap.dedent(r"""
+    template = textwrap.dedent(
+        r"""
         [version]
         current = "@current_version@"
 
@@ -43,14 +44,18 @@ def init(working_path: Path, current_version: str) -> None:
         [git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
-     """)
+     """
+    )
 
-    file_template = textwrap.dedent("""
+    file_template = textwrap.dedent(
+        """
         [[file]]
         src = "@src@"
-    """)
+    """
+    )
 
-    hooks_template = textwrap.dedent("""
+    hooks_template = textwrap.dedent(
+        """
         # You can specify a list of commands to
         # run after the files have been patched
         # and before the git commit is made
@@ -64,7 +69,8 @@ def init(working_path: Path, current_version: str) -> None:
         #  [[after_push]]
         #  name = "check changelog"
         #  cmd = "grep -q {current_version} Changelog.md"
-    """)
+    """
+    )
 
     to_write = template.replace("@current_version@", current_version)
     files = find_files(working_path, current_version)

@@ -20,7 +20,8 @@ from tbump.hooks import HooksRunner
 
 TBUMP_VERSION = "6.0.0"
 
-USAGE = textwrap.dedent("""
+USAGE = textwrap.dedent(
+    """
 Usage:
   tbump [options] <new_version>
   tbump [options] init <current_version>
@@ -33,13 +34,16 @@ Options:
    -C --cwd=<path>    Set working directory to <path>.
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
-""")
+"""
+)
 
 
 class InvalidConfig(tbump.Error):
-    def __init__(self,
-                 io_error: Optional[IOError] = None,
-                 parse_error: Optional[Exception] = None):
+    def __init__(
+        self,
+        io_error: Optional[IOError] = None,
+        parse_error: Optional[Exception] = None,
+    ):
         super().__init__()
         self.io_error = io_error
         self.parse_error = parse_error
@@ -115,8 +119,15 @@ def bump(options: BumpOptions) -> None:
 
     config = parse_config(options.working_path)
 
-    ui.info_1("Bumping from", ui.bold, config.current_version,
-              ui.reset, "to", ui.bold, new_version)
+    ui.info_1(
+        "Bumping from",
+        ui.bold,
+        config.current_version,
+        ui.reset,
+        "to",
+        ui.bold,
+        new_version,
+    )
 
     git_bumper = GitBumper(working_path)
     git_bumper.set_config(config)
