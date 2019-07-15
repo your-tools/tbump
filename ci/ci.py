@@ -24,6 +24,9 @@ def init_checks():
     def append_check(name, *cmd, env=None):
         res.append(Check(name, cmd, env=env))
 
+    if sys.version_info.minor >= 6:
+        append_check("black", "black", "--check", "--diff", ".")
+
     append_check("flake8", "flake8", ".")
 
     env = os.environ.copy()

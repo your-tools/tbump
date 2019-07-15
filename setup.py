@@ -22,6 +22,7 @@ setup(
     install_requires=["attrs", "docopt", "path.py", "cli-ui>=0.9.0", "schema", "toml"],
     extras_require={
         "dev": [
+            'black==19.3b0 ; python_version >= "3.6"',
             # tests
             "pytest==3.8.1",
             "pytest-sugar",
