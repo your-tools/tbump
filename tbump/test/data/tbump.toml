@@ -28,3 +28,7 @@ src = "VERSION"
 [[file]]
 src = "pub.js"
 version_template = "{major}.{minor}.{patch}"
+
+[[file]]
+src = "glob*.?"
+search = 'version = "{current_version}"'

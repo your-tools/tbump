@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Pattern
 import attr
 import re
+import glob
 
 from path import Path
 import cli_ui as ui
@@ -162,7 +163,8 @@ class FileBumper():
         assert self.files
         for file in self.files:
             expected_path = self.working_path / file.src
-            if not expected_path.exists():
+            files_found = glob.glob(expected_path, recursive=True)
+            if not files_found:
                 raise SourceFileNotFound(src=file.src)
 
     def get_patches(self, new_version: str) -> List[Patch]:
@@ -181,16 +183,19 @@ class FileBumper():
         old_string = change_request.old_string
         new_string = change_request.new_string
         search = change_request.search
-
-        file_path = self.working_path / change_request.src
-        old_lines = file_path.lines(retain=False)
-
         patches = list()
-        for i, old_line in enumerate(old_lines):
-            if should_replace(old_line, old_string, search):
-                new_line = old_line.replace(old_string, new_string)
-                patch = Patch(self.working_path, change_request.src, i, old_line, new_line)
-                patches.append(patch)
+
+        file_path_glob = self.working_path / change_request.src
+        for file_path_str in glob.glob(file_path_glob, recursive=True):
+            file_path = Path(file_path_str)
+            expanded_src = file_path.relpath(self.working_path)
+            old_lines = file_path.lines(retain=False)
+
+            for i, old_line in enumerate(old_lines):
+                if should_replace(old_line, old_string, search):
+                    new_line = old_line.replace(old_string, new_string)
+                    patch = Patch(self.working_path, expanded_src, i, old_line, new_line)
+                    patches.append(patch)
         if not patches:
             raise CurrentVersionNotFound(src=change_request.src, current_version_string=old_string)
         return patches

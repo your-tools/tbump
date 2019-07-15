@@ -17,6 +17,9 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
     pub_js = tbump.config.File(
         src="pub.js",
         version_template="{major}.{minor}.{patch}")
+    glob = tbump.config.File(
+        src="glob*.?",
+        search='version = "{current_version}"')
 
     expected_pattern = r"""  (?P<major>\d+)
   \.
@@ -37,6 +40,7 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
         foo_json,
         version_txt,
         pub_js,
+        glob,
     ]
 
     assert config.current_version == "1.2.41-alpha-1"
