@@ -127,7 +127,7 @@ def should_replace(line: str, old_string: str, search: Optional[str] = None) -> 
     if not search:
         return old_string in line
     else:
-        return (old_string in line) and (search in line)
+        return (old_string in line) and (re.search(search, line) is not None)
 
 
 def on_version_containing_none(src: str, verb: str, version: str, *,
@@ -233,7 +233,7 @@ class FileBumper():
 
         to_search = None
         if file.search:
-            to_search = file.search.format(current_version=current_version)
+            to_search = file.search.format(current_version=re.escape(current_version))
 
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 

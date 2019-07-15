@@ -17,8 +17,8 @@ def test_file_bumper_simple(test_repo: Path) -> None:
     assert file_contains(test_repo / "package.json", '"version": "1.2.41-alpha-2"')
     assert file_contains(test_repo / "package.json", '"other-dep": "1.2.41-alpha-1"')
     assert file_contains(test_repo / "pub.js", "PUBLIC_VERSION = '1.2.41'")
-    assert file_contains(test_repo / "glob-one.c", 'version = "1.2.41-alpha-2"')
-    assert file_contains(test_repo / "glob-two.v", 'version = "1.2.41-alpha-2"')
+    assert file_contains(test_repo / "glob-one.c", 'version_one = "1.2.41-alpha-2"')
+    assert file_contains(test_repo / "glob-two.v", 'version_two = "1.2.41-alpha-2"')
 
 
 def test_patcher_preserve_endings(tmp_path: Path) -> None:

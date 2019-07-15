@@ -19,7 +19,7 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
         version_template="{major}.{minor}.{patch}")
     glob = tbump.config.File(
         src="glob*.?",
-        search='version = "{current_version}"')
+        search='version_[a-z]+ = "{current_version}"')
 
     expected_pattern = r"""  (?P<major>\d+)
   \.
