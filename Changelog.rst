@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v6.0.0 (2019-07-15)
+
+* **Breaking change**: Search strings are now regular expressions
+* **Breaking change**: Allow globs in paths (breaking if paths contained ``*``, ``?``, ``[`` or ``]`` characters).
+
 v5.0.4 (2019-03-13)
 -------------------
 * Preserve line endings when patching files.
