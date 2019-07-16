@@ -119,19 +119,23 @@ def bump(options: BumpOptions) -> None:
 
     config = parse_config(options.working_path)
 
+    # fmt: off
     ui.info_1(
-        "Bumping from",
-        ui.bold,
-        config.current_version,
-        ui.reset,
-        "to",
-        ui.bold,
-        new_version,
+        "Bumping from", ui.bold, config.current_version,
+        ui.reset, "to", ui.bold, new_version,
     )
+    # fmt: on
 
     git_bumper = GitBumper(working_path)
     git_bumper.set_config(config)
-    git_bumper.check_state(new_version)
+    git_state_error = None
+    try:
+        git_bumper.check_state(new_version)
+    except tbump.git.GitError as e:
+        if dry_run:
+            git_state_error = e
+        else:
+            raise
 
     file_bumper = FileBumper(working_path)
     file_bumper.set_config(config)
@@ -150,7 +154,12 @@ def bump(options: BumpOptions) -> None:
                 raise Cancelled()
 
     if dry_run:
-        return
+        if git_state_error:
+            ui.error("Git repository state is invalid")
+            git_state_error.print_error()
+            sys.exit(1)
+        else:
+            return
 
     executor.print_self(dry_run=False)
     executor.run()
