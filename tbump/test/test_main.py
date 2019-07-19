@@ -95,6 +95,18 @@ def bump_not_done(test_repo: Path, previous_commit: str) -> bool:
     )
 
 
+def only_patch_done(test_repo: Path, previous_commit: str) -> bool:
+    return all(
+        (
+            files_bumped(test_repo),
+            not commit_created(test_repo),
+            not tag_created(test_repo),
+            not branch_pushed(test_repo, previous_commit),
+            not tag_pushed(test_repo),
+        )
+    )
+
+
 def test_end_to_end(test_repo: Path) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
@@ -119,6 +131,15 @@ def test_dry_run_non_interactive(
     )
 
     assert bump_not_done(test_repo, previous_commit)
+
+
+def test_only_patch(test_repo: Path) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    tbump.main.main(
+        ["-C", test_repo, "1.2.41-alpha-2", "--non-interactive", "--only-patch"]
+    )
+
+    assert only_patch_done(test_repo, previous_commit)
 
 
 def test_on_outdated_branch(test_repo: Path) -> None:

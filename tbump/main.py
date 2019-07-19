@@ -34,6 +34,7 @@ Options:
    -C --cwd=<path>    Set working directory to <path>.
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
+   --only-patch       Only patches files, skipping any git operations or hook commands.
 """
 )
 
@@ -67,6 +68,7 @@ class BumpOptions:
     new_version = attr.ib()  # type: str
     interactive = attr.ib(default=True)  # type: bool
     dry_run = attr.ib(default=False)  # type: bool
+    only_patch = attr.ib(default=False)  # type: bool
 
 
 def run(cmd: List[str]) -> None:
@@ -97,6 +99,8 @@ def run(cmd: List[str]) -> None:
         bump_options.dry_run = True
     if opt_dict["--non-interactive"]:
         bump_options.interactive = False
+    if opt_dict["--only-patch"]:
+        bump_options.only_patch = True
     bump(bump_options)
 
 
@@ -115,6 +119,7 @@ def bump(options: BumpOptions) -> None:
     working_path = options.working_path
     new_version = options.new_version
     interactive = options.interactive
+    only_patch = options.only_patch
     dry_run = options.dry_run
 
     config = parse_config(options.working_path)
@@ -130,7 +135,9 @@ def bump(options: BumpOptions) -> None:
     git_bumper.set_config(config)
     git_state_error = None
     try:
-        git_bumper.check_state(new_version)
+        git_bumper.check_dirty()  # Avoid data loss
+        if not only_patch:
+            git_bumper.check_branch_state(new_version)
     except tbump.git.GitError as e:
         if dry_run:
             git_state_error = e
@@ -141,10 +148,13 @@ def bump(options: BumpOptions) -> None:
     file_bumper.set_config(config)
 
     hooks_runner = HooksRunner(working_path)
-    for hook in config.hooks:
-        hooks_runner.add_hook(hook)
+    if not only_patch:
+        for hook in config.hooks:
+            hooks_runner.add_hook(hook)
 
-    executor = Executor(new_version, git_bumper, file_bumper, hooks_runner)
+    executor = Executor(new_version, file_bumper)
+    if not only_patch:
+        executor.add_git_and_hook_actions(new_version, git_bumper, hooks_runner)
 
     if interactive:
         executor.print_self(dry_run=True)
