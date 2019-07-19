@@ -12,7 +12,7 @@ def get_long_description():
 
 setup(
     name="tbump",
-    version="6.0.1",
+    version="6.0.2",
     description="Bump software releases",
     long_description=get_long_description(),
     url="https://github.com/TankerHQ/tbump",
