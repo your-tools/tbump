@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v6.0.2 (2019-07-16)
+-------------------
+
+* Implement `#36 <https://github.com/TankerHQ/tbump/issues/36>`_: The `--only-patch` flag now allows skipping any git operations or hook commands.
+
 v6.0.1 (2019-07-16)
 -------------------
 

@@ -42,13 +42,7 @@ class ActionGroup:
 
 
 class Executor:
-    def __init__(
-        self,
-        new_version: str,
-        git_bumper: GitBumper,
-        file_bumper: FileBumper,
-        hooks_runner: HooksRunner,
-    ):
+    def __init__(self, new_version: str, file_bumper: FileBumper):
         self.new_version = new_version
         self.work = list()  # type: List[ActionGroup]
 
@@ -59,6 +53,9 @@ class Executor:
         )
         self.work.append(patches)
 
+    def add_git_and_hook_actions(
+        self, new_version: str, git_bumper: GitBumper, hooks_runner: HooksRunner
+    ) -> None:
         before_hooks = ActionGroup(
             "Would run these hooks before commit",
             "Running hooks before commit",

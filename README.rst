@@ -114,9 +114,9 @@ Then run:
 * Push the current branch and the tag.
 
 Note that by default, ``tbump`` will display all the changes and stop to ask if they are correct before performing any action, allowing you to abort and re-try the bump if something is not right.
-
 You can use ``--non-interactive`` to disable this behavior.
 
+If you only want to bump the files without performing any git actions or running the hook commands, use the ``--only-patch`` option.
 
 Advanced configuration
 ----------------------

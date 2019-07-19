@@ -112,8 +112,7 @@ class GitBumper:
         if rc == 0:
             raise RefAlreadyExists(ref=tag_name)
 
-    def check_state(self, new_version: str) -> None:
-        self.check_dirty()
+    def check_branch_state(self, new_version: str) -> None:
         self.get_current_branch()
         tag_name = self.tag_template.format(new_version=new_version)
         self.check_ref_does_not_exists(tag_name)
