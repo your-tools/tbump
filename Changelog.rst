@@ -4,12 +4,12 @@ Changelog
 v6.0.2 (2019-07-16)
 -------------------
 
-* Implement `#36 <https://github.com/TankerHQ/tbump/issues/36>`_: The `--only-patch` flag now allows skipping any git operations or hook commands.
+* Implement `#36 <https://github.com/TankerHQ/tbump/issues/36>`_: The ``--only-patch`` flag now allows skipping any git operations or hook commands.
 
 v6.0.1 (2019-07-16)
 -------------------
 
-* Fix `#41 <https://github.com/TankerHQ/tbump/issues/41>`_: When run with `--dry-run`, don't abort if git state is incorrect, just print the error message at the end.
+* Fix `#41 <https://github.com/TankerHQ/tbump/issues/41>`_: When run with ``--dry-run``, don't abort if git state is incorrect, just print the error message at the end.
 
 v6.0.0 (2019-07-15)
 -------------------
