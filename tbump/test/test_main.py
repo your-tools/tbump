@@ -177,7 +177,7 @@ def test_tbump_toml_bad_syntax(
     toml_path.write_text(toml.dumps(bad_toml))
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
-    assert message_recorder.find("Missing keys")
+    assert message_recorder.find("Invalid config")
 
 
 def test_new_version_does_not_match(
