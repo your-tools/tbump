@@ -1,0 +1,30 @@
+name: linters
+
+on: [push]
+
+jobs:
+  run_linters:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dmenv
+      uses: TankerHQ/dmenv-install-action@v1.0.0
+      with:
+        dmenv-version: 0.20.0
+
+    - name: Prepare project for development
+      run: dmenv install
+
+    - name: Run linters
+      run: |
+        source $(dmenv show:bin_path)/activate
+        python lint.py
