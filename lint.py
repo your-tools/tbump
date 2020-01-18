@@ -33,11 +33,6 @@ def init_checks():
     env["MYPYPATH"] = "stubs/"
     append_check("mypy", "mypy", "tbump", env=env)
 
-    pytest_args = ["pytest", "--cov", ".", "--cov-report", "term"]
-    if os.environ.get("CI"):
-        pytest_args.extend(["-p", "no:sugar"])
-    append_check("pytest", *pytest_args)
-
     return res
 
 
