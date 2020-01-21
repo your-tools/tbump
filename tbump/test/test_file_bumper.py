@@ -36,11 +36,16 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
     config = tbump.config.parse(test_repo / "tbump.toml")
     package_json = test_repo / "package.json"
-    package_json.write_bytes(package_json.bytes().replace(b"\n", b"\r\n"))
+
+    # Make sure package.json contain CRLF line endings
+    lines = package_json.lines(retain=False)
+    package_json.write_text("\r\n".join(lines), linesep=None)
+
     bumper.set_config(config)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
     for patch in patches:
         patch.apply()
+
     actual = package_json.bytes()
     assert b'version": "1.2.41-alpha-2",\r\n' in actual
 
