@@ -33,38 +33,22 @@ class Patch(tbump.action.Action):
         self.new_line = new_line
 
     def print_self(self) -> None:
+        # fmt: off
         ui.info(
-            ui.red,
-            "- ",
-            ui.reset,
-            ui.bold,
-            self.src,
-            ":",
-            ui.reset,
-            ui.darkgray,
-            self.lineno + 1,
-            ui.reset,
-            " ",
-            ui.red,
-            self.old_line.strip(),
+            ui.red, "- ", ui.reset,
+            ui.bold, self.src, ":", ui.reset,
+            ui.darkgray, self.lineno + 1, ui.reset,
+            " ", ui.red, self.old_line.strip(),
             sep="",
         )
         ui.info(
-            ui.green,
-            "+ ",
-            ui.reset,
-            ui.bold,
-            self.src,
-            ":",
-            ui.reset,
-            ui.darkgray,
-            self.lineno + 1,
-            ui.reset,
-            " ",
-            ui.green,
-            self.new_line.strip(),
+            ui.green, "+ ", ui.reset,
+            ui.bold, self.src, ":", ui.reset,
+            ui.darkgray, self.lineno + 1, ui.reset,
+            " ", ui.green, self.new_line.strip(),
             sep="",
         )
+        # fmt: on
 
     def do(self) -> None:
         self.apply()
