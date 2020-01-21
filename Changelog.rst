@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v6.0.3 (2020-01-23)
+-------------------
+
+* Fix `#44`: when running `tbump init`, do not fail if no files are found matching the current version.
+
 v6.0.2 (2019-07-19)
 -------------------
 
