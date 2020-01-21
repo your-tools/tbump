@@ -26,7 +26,7 @@ def init(working_path: Path, current_version: str) -> None:
     if tbump_path.exists():
         ui.fatal(tbump_path, "already exists")
     template = textwrap.dedent(
-        r"""
+        """\
         [version]
         current = "@current_version@"
 
@@ -34,11 +34,11 @@ def init(working_path: Path, current_version: str) -> None:
         # Make sure this matches current_version before
         # using tbump
         regex = '''
-          (?P<major>\d+)
-          \.
-          (?P<minor>\d+)
-          \.
-          (?P<patch>\d+)
+          (?P<major>\\d+)
+          \\.
+          (?P<minor>\\d+)
+          \\.
+          (?P<patch>\\d+)
           '''
 
         [git]
