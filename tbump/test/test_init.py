@@ -6,7 +6,6 @@ import tbump.main
 
 import pytest
 from cli_ui.tests import MessageRecorder
-from tbump.test.conftest import file_contains
 
 
 def test_creates_config(test_repo: Path) -> None:
@@ -19,8 +18,6 @@ def test_creates_config(test_repo: Path) -> None:
     assert tbump_path.exists()
     config = toml.loads(tbump_path.text())
     assert config["version"]["current"] == "1.2.41-alpha1"
-    first_match = config["file"][0]
-    assert file_contains(test_repo / first_match["src"], current_version)
 
 
 def test_abort_if_tbump_toml_exists(

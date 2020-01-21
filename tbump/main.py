@@ -90,7 +90,7 @@ def run(cmd: List[str]) -> None:
 
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
-        tbump.init.init(working_path, current_version)
+        tbump.init.init(working_path, current_version=current_version)
         return
 
     new_version = opt_dict["<new_version>"]

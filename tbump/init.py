@@ -19,7 +19,7 @@ def find_files(working_path: Path, current_version: str) -> List[str]:
     return res
 
 
-def init(working_path: Path, current_version: str) -> None:
+def init(working_path: Path, *, current_version: str) -> None:
     """ Interactively creates a new tbump.toml """
     ui.info_1("Generating tbump config file")
     tbump_path = working_path / "tbump.toml"
@@ -49,8 +49,10 @@ def init(working_path: Path, current_version: str) -> None:
 
     file_template = textwrap.dedent(
         """
+        # For each file to patch, add a [[file]] config section containing
+        # the path of the file, relative to the tbump.toml location.
         [[file]]
-        src = "@src@"
+        src = "..."
     """
     )
 
@@ -73,9 +75,7 @@ def init(working_path: Path, current_version: str) -> None:
     )
 
     to_write = template.replace("@current_version@", current_version)
-    files = find_files(working_path, current_version)
-    for file in files:
-        to_write += file_template.replace("@src@", file)
+    to_write += file_template
     to_write += hooks_template
     tbump_path.write_text(to_write)
     ui.info_2(ui.check, "Generated tbump.toml")
