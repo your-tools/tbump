@@ -24,7 +24,7 @@ src = "tbump/main.py"
 
 [[before_commit]]
 name = "Run CI"
-cmd = "python ci/ci.py"
+cmd = "python lint.py && pytest"
 
 [[before_commit]]
 name = "Check Changelog"
