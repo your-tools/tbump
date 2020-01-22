@@ -16,7 +16,7 @@ tag_template = "v{new_version}"
 
 
 [[file]]
-src = "setup.py"
+src = "setup.cfg"
 
 
 [[file]]
