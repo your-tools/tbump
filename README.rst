@@ -1,16 +1,17 @@
 tbump: bump software releases
 =============================
 
+.. image:: https://github.com/TankerHQ/tbump/workflows/tests/badge.svg
+   :target: https://github.com/TankerHQ/tbump/actions
 
+.. image:: https://github.com/TankerHQ/tbump/workflows/linters/badge.svg
+   :target: https://github.com/TankerHQ/tbump/actions
+   
 .. image:: https://img.shields.io/travis/TankerHQ/tbump.svg?branch=master
   :target: https://travis-ci.org/TankerHQ/tbump
 
 .. image:: https://img.shields.io/pypi/v/tbump.svg
-  :target: https://pypi.org/project/tbump/
-  
-.. image:: https://img.shields.io/pypi/pyversions/tbump.svg
-  :target: https://pypi.org/project/tbump
-  
+  :target: https://pypi.org/project/tbump/  
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
   :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
