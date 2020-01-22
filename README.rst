@@ -7,16 +7,15 @@ tbump: bump software releases
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
   :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
-  
-.. image:: https://img.shields.io/codecov/c/github/TankerHQ/tbump.svg?label=Coverage
-   :target: https://codecov.io/gh/TankerHQ/tbump
    
 .. image:: https://github.com/TankerHQ/tbump/workflows/tests/badge.svg
    :target: https://github.com/TankerHQ/tbump/actions
 
 .. image:: https://github.com/TankerHQ/tbump/workflows/linters/badge.svg
    :target: https://github.com/TankerHQ/tbump/actions
-
+  
+.. image:: https://img.shields.io/codecov/c/github/TankerHQ/tbump.svg?label=Coverage
+   :target: https://codecov.io/gh/TankerHQ/tbump
 
 Installation
 ------------
