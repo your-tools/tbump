@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v6.0.4 (2020-01-28)
+v6.0.5 (2020-01-28)
 -------------------
 
 * Fix incorrect `python_requires` metadata
