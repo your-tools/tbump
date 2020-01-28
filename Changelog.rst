@@ -5,6 +5,7 @@ v6.0.4 (2020-01-28)
 -------------------
 
 * Fix incorrect `python_requires` metadata
+* Fix incorrect `entry_points` metadata
 
 v6.0.3 (2020-01-23)
 -------------------
