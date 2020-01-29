@@ -14,7 +14,7 @@ class Check:
 
     def run(self):
         ui.info_2(self.name)
-        rc = subprocess.call(self.cmd, env=self.env)
+        rc = subprocess.call(["poetry", "run"] + list(self.cmd), env=self.env)
         self.ok = rc == 0
 
 
