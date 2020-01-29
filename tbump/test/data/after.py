@@ -3,16 +3,15 @@ so it must be run *after* the push of the commit and tag
 
 """
 import sys
-
-from path import Path
-import tbump.git
+import subprocess
 
 
 def main():
-    this_path = Path(".")
-    _, out = tbump.git.run_git_captured(this_path, "status", "--porcelain")
+    process = subprocess.run(
+        ["git", "status", "--porcelain"], stdout=subprocess.PIPE, check=True
+    )
     dirty = False
-    for line in out.splitlines():
+    for line in process.stdout.decode().splitlines():
         # Ignore untracked files
         if not line.startswith("??"):
             dirty = True
