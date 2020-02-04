@@ -72,16 +72,13 @@ category = "main"
 description = "Build Nice User Interfaces In The Terminal"
 name = "cli-ui"
 optional = false
-python-versions = "*"
-version = "0.10.0"
+python-versions = ">=3.5,<4.0"
+version = "0.10.1"
 
 [package.dependencies]
-colorama = "*"
-tabulate = "*"
-unidecode = "*"
-
-[package.extras]
-dev = ["sphinx", "ghp-import", "black", "mypy (0.740)", "pyflakes", "codecov", "coverage", "pytest", "pytest-cov", "twine", "wheel"]
+colorama = ">=0.4.1,<0.5.0"
+tabulate = ">=0.8.3,<0.9.0"
+unidecode = ">=1.0.23,<2.0.0"
 
 [[package]]
 category = "dev"
@@ -580,8 +577,8 @@ chardet = [
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 cli-ui = [
-    {file = "cli-ui-0.10.0.tar.gz", hash = "sha256:9f767e3ffe14e38afc836dee49247128116bc0aafb672b223d87235799a2c20f"},
-    {file = "cli_ui-0.10.0-py3-none-any.whl", hash = "sha256:cfc3b6c1192f625f5a02f8f522df5b748ecc464d15a2cba8853506e486ff87f9"},
+    {file = "cli-ui-0.10.1.tar.gz", hash = "sha256:4543c8c6f4436e07f3dd347ad084674eba499ceeeba871ff3cc2152185a0230a"},
+    {file = "cli_ui-0.10.1-py3-none-any.whl", hash = "sha256:5ed63907670347ad52f9861eb41ef0b522a3a54fde5361057246eccab0f376c0"},
 ]
 click = [
     {file = "Click-7.0-py2.py3-none-any.whl", hash = "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13"},
