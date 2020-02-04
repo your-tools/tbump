@@ -13,10 +13,10 @@ from .hooks import HOOKS_CLASSES, Hook, BeforeCommitHook, AfterPushHook  # noqa
 class Config:
     current_version = attr.ib()  # type: str
     version_regex = attr.ib()  # type: Pattern[str]
-    tag_template = attr.ib(default="")  # type: str
-    message_template = attr.ib(default=None)  # type: str
-    files = attr.ib(default=[])  # type: List[File]
-    hooks = attr.ib(default=[])  # type: List[Hook]
+    message_template = attr.ib()  # type: str
+    files = attr.ib()  # type: List[File]
+    hooks = attr.ib()  # type: List[Hook]
+    tag_template = attr.ib()  # type: str
 
 
 @attr.s
@@ -97,12 +97,9 @@ def parse(cfg_path: Path) -> Config:
         message = "Current version: %s does not match version regex" % current_version
         raise schema.SchemaError(message)
     current_groups = match.groupdict()
-    config = Config(current_version=current_version, version_regex=version_regex)
-
-    config.tag_template = parsed["git"]["tag_template"]
-    config.message_template = parsed["git"]["message_template"]
-
-    config.files = []
+    message_template = parsed["git"]["message_template"]
+    tag_template = parsed["git"]["tag_template"]
+    files = []
     for file_dict in parsed["file"]:
         file_config = File(
             src=file_dict["src"],
@@ -113,13 +110,23 @@ def parse(cfg_path: Path) -> Config:
             validate_version_template(
                 file_config.src, file_config.version_template, current_groups
             )
-        config.files.append(file_config)
+        files.append(file_config)
 
-    config.hooks = []
+    hooks = []
     for hook_type in ("hook", "before_push", "before_commit", "after_push"):
         cls = HOOKS_CLASSES[hook_type]
         if hook_type in parsed:
             for hook_dict in parsed[hook_type]:
                 hook = cls(hook_dict["name"], hook_dict["cmd"])
-                config.hooks.append(hook)
+                hooks.append(hook)
+
+    config = Config(
+        current_version=current_version,
+        version_regex=version_regex,
+        message_template=message_template,
+        tag_template=tag_template,
+        files=files,
+        hooks=hooks,
+    )
+
     return config
