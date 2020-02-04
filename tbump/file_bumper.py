@@ -160,12 +160,12 @@ def on_version_containing_none(
 class FileBumper:
     def __init__(self, working_path: Path):
         self.working_path = working_path
-        self.files = list()  # type: List[tbump.config.File]
+        self.files = []  # type: List[tbump.config.File]
         self.version_regex = re.compile(".")
         self.current_version = ""
-        self.current_groups = dict()  # type: Dict[str, str]
+        self.current_groups = {}  # type: Dict[str, str]
         self.new_version = ""
-        self.new_groups = dict()  # type: Dict[str, str]
+        self.new_groups = {}  # type: Dict[str, str]
 
     def parse_version(self, version: str) -> Dict[str, str]:
         assert self.version_regex
@@ -197,7 +197,7 @@ class FileBumper:
             "tbump.toml", self.current_version, new_version
         )
         change_requests.append(tbump_toml_change)
-        patches = list()
+        patches = []
         for change_request in change_requests:
             patches_for_request = self.compute_patches_for_change_request(
                 change_request
@@ -211,7 +211,7 @@ class FileBumper:
         old_string = change_request.old_string
         new_string = change_request.new_string
         search = change_request.search
-        patches = list()
+        patches = []
 
         file_path_glob = self.working_path / change_request.src
         for file_path_str in glob.glob(file_path_glob, recursive=True):
@@ -233,7 +233,7 @@ class FileBumper:
         return patches
 
     def compute_change_requests(self) -> List[ChangeRequest]:
-        change_requests = list()
+        change_requests = []
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
             change_requests.append(change_request)
