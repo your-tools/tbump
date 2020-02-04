@@ -1,6 +1,6 @@
 from path import Path
 import sys
-import toml
+import tomlkit
 import pytest
 
 import tbump.git
@@ -14,16 +14,19 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
 
     """
     cfg_path = test_repo / "tbump.toml"
-    parsed = toml.loads(cfg_path.text())
+    parsed = tomlkit.loads(cfg_path.text())
     if after_push:
         key = "after_push"
     else:
         key = "before_commit"
     if key not in parsed:
-        parsed[key] = list()
-    parsed[key].append({"cmd": cmd, "name": name})
+        parsed[key] = tomlkit.aot()
+    hook_config = tomlkit.table()
+    hook_config.add("cmd", cmd)
+    hook_config.add("name", name)
+    parsed[key].append(hook_config)
 
-    cfg_path.write_text(toml.dumps(parsed))
+    cfg_path.write_text(tomlkit.dumps(parsed))
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
 

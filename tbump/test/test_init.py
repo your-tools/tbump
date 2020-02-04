@@ -1,5 +1,5 @@
 from path import Path
-import toml
+import tomlkit
 
 import tbump.config
 import tbump.main
@@ -16,7 +16,7 @@ def test_creates_config(test_repo: Path) -> None:
     tbump.main.main(["-C", test_repo, "init", current_version])
 
     assert tbump_path.exists()
-    config = toml.loads(tbump_path.text())
+    config = tomlkit.loads(tbump_path.text())
     assert config["version"]["current"] == "1.2.41-alpha1"
 
 

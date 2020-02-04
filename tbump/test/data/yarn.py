@@ -7,7 +7,7 @@ Its only job is to update yarn.lock based on the contents of the package.json
 import json
 
 import path
-import toml
+import tomlkit
 
 
 def main() -> None:
@@ -16,10 +16,10 @@ def main() -> None:
     current_version = parsed["version"]
 
     yarn_lock = path.Path("yarn.lock")
-    parsed = toml.loads(yarn_lock.text())
+    parsed = tomlkit.loads(yarn_lock.text())
     parsed["dependencies"]["hello"] = current_version
     parsed["dependencies"]["some-dep"] = "1.2.0"
-    yarn_lock.write_text(toml.dumps(parsed))
+    yarn_lock.write_text(tomlkit.dumps(parsed))
 
 
 if __name__ == "__main__":
