@@ -4,7 +4,7 @@ from typing import cast, Any, Dict, List, Optional, Pattern  # noqa
 import attr
 import schema
 from path import Path
-import toml
+import tomlkit
 
 from .hooks import HOOKS_CLASSES, Hook, BeforeCommitHook, AfterPushHook  # noqa
 
@@ -69,12 +69,13 @@ def validate(config: Dict[str, Any]) -> Config:
 
     hook_schema = schema.Schema({"name": str, "cmd": str})
 
-    def compile_re(regex: str) -> Pattern[str]:
-        return re.compile(regex, re.VERBOSE)
+    def validate_re(regex: str) -> str:
+        re.compile(regex, re.VERBOSE)
+        return regex
 
     tbump_schema = schema.Schema(
         {
-            "version": {"current": str, "regex": schema.Use(compile_re)},
+            "version": {"current": str, "regex": schema.Use(validate_re)},
             "git": {"message_template": ValidMessage(), "tag_template": ValidTag()},
             "file": [file_schema],
             schema.Optional("hook"): [hook_schema],  # retro-compat
@@ -87,13 +88,10 @@ def validate(config: Dict[str, Any]) -> Config:
 
 
 def parse(cfg_path: Path) -> Config:
-    parsed = None
-    with cfg_path.open() as stream:
-        parsed = toml.load(stream)
-
-    parsed = validate(parsed)  # type: ignore
+    parsed = tomlkit.loads(cfg_path.text())
+    parsed = validate(parsed)
     current_version = parsed["version"]["current"]
-    version_regex = parsed["version"]["regex"]
+    version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     match = version_regex.fullmatch(current_version)
     if not match:
         message = "Current version: %s does not match version regex" % current_version
