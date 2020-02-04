@@ -44,7 +44,7 @@ class ActionGroup:
 class Executor:
     def __init__(self, new_version: str, file_bumper: FileBumper):
         self.new_version = new_version
-        self.work = list()  # type: List[ActionGroup]
+        self.work = []  # type: List[ActionGroup]
 
         patches = ActionGroup(
             "Would patch these files",

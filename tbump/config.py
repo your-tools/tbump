@@ -15,8 +15,8 @@ class Config:
     version_regex = attr.ib()  # type: Pattern[str]
     tag_template = attr.ib(default="")  # type: str
     message_template = attr.ib(default=None)  # type: str
-    files = attr.ib(default=list())  # type: List[File]
-    hooks = attr.ib(default=list())  # type: List[Hook]
+    files = attr.ib(default=[])  # type: List[File]
+    hooks = attr.ib(default=[])  # type: List[Hook]
 
 
 @attr.s
@@ -102,7 +102,7 @@ def parse(cfg_path: Path) -> Config:
     config.tag_template = parsed["git"]["tag_template"]
     config.message_template = parsed["git"]["message_template"]
 
-    config.files = list()
+    config.files = []
     for file_dict in parsed["file"]:
         file_config = File(
             src=file_dict["src"],
@@ -115,7 +115,7 @@ def parse(cfg_path: Path) -> Config:
             )
         config.files.append(file_config)
 
-    config.hooks = list()
+    config.hooks = []
     for hook_type in ("hook", "before_push", "before_commit", "after_push"):
         cls = HOOKS_CLASSES[hook_type]
         if hook_type in parsed:

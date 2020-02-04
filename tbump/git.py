@@ -58,7 +58,7 @@ def run_git_captured(
     """
     git_cmd = list(cmd)
     git_cmd.insert(0, "git")
-    options = dict()
+    options = {}
     options["stdout"] = subprocess.PIPE
     options["stderr"] = subprocess.STDOUT
 
