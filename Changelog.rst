@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v6.0.7 (2020-01-28)
+-------------------
+
+* Relax constraint on `path` version
+
 v6.0.6 (2020-01-28)
 -------------------
 
@@ -45,7 +50,7 @@ v5.0.3 (2018-12-18)
 v5.0.2 (2018-10-11)
 -------------------
 
-* Rename ``before_push`` section to ``before_commit``: it better reflets at which
+* Rename ``before_push`` section to ``before_commit``: it better reflects at which
   moment the hook runs. Note that you can still use ``before_push`` or even ``hook`` if
   you want.
 
