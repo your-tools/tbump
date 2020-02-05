@@ -25,7 +25,7 @@ src = "tbump/main.py"
 
 [[before_commit]]
 name = "Run CI"
-cmd = "python lint.py && pytest"
+cmd = "poetry run python lint.py && poetry run pytest"
 
 [[before_commit]]
 name = "Check Changelog"
