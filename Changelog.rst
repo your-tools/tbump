@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v6.0.6 (2020-01-28)
+-------------------
+
+* Switch to `poetry <https://python-poetry.org/>`_ for dependencies management and packaging.
+
 v6.0.5 (2020-01-28)
 -------------------
 
