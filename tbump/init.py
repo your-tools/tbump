@@ -64,13 +64,13 @@ def init(working_path: Path, *, current_version: str) -> None:
 
         #  [[before_commit]]
         #  name = "check changelog"
-        #  cmd = "grep -q {current_version} Changelog.md"
+        #  cmd = "grep -q {new_version} Changelog.rst"
 
         # Or run some commands after the git tag and the branch
         # have been pushed:
         #  [[after_push]]
-        #  name = "check changelog"
-        #  cmd = "grep -q {current_version} Changelog.md"
+        #  name = "publish"
+        #  cmd = "./publish.sh"
     """
     )
 
