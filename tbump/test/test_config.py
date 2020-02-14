@@ -1,13 +1,17 @@
-from typing import Any
+import textwrap
+import re
+
 from path import Path
 import schema
+import tomlkit
+import pytest
 
-from tbump.hooks import HOOKS_CLASSES
+from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 import tbump.config
+from tbump.config import Config
 
 
-def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
-    monkeypatch.chdir(test_data_path)
+def test_happy_parse(test_data_path: Path) -> None:
     config = tbump.config.parse(test_data_path / "tbump.toml")
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
@@ -38,80 +42,46 @@ def test_happy_parse(test_data_path: Path, monkeypatch: Any) -> None:
     assert config.current_version == "1.2.41-alpha-1"
 
 
-def check_error(tmp_path: Path, contents: str, expected_message: str) -> None:
-    cfg_path = tmp_path / "tbump.toml"
-    cfg_path.write_text(contents)
+def assert_validation_error(config: Config, expected_message: str) -> None:
     try:
-        tbump.config.parse(cfg_path)
+        tbump.config.validate_config(config)
         assert False, "shoud have raise schema error"
     except schema.SchemaError as error:
         assert expected_message in error.args[0]
 
 
-def test_invalid_commit_message(tmp_path: Path) -> None:
-    check_error(
-        tmp_path,
-        r"""
-        [version]
-        current = '1.2'
-        regex = ".*"
+@pytest.fixture
+def test_config(test_data_path: Path) -> Config:
+    return tbump.config.parse(test_data_path / "tbump.toml")
 
-        [git]
-        message_template = "invalid message"
-        tag_template = "v{new_version}"
 
-        [[file]]
-        src = "VERSION"
-        """,
-        "message_template should contain the string {new_version}",
+def test_invalid_commit_message(test_config: Config) -> None:
+    test_config.message_template = "invalid message"
+    assert_validation_error(
+        test_config, "git.message_template should contain the string {new_version}"
     )
 
 
-def test_invalid_hook_cmd(tmp_path: Path) -> None:
-    check_error(
-        tmp_path,
-        r"""
-        [version]
-        current = '1.2'
-        regex = ".*"
-
-        [git]
-        message_template = "Bump to {new_version}"
-        tag_template = "v{new_version}"
-
-        [[file]]
-        src = "VERSION"
-
-        [[before_commit]]
-        name = "Check changelog"
-        cmd = "grep -q {version} Changelog.rst"
-        """,
+def test_invalid_hook_cmd(test_config: Config) -> None:
+    invalid_cmd = "grep -q {version} Changelog.rst"
+    invalid_hook = BeforeCommitHook(name="check changelog", cmd=invalid_cmd)
+    test_config.hooks.append(invalid_hook)
+    assert_validation_error(
+        test_config,
         "hook cmd: 'grep -q {version} Changelog.rst' uses unknown placeholder: 'version'",
     )
 
 
-def test_current_version_does_not_match_expected_regex(tmp_path: Path) -> None:
-    check_error(
-        tmp_path,
-        r"""
-        [version]
-        current = '1.42a1'
-        regex = '(\d+)\.(\d+)\.(\d+)'
-
-        [git]
-        message_template = "Bump to {new_version}"
-        tag_template = "v{new_version}"
-
-        [[file]]
-        src = "VERSION"
-        """,
-        "Current version: 1.42a1 does not match version regex",
+def test_current_version_does_not_match_expected_regex(test_config: Config) -> None:
+    test_config.version_regex = re.compile(r"(\d+)\.(\d+)\.(\d+)")
+    test_config.current_version = "1.42a1"
+    assert_validation_error(
+        test_config, "Current version: 1.42a1 does not match version regex"
     )
 
 
-def test_invalid_regex(tmp_path: Path) -> None:
-    check_error(
-        tmp_path,
+def test_invalid_regex() -> None:
+    contents = textwrap.dedent(
         r"""
         [version]
         current = '1.42a1'
@@ -123,27 +93,20 @@ def test_invalid_regex(tmp_path: Path) -> None:
 
         [[file]]
         src = "VERSION"
-        """,
-        "Key 'regex' error",
+        """
     )
+    data = tomlkit.loads(contents)
+    with pytest.raises(schema.SchemaError) as e:
+        tbump.config.validate_basic_schema(data)
+    print(e)
 
 
-def test_invalid_custom_template(tmp_path: Path) -> None:
-    check_error(
-        tmp_path,
-        r"""
-        [version]
-        current = "1.2.3"
-        regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
-
-        [git]
-        message_template = "Bump to  {new_version}"
-        tag_template = "v{new_version}"
-
-        [[file]]
-        src = "pub.js"
-        version_template = "{major}.{minor}.{no_such_group}"
-        """,
+def test_invalid_custom_template(test_config: Config) -> None:
+    first_file = test_config.files[0]
+    first_file.src = "pub.js"
+    first_file.version_template = "{major}.{minor}.{no_such_group}"
+    assert_validation_error(
+        test_config,
         "version template for 'pub.js' contains unknown group: 'no_such_group'",
     )
 
