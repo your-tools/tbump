@@ -147,7 +147,7 @@ def bump(options: BumpOptions) -> None:
     file_bumper = FileBumper(working_path)
     file_bumper.set_config(config)
 
-    hooks_runner = HooksRunner(working_path)
+    hooks_runner = HooksRunner(working_path, config.current_version)
     if not only_patch:
         for hook in config.hooks:
             hooks_runner.add_hook(hook)

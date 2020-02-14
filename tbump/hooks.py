@@ -55,9 +55,10 @@ class HookError(tbump.Error):
 
 
 class HooksRunner:
-    def __init__(self, working_path: Path):
+    def __init__(self, working_path: Path, current_version: str):
         self.hooks = []  # type: List[Hook]
         self.working_path = working_path
+        self.current_version = current_version
 
     def add_hook(self, hook: Hook) -> None:
         hook.working_path = self.working_path
@@ -76,6 +77,8 @@ class HooksRunner:
         matching_hooks = [hook for hook in self.hooks if isinstance(hook, cls)]
         res = []
         for hook in matching_hooks:
-            hook.cmd = hook.cmd.format(new_version=new_version)
+            hook.cmd = hook.cmd.format(
+                current_version=self.current_version, new_version=new_version
+            )
             res.append(hook)
         return res
