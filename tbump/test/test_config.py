@@ -67,6 +67,29 @@ def test_invalid_commit_message(tmp_path: Path) -> None:
     )
 
 
+def test_invalid_hook_cmd(tmp_path: Path) -> None:
+    check_error(
+        tmp_path,
+        r"""
+        [version]
+        current = '1.2'
+        regex = ".*"
+
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "VERSION"
+
+        [[before_commit]]
+        name = "Check changelog"
+        cmd = "grep -q {version} Changelog.rst"
+        """,
+        "hook cmd: 'grep -q {version} Changelog.rst' uses unknown placeholder: 'version'",
+    )
+
+
 def test_current_version_does_not_match_expected_regex(tmp_path: Path) -> None:
     check_error(
         tmp_path,
@@ -76,7 +99,7 @@ def test_current_version_does_not_match_expected_regex(tmp_path: Path) -> None:
         regex = '(\d+)\.(\d+)\.(\d+)'
 
         [git]
-        message_template = "Bump to  {new_version}"
+        message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
 
         [[file]]
