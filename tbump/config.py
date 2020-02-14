@@ -13,10 +13,12 @@ from .hooks import HOOKS_CLASSES, Hook, BeforeCommitHook, AfterPushHook  # noqa
 class Config:
     current_version = attr.ib()  # type: str
     version_regex = attr.ib()  # type: Pattern[str]
+
+    tag_template = attr.ib()  # type: str
     message_template = attr.ib()  # type: str
+
     files = attr.ib()  # type: List[File]
     hooks = attr.ib()  # type: List[Hook]
-    tag_template = attr.ib()  # type: str
 
 
 @attr.s
@@ -26,26 +28,18 @@ class File:
     version_template = attr.ib(default=None)  # type: Optional[str]
 
 
-class ValidTemplate:
-    def __init__(self, name: str, pattern: str):
-        self.name = name
-        self.pattern = pattern
-        self.message = "%s should contain the string %s" % (name, pattern)
-
-    def validate(self, value: str) -> str:
-        if self.pattern not in value:
-            raise schema.SchemaError(self.message)
-        return value
+def validate_template(name: str, pattern: str, value: str) -> None:
+    if pattern not in value:
+        message = "%s should contain the string %s" % (name, pattern)
+        raise schema.SchemaError(message)
 
 
-class ValidTag(ValidTemplate):
-    def __init__(self) -> None:
-        super().__init__("tag_template", "{new_version}")
+def validate_git_tag_template(value: str) -> None:
+    validate_template("tag_template", "{new_version}", value)
 
 
-class ValidMessage(ValidTemplate):
-    def __init__(self) -> None:
-        super().__init__("message_template", "{new_version}")
+def validate_git_message_template(value: str) -> None:
+    validate_template("git.message_template", "{new_version}", value)
 
 
 def validate_version_template(
@@ -58,16 +52,18 @@ def validate_version_template(
         raise schema.SchemaError(message)
 
 
-def validate_hook_cmd(cmd: str):
+def validate_hook_cmd(cmd: str) -> None:
     try:
         cmd.format(new_version="dummy", current_version="dummy")
     except KeyError as e:
         message = "hook cmd: '%s' uses unknown placeholder: %s" % (cmd, e)
         raise schema.SchemaError(message)
-    return cmd
 
 
-def validate(config: Dict[str, Any]) -> Config:
+def validate_basic_schema(config: Dict[str, Any]) -> Config:
+    """ First pass of validation, using schema """
+    # Note: asserts that we won't get KeyError or invalid types
+    # when building or initial Config instance
     file_schema = schema.Schema(
         {
             "src": str,
@@ -85,7 +81,7 @@ def validate(config: Dict[str, Any]) -> Config:
     tbump_schema = schema.Schema(
         {
             "version": {"current": str, "regex": schema.Use(validate_re)},
-            "git": {"message_template": ValidMessage(), "tag_template": ValidTag()},
+            "git": {"message_template": str, "tag_template": str},
             "file": [file_schema],
             schema.Optional("hook"): [hook_schema],  # retro-compat
             schema.Optional("before_push"): [hook_schema],  # retro-compat
@@ -96,18 +92,43 @@ def validate(config: Dict[str, Any]) -> Config:
     return cast(Config, tbump_schema.validate(config))
 
 
-def parse(cfg_path: Path) -> Config:
-    parsed = tomlkit.loads(cfg_path.text())
-    parsed = validate(parsed)
-    current_version = parsed["version"]["current"]
-    version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
-    match = version_regex.fullmatch(current_version)
+def validate_config(cfg: Config) -> None:
+    """ Second pass of validation, using the Config
+    class.
+
+    """
+    # Note: separated from validate_basic_schema to keep error
+    # messages user friendly
+
+    current_version = cfg.current_version
+
+    validate_git_message_template(cfg.message_template)
+    validate_git_tag_template(cfg.tag_template)
+
+    match = cfg.version_regex.fullmatch(current_version)
     if not match:
         message = "Current version: %s does not match version regex" % current_version
         raise schema.SchemaError(message)
-    current_groups = match.groupdict()
+    current_version_regex_groups = match.groupdict()
+
+    for file_config in cfg.files:
+        version_template = file_config.version_template
+        if version_template:
+            validate_version_template(
+                file_config.src, version_template, current_version_regex_groups
+            )
+
+    for hook in cfg.hooks:
+        validate_hook_cmd(hook.cmd)
+
+
+def parse(cfg_path: Path) -> Config:
+    parsed = tomlkit.loads(cfg_path.text())
+    parsed = validate_basic_schema(parsed)
+    current_version = parsed["version"]["current"]
     message_template = parsed["git"]["message_template"]
     tag_template = parsed["git"]["tag_template"]
+    version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
     for file_dict in parsed["file"]:
         file_config = File(
@@ -115,10 +136,6 @@ def parse(cfg_path: Path) -> Config:
             search=file_dict.get("search"),
             version_template=file_dict.get("version_template"),
         )
-        if file_config.version_template:
-            validate_version_template(
-                file_config.src, file_config.version_template, current_groups
-            )
         files.append(file_config)
 
     hooks = []
@@ -127,7 +144,6 @@ def parse(cfg_path: Path) -> Config:
         if hook_type in parsed:
             for hook_dict in parsed[hook_type]:
                 hook = cls(hook_dict["name"], hook_dict["cmd"])
-                validate_hook_cmd(hook.cmd)
                 hooks.append(hook)
 
     config = Config(
@@ -138,5 +154,7 @@ def parse(cfg_path: Path) -> Config:
         files=files,
         hooks=hooks,
     )
+
+    validate_config(config)
 
     return config
