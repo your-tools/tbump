@@ -58,6 +58,15 @@ def validate_version_template(
         raise schema.SchemaError(message)
 
 
+def validate_hook_cmd(cmd: str):
+    try:
+        cmd.format(new_version="dummy", current_version="dummy")
+    except KeyError as e:
+        message = "hook cmd: '%s' uses unknown placeholder: %s" % (cmd, e)
+        raise schema.SchemaError(message)
+    return cmd
+
+
 def validate(config: Dict[str, Any]) -> Config:
     file_schema = schema.Schema(
         {
@@ -118,6 +127,7 @@ def parse(cfg_path: Path) -> Config:
         if hook_type in parsed:
             for hook_dict in parsed[hook_type]:
                 hook = cls(hook_dict["name"], hook_dict["cmd"])
+                validate_hook_cmd(hook.cmd)
                 hooks.append(hook)
 
     config = Config(
