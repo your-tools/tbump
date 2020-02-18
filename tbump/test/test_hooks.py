@@ -6,7 +6,6 @@ import pytest
 import tbump.git
 import tbump.hooks
 import tbump.main
-from tbump.test.conftest import file_contains
 
 
 def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
@@ -31,33 +30,62 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
 
 
-def add_working_hook(test_repo: Path) -> None:
-    add_hook(test_repo, "fake yarn", sys.executable + " yarn.py")
+def add_before_hook(test_repo: Path) -> None:
+    """ Patch config to add a working `before_commit` hook
+    that runs tbump/test/data/before.py
 
-
-def add_crashing_hook(test_repo: Path) -> None:
-    add_hook(test_repo, "crashing hook", sys.executable + " nosuchfile.py")
+    """
+    add_hook(
+        test_repo,
+        "fake yarn",
+        sys.executable + " before.py {current_version} {new_version}",
+    )
 
 
 def add_after_hook(test_repo: Path) -> None:
+    """ Patch config to add a working `after_push` hook
+    that runs tbump/test/data/after.py
+
+    """
     add_hook(test_repo, "after hook", sys.executable + " after.py", after_push=True)
 
 
-def test_working_hook(test_repo: Path) -> None:
-    add_working_hook(test_repo)
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+def add_crashing_hook(test_repo: Path) -> None:
+    """ Patch config to add a `before_commit` hook
+    that runs a command that fails
+    """
+    add_hook(test_repo, "crashing hook", sys.executable + " nosuchfile.py")
 
-    assert file_contains(test_repo / "yarn.lock", "1.2.41-alpha-2")
+
+def test_working_hook(test_repo: Path) -> None:
+    """
+    Check that the configured hook runs and properly uses
+    current and new version
+    """
+    add_before_hook(test_repo)
+    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+    hook_stamp = test_repo / "before-hook.stamp"
+    assert hook_stamp.text() == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
 
 
 def test_hook_fails(test_repo: Path) -> None:
-    add_working_hook(test_repo)
+    """
+    Check that the proper exception is raised
+    if the hooks exits with non-zero return code
+    """
+    add_before_hook(test_repo)
     add_crashing_hook(test_repo)
     with pytest.raises(tbump.hooks.HookError):
         tbump.main.run(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
 
 
 def test_hooks_after_push(test_repo: Path) -> None:
-    add_working_hook(test_repo)
+    """
+    Check that both `before_commit` and `after_push`
+    hooks run when tbump is configured with both
+    """
+    add_before_hook(test_repo)
     add_after_hook(test_repo)
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+    assert (test_repo / "before-hook.stamp").exists()
+    assert (test_repo / "after-hook.stamp").exists()
