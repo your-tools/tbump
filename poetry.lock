@@ -73,7 +73,7 @@ description = "Build Nice User Interfaces In The Terminal"
 name = "cli-ui"
 optional = false
 python-versions = ">=3.5,<4.0"
-version = "0.10.1"
+version = "0.10.2"
 
 [package.dependencies]
 colorama = ">=0.4.1,<0.5.0"
@@ -255,7 +255,7 @@ description = "A module wrapper for os.path"
 name = "path"
 optional = false
 python-versions = ">=3.5"
-version = "13.0.0"
+version = "13.1.0"
 
 [package.dependencies]
 [package.dependencies.importlib-metadata]
@@ -541,14 +541,14 @@ marker = "python_version < \"3.8\""
 name = "zipp"
 optional = false
 python-versions = ">=2.7"
-version = "1.1.0"
+version = "1.2.0"
 
 [package.extras]
 docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
-testing = ["pathlib2", "unittest2", "jaraco.itertools"]
+testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "f4a315cb5ecc4af462fead813c5753e511264df7085b908612ee55094d6babd7"
+content-hash = "1c99e96f8c02fc99c3673b06864513603c2b14886272b5bbb5b0a8c1e08f7dec"
 python-versions = "^3.5"
 
 [metadata.files]
@@ -577,8 +577,8 @@ chardet = [
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 cli-ui = [
-    {file = "cli-ui-0.10.1.tar.gz", hash = "sha256:4543c8c6f4436e07f3dd347ad084674eba499ceeeba871ff3cc2152185a0230a"},
-    {file = "cli_ui-0.10.1-py3-none-any.whl", hash = "sha256:5ed63907670347ad52f9861eb41ef0b522a3a54fde5361057246eccab0f376c0"},
+    {file = "cli-ui-0.10.2.tar.gz", hash = "sha256:af0a8aece8e70239e8d6635db768fa62bdba677d7ef81dac551efefd05f17bae"},
+    {file = "cli_ui-0.10.2-py3-none-any.whl", hash = "sha256:f9ec87002e29848f6ad59fa19a7a512d951cd299d61d520f49c54391036c1669"},
 ]
 click = [
     {file = "Click-7.0-py2.py3-none-any.whl", hash = "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13"},
@@ -685,8 +685,8 @@ packaging = [
     {file = "packaging-20.1.tar.gz", hash = "sha256:e665345f9eef0c621aa0bf2f8d78cf6d21904eef16a93f020240b704a57f1334"},
 ]
 path = [
-    {file = "path-13.0.0-py3-none-any.whl", hash = "sha256:917af40877eb18f814e657e2626731128c831536b2c7562ed8078b8a2e5fe2e9"},
-    {file = "path-13.0.0.tar.gz", hash = "sha256:e82f0737e3e185126d686489c74aebdfe14577b3b127b4766141d57aacee3fc8"},
+    {file = "path-13.1.0-py3-none-any.whl", hash = "sha256:41f0db0b6e32b3fc33c0bede630f6b58c7790af3a27c899e0c7ff69143d8696d"},
+    {file = "path-13.1.0.tar.gz", hash = "sha256:97249b37e5e4017429a780920147200a2215e268c1a18fa549fec0b654ce99b7"},
 ]
 pathlib2 = [
     {file = "pathlib2-2.3.5-py2.py3-none-any.whl", hash = "sha256:0ec8205a157c80d7acc301c0b18fbd5d44fe655968f5d947b6ecef5290fc35db"},
@@ -823,6 +823,6 @@ wcwidth = [
     {file = "wcwidth-0.1.8.tar.gz", hash = "sha256:f28b3e8a6483e5d49e7f8949ac1a78314e740333ae305b4ba5defd3e74fb37a8"},
 ]
 zipp = [
-    {file = "zipp-1.1.0-py2.py3-none-any.whl", hash = "sha256:15428d652e993b6ce86694c3cccf0d71aa7afdc6ef1807fa25a920e9444e0281"},
-    {file = "zipp-1.1.0.tar.gz", hash = "sha256:d9d2efe11d3a3fb9184da550d35bd1319dc8e30a63255927c82bb42fca1f4f7c"},
+    {file = "zipp-1.2.0-py2.py3-none-any.whl", hash = "sha256:e0d9e63797e483a30d27e09fffd308c59a700d365ec34e93cc100844168bf921"},
+    {file = "zipp-1.2.0.tar.gz", hash = "sha256:c70410551488251b0fee67b460fb9a536af8d6f9f008ad10ac51f615b6a521b1"},
 ]
