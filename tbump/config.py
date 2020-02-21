@@ -14,8 +14,8 @@ class Config:
     current_version = attr.ib()  # type: str
     version_regex = attr.ib()  # type: Pattern[str]
 
-    tag_template = attr.ib()  # type: str
-    message_template = attr.ib()  # type: str
+    git_tag_template = attr.ib()  # type: str
+    git_message_template = attr.ib()  # type: str
 
     files = attr.ib()  # type: List[File]
     hooks = attr.ib()  # type: List[Hook]
@@ -35,7 +35,7 @@ def validate_template(name: str, pattern: str, value: str) -> None:
 
 
 def validate_git_tag_template(value: str) -> None:
-    validate_template("tag_template", "{new_version}", value)
+    validate_template("git.tag_template", "{new_version}", value)
 
 
 def validate_git_message_template(value: str) -> None:
@@ -102,8 +102,8 @@ def validate_config(cfg: Config) -> None:
 
     current_version = cfg.current_version
 
-    validate_git_message_template(cfg.message_template)
-    validate_git_tag_template(cfg.tag_template)
+    validate_git_message_template(cfg.git_message_template)
+    validate_git_tag_template(cfg.git_tag_template)
 
     match = cfg.version_regex.fullmatch(current_version)
     if not match:
@@ -126,8 +126,8 @@ def parse(cfg_path: Path) -> Config:
     parsed = tomlkit.loads(cfg_path.text())
     parsed = validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
-    message_template = parsed["git"]["message_template"]
-    tag_template = parsed["git"]["tag_template"]
+    git_message_template = parsed["git"]["message_template"]
+    git_tag_template = parsed["git"]["tag_template"]
     version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
     for file_dict in parsed["file"]:
@@ -149,8 +149,8 @@ def parse(cfg_path: Path) -> Config:
     config = Config(
         current_version=current_version,
         version_regex=version_regex,
-        message_template=message_template,
-        tag_template=tag_template,
+        git_message_template=git_message_template,
+        git_tag_template=git_tag_template,
         files=files,
         hooks=hooks,
     )

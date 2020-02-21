@@ -56,7 +56,7 @@ def test_config(test_data_path: Path) -> Config:
 
 
 def test_invalid_commit_message(test_config: Config) -> None:
-    test_config.message_template = "invalid message"
+    test_config.git_message_template = "invalid message"
     assert_validation_error(
         test_config, "git.message_template should contain the string {new_version}"
     )

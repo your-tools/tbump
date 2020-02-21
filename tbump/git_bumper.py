@@ -70,8 +70,8 @@ class GitBumper:
         self.commands = []  # type: List[Command]
 
     def set_config(self, config: Config) -> None:
-        self.tag_template = config.tag_template
-        self.message_template = config.message_template
+        self.tag_template = config.git_tag_template
+        self.message_template = config.git_message_template
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
         full_args = [self.repo_path] + list(args)
