@@ -3,19 +3,23 @@ tbump: bump software releases
 
 
 .. image:: https://img.shields.io/pypi/v/tbump.svg
-  :target: https://pypi.org/project/tbump/  
+  :target: https://pypi.org/project/tbump/
 
 .. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
   :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
-   
+
 .. image:: https://github.com/TankerHQ/tbump/workflows/tests/badge.svg
    :target: https://github.com/TankerHQ/tbump/actions
 
 .. image:: https://github.com/TankerHQ/tbump/workflows/linters/badge.svg
    :target: https://github.com/TankerHQ/tbump/actions
-  
+
 .. image:: https://img.shields.io/codecov/c/github/TankerHQ/tbump.svg?label=Coverage
    :target: https://codecov.io/gh/TankerHQ/tbump
+
+.. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
+     :target: https://github.com/TankerHQ/tbump/workflows/safety/
+
 
 Installation
 ------------
