@@ -23,7 +23,7 @@ pytest-sugar = "^0.9.2"
 pytest-mock = "^2.0.0"
 pytest-cov = "^2.8.1"
 codecov = "^2.0.15"
-mypy = "^0.761"
+mypy = "^0.770"
 flake8 = "^3.7.9"
 flake8-comprehensions = "^3.2.2"
 
