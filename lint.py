@@ -37,7 +37,7 @@ def init_checks():
 
 
 def main():
-    ui.info_1("Starting lintings")
+    ui.info_1("Running linters")
     all_checks = init_checks()
     check_list = sys.argv[1:]
     checks = all_checks
@@ -47,7 +47,7 @@ def main():
         check.run()
     failed_checks = [check for check in checks if not check.ok]
     if not failed_checks:
-        ui.info(ui.check, "All lints passed")
+        ui.info(ui.check, "All linters passed")
         return
     for check in failed_checks:
         ui.error(check.name, "failed")
