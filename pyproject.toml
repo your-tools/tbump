@@ -26,6 +26,7 @@ codecov = "^2.0.15"
 mypy = "^0.770"
 flake8 = "^3.7.9"
 flake8-comprehensions = "^3.2.2"
+safety = "^1.9.0"
 
 [tool.poetry.scripts]
 tbump = "tbump.main:main"
