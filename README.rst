@@ -96,7 +96,7 @@ Frist, run ``tbump init``. This will create a ``tbump.toml`` file looking like t
  * The file uses `toml syntax <https://github.com/toml-lang/toml>`_.
  * Strings should be templated using curly brackets, to be used with Python's built-in ``.format()`` method.
  * Paths may contain unix-style `globs <https://docs.python.org/3/library/glob.html>`_, e.g. ``src = "a/**/script.?s"`` matches both ``a/b/script.js`` and ``a/b/c/script.ts``.
- * The version regular expression will be used in `verbose mode <https://docs.python.org/3/library/re.html#re.VERBOSE>`_ and must contain named groups.
+ * The version regular expression will be used in `verbose mode <https://docs.python.org/3/library/re.html#re.VERBOSE>`_ and can contain named groups (see below).
 
 Then run:
 
