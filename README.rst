@@ -18,7 +18,13 @@ tbump: bump software releases
    :target: https://codecov.io/gh/TankerHQ/tbump
 
 .. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-     :target: https://github.com/TankerHQ/tbump/workflows/safety/
+   :target: https://github.com/TankerHQ/tbump/workflows/safety/
+
+.. image:: https://img.shields.io/badge/code%20style-black-black.svg
+   :target: https://github.com/psf/black
+
+.. image:: https://img.shields.io/badge/mypy-checked-blue.svg
+   :target: https://mypy-lang.org
 
 
 Installation
