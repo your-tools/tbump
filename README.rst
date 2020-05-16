@@ -31,7 +31,7 @@ Installation
 ------------
 
 * Make sure you are using Python **3.5** or later
-* Intall ``tbump`` with ``pip`` as usual.
+* Install ``tbump`` with ``pip`` as usual.
 
 Screenshot
 -----------
@@ -48,7 +48,7 @@ Here's what a typical usage of ``tbump`` looks like:
     - tbump.toml:2 current = "5.0.4"
     + tbump.toml:2 current = "5.0.5"
     => Would run these hooks before commit
-    * (1/2) $ python ci/ci.py
+    * (1/2) $ ./test.sh
     * (2/2) $ grep -q 5.0.5 Changelog.rst
     => Would run these git commands
      * git add --update
@@ -57,7 +57,7 @@ Here's what a typical usage of ``tbump`` looks like:
      * git push origin master
      * git push origin v5.0.5
     => Would run these hooks after push
-    * (1/1) $ tools/publish.sh
+    * (1/1) $ ./publish.sh
     :: Looking good? (y/N)
     y
     => Patching files
@@ -75,7 +75,7 @@ Here's what a typical usage of ``tbump`` looks like:
 Usage
 ------
 
-Frist, run ``tbump init``. This will create a ``tbump.toml`` file looking like this:
+First, run ``tbump init``. This will create a ``tbump.toml`` file looking like this:
 
 .. code-block:: ini
 
@@ -133,7 +133,7 @@ Restricting the lines that are replaced
 +++++++++++++++++++++++++++++++++++++++
 
 
-Sometimes you want to make sure only the line matching a given pattern is replaced. For instance, with the folliwing ``package.json``:
+Sometimes you want to make sure only the line matching a given pattern is replaced. For instance, with the following ``package.json``:
 
 .. code-block:: js
 
@@ -167,7 +167,7 @@ Using a custom version template
 
 If you are using a version schema like ``1.2.3-alpha-4``, you may want to expose a variable that only contains the "public" part of the version string. (``1.2.3`` in this case).
 
-To do so, add a ``version_template`` option in te ``file`` section. The names used in the format string should match the group names in the regular expression.
+To do so, add a ``version_template`` option in the ``file`` section. The names used in the format string should match the group names in the regular expression.
 
 
 .. code-block:: js
