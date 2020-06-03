@@ -31,7 +31,7 @@ Installation
 ------------
 
 
-The recommended way to install ``tbump`` is to use `<pipx> https://pipxproject.github.io/pipx/`_.,
+The recommended way to install ``tbump`` is to use `pipx <https://pipxproject.github.io/pipx/>`_.
 
 * Make sure to have Python **3.5** or later installed.
 * Install ``pipx``
