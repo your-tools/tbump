@@ -30,8 +30,14 @@ tbump: bump software releases
 Installation
 ------------
 
-* Make sure you are using Python **3.5** or later
-* Install ``tbump`` with ``pip`` as usual.
+
+The recommended way to install ``tbump`` is to use `<pipx> https://pipxproject.github.io/pipx/`_.,
+
+* Make sure to have Python **3.5** or later installed.
+* Install ``pipx``
+* Run ``pipx install tbump``.
+
+``tbump`` is also available on ``pypi`` and can be installed with ``pip`` if you know what you are doing.
 
 Screenshot
 -----------
