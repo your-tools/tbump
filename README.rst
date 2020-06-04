@@ -1,6 +1,7 @@
-tbump: bump software releases
-=============================
+.. image::  https://tanker.io/images/github-logo.png
+   :target: #readme
 
+|
 
 .. image:: https://img.shields.io/pypi/v/tbump.svg
   :target: https://pypi.org/project/tbump/
@@ -27,11 +28,14 @@ tbump: bump software releases
    :target: https://mypy-lang.org
 
 
+tbump: bump software releases
+=============================
+
 Installation
 ------------
 
 
-The recommended way to install ``tbump`` is to use `pipx <https://pipxproject.github.io/pipx/>`_.
+The recommended way to install ``tbump`` is to use `pipx <https://pipxproject.github.io/pipx/>`_
 
 * Make sure to have Python **3.5** or later installed.
 * Install ``pipx``
