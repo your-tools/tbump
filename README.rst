@@ -1,4 +1,5 @@
 .. image::  https://tanker.io/images/github-logo.png
+   :width: 180 px
    :target: #readme
 
 |
