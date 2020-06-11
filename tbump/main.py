@@ -1,6 +1,7 @@
 from typing import List, Optional
 import sys
 import textwrap
+import urllib.parse
 
 import attr
 import docopt
@@ -173,6 +174,20 @@ def bump(options: BumpOptions) -> None:
 
     executor.print_self(dry_run=False)
     executor.run()
+
+    if config.github_url:
+        tag_name = git_bumper.get_tag_name(new_version)
+        suggest_creating_github_release(config.github_url, tag_name)
+
+
+def suggest_creating_github_release(github_url: str, tag_name: str) -> None:
+    query_string = urllib.parse.urlencode({"tag": tag_name})
+    if not github_url.endswith("/"):
+        github_url += "/"
+    full_url = github_url + "releases/new?" + query_string
+    ui.info()
+    ui.info("Note: create a new release on GitHub by visiting:")
+    ui.info(ui.tabs(1), full_url)
 
 
 def main(args: Optional[List[str]] = None) -> None:
