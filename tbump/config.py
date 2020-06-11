@@ -20,6 +20,8 @@ class Config:
     files = attr.ib()  # type: List[File]
     hooks = attr.ib()  # type: List[Hook]
 
+    github_url = attr.ib()  # type: Optional[str]
+
 
 @attr.s
 class File:
@@ -87,6 +89,7 @@ def validate_basic_schema(config: Dict[str, Any]) -> Config:
             schema.Optional("before_push"): [hook_schema],  # retro-compat
             schema.Optional("before_commit"): [hook_schema],
             schema.Optional("after_push"): [hook_schema],
+            schema.Optional("github_url"): str,
         }
     )
     return cast(Config, tbump_schema.validate(config))
@@ -146,6 +149,8 @@ def parse(cfg_path: Path) -> Config:
                 hook = cls(hook_dict["name"], hook_dict["cmd"])
                 hooks.append(hook)
 
+    github_url = parsed.get("github_url")
+
     config = Config(
         current_version=current_version,
         version_regex=version_regex,
@@ -153,6 +158,7 @@ def parse(cfg_path: Path) -> Config:
         git_tag_template=git_tag_template,
         files=files,
         hooks=hooks,
+        github_url=github_url,
     )
 
     validate_config(config)

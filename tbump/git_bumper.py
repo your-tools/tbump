@@ -69,6 +69,9 @@ class GitBumper:
         self.remote_branch = ""
         self.commands = []  # type: List[Command]
 
+    def get_tag_name(self, new_version: str) -> str:
+        return self.tag_template.format(new_version=new_version)
+
     def set_config(self, config: Config) -> None:
         self.tag_template = config.git_tag_template
         self.message_template = config.git_message_template
@@ -114,7 +117,7 @@ class GitBumper:
 
     def check_branch_state(self, new_version: str) -> None:
         self.get_current_branch()
-        tag_name = self.tag_template.format(new_version=new_version)
+        tag_name = self.get_tag_name(new_version)
         self.check_ref_does_not_exists(tag_name)
 
         tracking_ref = self.get_tracking_ref()
@@ -129,7 +132,7 @@ class GitBumper:
         self.add_command(res, "add", "--update")
         commit_message = self.message_template.format(new_version=new_version)
         self.add_command(res, "commit", "--message", commit_message)
-        tag_name = self.tag_template.format(new_version=new_version)
+        tag_name = self.get_tag_name(new_version)
         tag_message = tag_name
         self.add_command(res, "tag", "--annotate", "--message", tag_message, tag_name)
         self.add_command(res, "push", self.remote_name, self.remote_branch)
