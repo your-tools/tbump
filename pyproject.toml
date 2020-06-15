@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tbump"
-version = "6.0.7"
+version = "6.1.0"
 description = "Bump software releases"
 authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
