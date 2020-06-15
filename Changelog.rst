@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v6.1.0 (2020-06-15)
+-------------------
+
+* If ``github_url`` is found in the config file, display
+  a link suggesting to create a release on GitHub after
+  the tag is pushed
+
 v6.0.7 (2020-01-28)
 -------------------
 
