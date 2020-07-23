@@ -9,7 +9,7 @@ import tbump.git
 from cli_ui.tests import MessageRecorder
 
 
-@pytest.fixture()
+@pytest.fixture()  # type: ignore
 def message_recorder() -> Iterator[MessageRecorder]:
     res = MessageRecorder()
     res.start()
@@ -17,18 +17,18 @@ def message_recorder() -> Iterator[MessageRecorder]:
     res.stop()
 
 
-@pytest.fixture()
+@pytest.fixture()  # type: ignore
 def tmp_path(tmpdir: Any) -> Path:
     return Path(tmpdir)
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def test_data_path() -> Path:
     this_dir = Path(__file__).abspath().parent
     return this_dir / "data"
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True, scope="session")  # type: ignore
 def restore_cwd() -> Iterator[None]:
     old_cwd = os.getcwd()
     yield
@@ -67,7 +67,7 @@ def setup_remote(tmp_path: Path) -> Path:
     return src_path
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def test_repo(tmp_path: Path, test_data_path: Path) -> Path:
     res = setup_repo(tmp_path, test_data_path)
     setup_remote(tmp_path)
