@@ -21,7 +21,6 @@ class ChangeRequest:
 
 
 class Patch(tbump.action.Action):
-    # pylint: disable=too-many-arguments
     def __init__(
         self, working_path: Path, src: str, lineno: int, old_line: str, new_line: str
     ):

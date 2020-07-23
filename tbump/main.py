@@ -62,7 +62,6 @@ class Cancelled(tbump.Error):
         ui.error("Cancelled by user")
 
 
-# pylint: disable=too-few-public-methods
 @attr.s
 class BumpOptions:
     working_path = attr.ib()  # type: Path
