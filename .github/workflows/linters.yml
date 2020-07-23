@@ -24,4 +24,4 @@ jobs:
 
     - name: Run linters
       run: |
-        python -m poetry run python lint.py
+        ./lint.sh
