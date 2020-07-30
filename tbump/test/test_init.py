@@ -16,7 +16,7 @@ def test_creates_config(test_repo: Path) -> None:
     tbump.main.main(["-C", test_repo, "init", current_version])
 
     assert tbump_path.exists()
-    config = tomlkit.loads(tbump_path.text())
+    config = tomlkit.loads(tbump_path.read_text())
     assert config["version"]["current"] == "1.2.41-alpha1"
 
 

@@ -38,7 +38,7 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
     package_json = test_repo / "package.json"
 
     # Make sure package.json contain CRLF line endings
-    lines = package_json.lines(retain=False)
+    lines = package_json.read_text().splitlines(keepends=False)
     package_json.write_text("\r\n".join(lines), linesep=None)
 
     bumper.set_config(config)

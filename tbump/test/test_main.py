@@ -13,7 +13,7 @@ import tbump.git
 
 def files_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.text())
+    new_toml = tomlkit.loads(toml_path.read_text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-2"
 
     return all(
@@ -27,7 +27,7 @@ def files_bumped(test_repo: Path) -> bool:
 
 def files_not_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.text())
+    new_toml = tomlkit.loads(toml_path.read_text())
     assert new_toml["version"]["current"] == "1.2.41-alpha-1"
 
     return all(
@@ -172,7 +172,7 @@ def test_tbump_toml_bad_syntax(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     toml_path = test_repo / "tbump.toml"
-    bad_toml = tomlkit.loads(toml_path.text())
+    bad_toml = tomlkit.loads(toml_path.read_text())
     del bad_toml["git"]
     toml_path.write_text(tomlkit.dumps(bad_toml))
     with pytest.raises(SystemExit):
@@ -291,7 +291,7 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 
 def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) -> None:
     toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.text())
+    new_toml = tomlkit.loads(toml_path.read_text())
     new_toml["file"][0]["version_template"] = "{release}"
     toml_path.write_text(tomlkit.dumps(new_toml))
     tbump.git.run_git(test_repo, "add", ".")

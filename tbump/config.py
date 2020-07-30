@@ -126,7 +126,7 @@ def validate_config(cfg: Config) -> None:
 
 
 def parse(cfg_path: Path) -> Config:
-    parsed = tomlkit.loads(cfg_path.text())
+    parsed = tomlkit.loads(cfg_path.read_text())
     parsed = validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]
