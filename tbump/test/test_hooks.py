@@ -13,7 +13,7 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
 
     """
     cfg_path = test_repo / "tbump.toml"
-    parsed = tomlkit.loads(cfg_path.text())
+    parsed = tomlkit.loads(cfg_path.read_text())
     if after_push:
         key = "after_push"
     else:
@@ -65,7 +65,7 @@ def test_working_hook(test_repo: Path) -> None:
     add_before_hook(test_repo)
     tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
     hook_stamp = test_repo / "before-hook.stamp"
-    assert hook_stamp.text() == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
+    assert hook_stamp.read_text() == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
 
 
 def test_hook_fails(test_repo: Path) -> None:
