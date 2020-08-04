@@ -8,7 +8,7 @@ from tbump.git_bumper import GitBumper
 import pytest
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_git_bumper(test_repo: Path) -> GitBumper:
     config = tbump.config.parse(test_repo / "tbump.toml")
     git_bumper = tbump.git_bumper.GitBumper(test_repo)

@@ -18,7 +18,7 @@ tomlkit = "^0.5.8"
 
 [tool.poetry.dev-dependencies]
 black = { version = "19.10b0", python = '^3.6' }
-pytest = "^5.3.5"
+pytest = "^6.0.1"
 pytest-mock = "^2.0.0"
 pytest-cov = "^2.8.1"
 codecov = "^2.0.15"
