@@ -50,7 +50,7 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
         assert expected_message in error.args[0]
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_config(test_data_path: Path) -> Config:
     return tbump.config.parse(test_data_path / "tbump.toml")
 
