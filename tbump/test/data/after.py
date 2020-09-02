@@ -1,4 +1,4 @@
-""" Fake hook used for tetsting.
+""" Fake hook used for testing.
 Just write a file named after-hook.stamp when called,
 so that test code can check if the hook ran
 """
