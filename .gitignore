@@ -1,3 +1,5 @@
+.envrc
+.venv
 .coverage
 htmlcov
 *.egg-info
