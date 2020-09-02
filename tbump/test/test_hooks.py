@@ -12,18 +12,20 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     """ Patch the configuration file so that we can also test hooks.
 
     """
-    cfg_path = test_repo / "tbump.toml"
+    cfg_path = test_repo / "pyproject.toml"
     parsed = tomlkit.loads(cfg_path.text())
     if after_push:
         key = "after_push"
     else:
         key = "before_commit"
-    if key not in parsed:
-        parsed[key] = tomlkit.aot()
+    if key not in parsed["tool"]["tbump"]:
+        parsed["tool"]["tbump"][key] = tomlkit.aot()
     hook_config = tomlkit.table()
     hook_config.add("cmd", cmd)
     hook_config.add("name", name)
-    parsed[key].append(hook_config)
+    parsed["tool"]["tbump"][key].append(hook_config)
+    from pprint import pprint
+    pprint(parsed)
 
     cfg_path.write_text(tomlkit.dumps(parsed))
     tbump.git.run_git(test_repo, "add", ".")

@@ -34,3 +34,39 @@ tbump = "tbump.main:main"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+
+[tool.tbump.version]
+current = "6.1.1"
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  '''
+
+[tool.tbump.git]
+message_template  = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+search = 'version = "{current_version}"'
+
+
+[[tool.tbump.file]]
+src = "tbump/main.py"
+
+[[tool.tbump.before_commit]]
+name = "Run CI"
+cmd = "./lint.sh && poetry run pytest"
+
+[[tool.tbump.before_commit]]
+name = "Check Changelog"
+cmd = "grep -q {new_version} Changelog.rst"
+
+[[tool.tbump.after_push]]
+name = "Publish to pypi"
+cmd = "tools/publish.sh"

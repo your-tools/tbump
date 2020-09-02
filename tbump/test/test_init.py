@@ -9,7 +9,7 @@ from cli_ui.tests import MessageRecorder
 
 
 def test_creates_config(test_repo: Path) -> None:
-    tbump_path = test_repo / "tbump.toml"
+    tbump_path = test_repo / "pyproject.toml"
     tbump_path.remove()
     current_version = "1.2.41-alpha1"
 
@@ -17,10 +17,10 @@ def test_creates_config(test_repo: Path) -> None:
 
     assert tbump_path.exists()
     config = tomlkit.loads(tbump_path.text())
-    assert config["version"]["current"] == "1.2.41-alpha1"
+    assert config["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha1"
 
 
-def test_abort_if_tbump_toml_exists(
+def test_abort_if_pyproject_toml_exists(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     with pytest.raises(SystemExit):

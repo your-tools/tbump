@@ -105,7 +105,7 @@ def run(cmd: List[str]) -> None:
 
 
 def parse_config(working_path: Path) -> Config:
-    tbump_path = working_path / "tbump.toml"
+    tbump_path = working_path / "pyproject.toml"
     try:
         config = tbump.config.parse(tbump_path)
     except IOError as io_error:

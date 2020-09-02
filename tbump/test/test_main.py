@@ -12,9 +12,9 @@ import tbump.git
 
 
 def files_bumped(test_repo: Path) -> bool:
-    toml_path = test_repo / "tbump.toml"
+    toml_path = test_repo / "pyproject.toml"
     new_toml = tomlkit.loads(toml_path.text())
-    assert new_toml["version"]["current"] == "1.2.41-alpha-2"
+    assert new_toml["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha-2"
 
     return all(
         (
@@ -26,9 +26,9 @@ def files_bumped(test_repo: Path) -> bool:
 
 
 def files_not_bumped(test_repo: Path) -> bool:
-    toml_path = test_repo / "tbump.toml"
+    toml_path = test_repo / "pyproject.toml"
     new_toml = tomlkit.loads(toml_path.text())
-    assert new_toml["version"]["current"] == "1.2.41-alpha-1"
+    assert new_toml["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha-1"
 
     return all(
         (
@@ -158,22 +158,22 @@ def test_on_outdated_branch(test_repo: Path) -> None:
     assert not tag_pushed(test_repo)
 
 
-def test_tbump_toml_not_found(
+def test_pyproject_toml_not_found(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
-    toml_path = test_repo / "tbump.toml"
+    toml_path = test_repo / "pyproject.toml"
     toml_path.remove()
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
     assert message_recorder.find("No such file")
 
 
-def test_tbump_toml_bad_syntax(
+def test_pyproject_toml_bad_syntax(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
-    toml_path = test_repo / "tbump.toml"
+    toml_path = test_repo / "pyproject.toml"
     bad_toml = tomlkit.loads(toml_path.text())
-    del bad_toml["git"]
+    del bad_toml["tool"]["tbump"]["git"]
     toml_path.write_text(tomlkit.dumps(bad_toml))
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
@@ -235,10 +235,10 @@ def test_abort_if_file_does_not_match(
 ) -> None:
     invalid_src = test_repo / "foo.txt"
     invalid_src.write_text("this is foo")
-    tbump_path = test_repo / "tbump.toml"
+    tbump_path = test_repo / "pyproject.toml"
     tbump_path.write_text(
         """\
-    [[file]]
+    [[tool.tbump.file]]
     src = "foo.txt"
     """,
         append=True,
@@ -290,9 +290,9 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 
 
 def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) -> None:
-    toml_path = test_repo / "tbump.toml"
+    toml_path = test_repo / "pyproject.toml"
     new_toml = tomlkit.loads(toml_path.text())
-    new_toml["file"][0]["version_template"] = "{release}"
+    new_toml["tool"]["tbump"]["file"][0]["version_template"] = "{release}"
     toml_path.write_text(tomlkit.dumps(new_toml))
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update repo")

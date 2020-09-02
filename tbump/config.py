@@ -92,7 +92,8 @@ def validate_basic_schema(config: Dict[str, Any]) -> Config:
             schema.Optional("github_url"): str,
         }
     )
-    return cast(Config, tbump_schema.validate(config))
+    validated_config = tbump_schema.validate(config)
+    return cast(Config, validated_config)
 
 
 def validate_config(cfg: Config) -> None:
@@ -126,7 +127,19 @@ def validate_config(cfg: Config) -> None:
 
 
 def parse(cfg_path: Path) -> Config:
-    parsed = tomlkit.loads(cfg_path.text())
+    # tbump.toml used to contain "flat" keys while pyproject.toml contains nested keys.
+    # For example:
+    #
+    #       [[file]]
+    # vs
+    #       [[tool.tbump.file]]
+    #
+    # In order to minimize the number of changes that are needed for this switch
+    # we parse `pyproject.toml` and use it to create a new `tomlkit.Document()` with
+    # a flat structure
+    parsed_pyproject = tomlkit.loads(cfg_path.text())["tool"]["tbump"]
+    parsed = tomlkit.document()
+    parsed.update(parsed_pyproject)
     parsed = validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]

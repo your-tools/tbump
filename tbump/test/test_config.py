@@ -12,7 +12,7 @@ from tbump.config import Config
 
 
 def test_happy_parse(test_data_path: Path) -> None:
-    config = tbump.config.parse(test_data_path / "tbump.toml")
+    config = tbump.config.parse(test_data_path / "pyproject.toml")
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
     )
@@ -52,7 +52,7 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 @pytest.fixture  # type: ignore
 def test_config(test_data_path: Path) -> Config:
-    return tbump.config.parse(test_data_path / "tbump.toml")
+    return tbump.config.parse(test_data_path / "pyproject.toml")
 
 
 def test_invalid_commit_message(test_config: Config) -> None:
@@ -83,15 +83,15 @@ def test_current_version_does_not_match_expected_regex(test_config: Config) -> N
 def test_invalid_regex() -> None:
     contents = textwrap.dedent(
         r"""
-        [version]
+        [tool.tbump.version]
         current = '1.42a1'
         regex = '(unbalanced'
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "VERSION"
         """
     )
@@ -112,25 +112,25 @@ def test_invalid_custom_template(test_config: Config) -> None:
 
 
 def test_parse_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
+    toml_path = tmp_path / "pyproject.toml"
     toml_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "pub.js"
 
-        [[before_commit]]
+        [[tool.tbump.before_commit]]
         name = "Check changelog"
         cmd = "grep -q {new_version} Changelog.md"
 
-        [[after_push]]
+        [[tool.tbump.after_push]]
         name = "After push"
         cmd = "cargo publish"
     """
@@ -148,25 +148,25 @@ def test_parse_hooks(tmp_path: Path) -> None:
 
 
 def test_retro_compat_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
+    toml_path = tmp_path / "pyproject.toml"
     toml_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "pub.js"
 
-        [[hook]]
+        [[tool.tbump.hook]]
         name = "very old name"
         cmd = "old command"
 
-        [[before_push]]
+        [[tool.tbump.before_push]]
         name = "deprecated name"
         cmd = "deprecated command"
       """

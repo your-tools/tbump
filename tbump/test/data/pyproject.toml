@@ -1,4 +1,4 @@
-[version]
+[tool.tbump.version]
 current = "1.2.41-alpha-1"
 regex = '''
   (?P<major>\d+)
@@ -14,21 +14,21 @@ regex = '''
   )?
   '''
 
-[git]
+[tool.tbump.git]
 message_template = "Bump to {new_version}"
 tag_template = "v{new_version}"
 
-[[file]]
+[[tool.tbump.file]]
 src = "package.json"
 search = '"version": "{current_version}"'
 
-[[file]]
+[[tool.tbump.file]]
 src = "VERSION"
 
-[[file]]
+[[tool.tbump.file]]
 src = "pub.js"
 version_template = "{major}.{minor}.{patch}"
 
-[[file]]
+[[tool.tbump.file]]
 src = "glob*.?"
 search = 'version_[a-z]+ = "{current_version}"'

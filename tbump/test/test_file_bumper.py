@@ -7,7 +7,7 @@ from tbump.test.conftest import file_contains
 
 def test_file_bumper_simple(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
-    config = tbump.config.parse(test_repo / "tbump.toml")
+    config = tbump.config.parse(test_repo / "pyproject.toml")
     assert bumper.working_path == test_repo
     bumper.set_config(config)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
@@ -34,7 +34,7 @@ def test_patcher_preserve_endings(tmp_path: Path) -> None:
 
 def test_file_bumper_preserve_endings(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
-    config = tbump.config.parse(test_repo / "tbump.toml")
+    config = tbump.config.parse(test_repo / "pyproject.toml")
     package_json = test_repo / "package.json"
 
     # Make sure package.json contain CRLF line endings
@@ -51,10 +51,10 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
 
 
 def test_looking_for_empty_groups(tmp_path: Path) -> None:
-    tbump_path = tmp_path / "tbump.toml"
+    tbump_path = tmp_path / "pyproject.toml"
     tbump_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2"
         regex = '''
             (?P<major>\d+)
@@ -66,11 +66,11 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
             )?
         '''
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "foo"
         version_template = "{major}.{minor}.{patch}"
 
@@ -92,18 +92,18 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
 
 
 def test_current_version_not_found(tmp_path: Path) -> None:
-    tbump_path = tmp_path / "tbump.toml"
+    tbump_path = tmp_path / "pyproject.toml"
     tbump_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2.3"
         regex = ".*"
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "version.txt"
         """
     )
@@ -119,10 +119,10 @@ def test_current_version_not_found(tmp_path: Path) -> None:
 
 
 def test_replacing_with_empty_groups(tmp_path: Path) -> None:
-    tbump_path = tmp_path / "tbump.toml"
+    tbump_path = tmp_path / "pyproject.toml"
     tbump_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2.3"
         regex = '''
             (?P<major>\d+)
@@ -134,11 +134,11 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
             )?
         '''
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "foo"
         version_template = "{major}.{minor}.{patch}"
 
@@ -160,10 +160,10 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
 
 
 def test_changing_same_file_twice(tmp_path: Path) -> None:
-    tbump_path = tmp_path / "tbump.toml"
+    tbump_path = tmp_path / "pyproject.toml"
     tbump_path.write_text(
         r"""
-        [version]
+        [tool.tbump.version]
         current = "1.2.3"
         regex = '''
             (?P<major>\d+)
@@ -175,16 +175,16 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
             )?
         '''
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "foo.c"
         version_template = "{major}.{minor}"
         search = "PUBLIC_VERSION"
 
-        [[file]]
+        [[tool.tbump.file]]
         src = "foo.c"
         search = "FULL_VERSION"
 

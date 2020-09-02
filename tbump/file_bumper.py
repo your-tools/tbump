@@ -193,7 +193,7 @@ class FileBumper:
         self.new_groups = self.parse_version(self.new_version)
         change_requests = self.compute_change_requests()
         tbump_toml_change = ChangeRequest(
-            "tbump.toml", self.current_version, new_version
+            "pyproject.toml", self.current_version, new_version
         )
         change_requests.append(tbump_toml_change)
         patches = []
@@ -272,7 +272,7 @@ class FileBumper:
 def bump_files(new_version: str, repo_path: Path = None) -> None:
     repo_path = repo_path or Path(".")
     bumper = FileBumper(repo_path)
-    cfg = tbump.config.parse(repo_path / "tbump.toml")
+    cfg = tbump.config.parse(repo_path / "pyproject.toml")
     bumper.set_config(cfg)
     patches = bumper.get_patches(new_version=new_version)
     n = len(patches)

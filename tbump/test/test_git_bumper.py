@@ -10,7 +10,7 @@ import pytest
 
 @pytest.fixture  # type: ignore
 def test_git_bumper(test_repo: Path) -> GitBumper:
-    config = tbump.config.parse(test_repo / "tbump.toml")
+    config = tbump.config.parse(test_repo / "pyproject.toml")
     git_bumper = tbump.git_bumper.GitBumper(test_repo)
     git_bumper.set_config(config)
     return git_bumper

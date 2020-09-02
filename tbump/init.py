@@ -20,17 +20,18 @@ def find_files(working_path: Path, current_version: str) -> List[str]:
 
 
 def init(working_path: Path, *, current_version: str) -> None:
-    """ Interactively creates a new tbump.toml """
+    """ Interactively creates a new pyproject.toml """
     ui.info_1("Generating tbump config file")
-    tbump_path = working_path / "tbump.toml"
+    tbump_path = working_path / "pyproject.toml"
     if tbump_path.exists():
         ui.fatal(tbump_path, "already exists")
     template = textwrap.dedent(
         """\
         # Uncomment this if your project is hosted on GitHub:
+        # [tool.tbump]
         # github_url = https://github.com/<user or organization>/<project>/
 
-        [version]
+        [tool.tbump.version]
         current = "@current_version@"
 
         # Example of a semver regexp.
@@ -44,7 +45,7 @@ def init(working_path: Path, *, current_version: str) -> None:
           (?P<patch>\\d+)
           '''
 
-        [git]
+        [tool.tbump.git]
         message_template = "Bump to {new_version}"
         tag_template = "v{new_version}"
      """
@@ -53,9 +54,9 @@ def init(working_path: Path, *, current_version: str) -> None:
     file_template = textwrap.dedent(
         """
         # For each file to patch, add a [[file]] config section containing
-        # the path of the file, relative to the tbump.toml location.
-        [[file]]
-        src = "..."
+        # the path of the file, relative to the pyproject.toml location.
+        [[tool.tbump.file]]
+        src = "pyproject.toml"
     """
     )
 
@@ -81,4 +82,4 @@ def init(working_path: Path, *, current_version: str) -> None:
     to_write += file_template
     to_write += hooks_template
     tbump_path.write_text(to_write)
-    ui.info_2(ui.check, "Generated tbump.toml")
+    ui.info_2(ui.check, "Generated pyproject.toml")
