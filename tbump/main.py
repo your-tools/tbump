@@ -25,7 +25,7 @@ USAGE = textwrap.dedent(
     """
 Usage:
   tbump [options] <new_version>
-  tbump [options] init <current_version>
+  tbump [options] init [--use-pyproject] <current_version>
   tbump --help
   tbump --version
 
@@ -33,6 +33,7 @@ Options:
    -h --help          Show this screen.
    -v --version       Show version.
    -C --cwd=<path>    Set working directory to <path>.
+   --use-pyproject    Use pyproject.toml as the configuration file [Default: False].
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
@@ -89,8 +90,11 @@ def run(cmd: List[str]) -> None:
         working_path = Path.getcwd()
 
     if opt_dict["init"]:
+        use_pyproject = opt_dict["--use-pyproject"]
         current_version = opt_dict["<current_version>"]
-        tbump.init.init(working_path, current_version=current_version)
+        tbump.init.init(
+            working_path, current_version=current_version, use_pyproject=use_pyproject
+        )
         return
 
     new_version = opt_dict["<new_version>"]

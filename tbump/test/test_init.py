@@ -20,6 +20,18 @@ def test_creates_config(test_repo: Path) -> None:
     assert config["version"]["current"] == "1.2.41-alpha1"
 
 
+def test_creates_config_pyproject(test_repo: Path) -> None:
+    tbump_path = test_repo / "pyproject.toml"
+    tbump_path.remove()
+    current_version = "1.2.41-alpha1"
+
+    tbump.main.main(["-C", test_repo, "init", "--use-pyproject", current_version])
+
+    assert tbump_path.exists()
+    config = tomlkit.loads(tbump_path.read_text())
+    assert config["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha1"
+
+
 def test_abort_if_tbump_toml_exists(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
