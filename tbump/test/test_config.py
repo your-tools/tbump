@@ -1,9 +1,7 @@
-import textwrap
 import re
 
 from path import Path
 import schema
-import tomlkit
 import pytest
 
 from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
@@ -20,7 +18,7 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 
 @pytest.fixture(params=["tbump.toml", "pyproject.toml"])
-def test_config(request, test_data_path: Path) -> Config:
+def test_config(request, test_data_path: Path) -> Config:  # type: ignore
     return tbump.config.parse(test_data_path / request.param)
 
 
@@ -89,51 +87,99 @@ def test_current_version_does_not_match_expected_regex(test_config: Config) -> N
     )
 
 
-def test_invalid_regex() -> None:
-    contents = textwrap.dedent(
-        r"""
-        [version]
+# --------------------------------------------
+
+INVALID_REGEX_CONFIG_TEMPLATE = r"""
+        [@key_prefix@version]
         current = '1.42a1'
         regex = '(unbalanced'
 
-        [git]
+        [@key_prefix@git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[@key_prefix@file]]
         src = "VERSION"
-        """
-    )
-    data = tomlkit.loads(contents)
+"""
+
+
+@pytest.fixture()
+def invalid_regex_tbump_toml_config() -> str:
+    return INVALID_REGEX_CONFIG_TEMPLATE.replace("@key_prefix@", "")
+
+
+@pytest.fixture()
+def invalid_regex_pyproject_toml_config() -> str:
+    return INVALID_REGEX_CONFIG_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
+
+
+@pytest.mark.parametrize(
+    "config_filename,config_contents",
+    # fmt: off
+    [
+        pytest.param("tbump.toml", pytest.lazy_fixture("invalid_regex_tbump_toml_config"), id="tbump.toml"),  # type: ignore  # noqa
+        pytest.param("pyproject.toml", pytest.lazy_fixture("invalid_regex_pyproject_toml_config"), id="pyproject.toml")  # type: ignore  # noqa
+    ]
+    # fmt: on
+)
+def test_invalid_regex(
+    tmp_path: Path, config_filename: str, config_contents: str
+) -> None:
+    toml_path = tmp_path / config_filename
+    toml_path.write_text(config_contents)
     with pytest.raises(schema.SchemaError) as e:
-        tbump.config.validate_basic_schema(data)
+        tbump.config.parse(toml_path)
     print(e)
 
 
-def test_parse_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(
-        r"""
-        [version]
+# --------------------------------------------
+
+HOOK_TEMPLATE = r"""
+        [@key_prefix@version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 
-        [git]
+        [@key_prefix@git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[@key_prefix@file]]
         src = "pub.js"
 
-        [[before_commit]]
+        [[@key_prefix@before_commit]]
         name = "Check changelog"
         cmd = "grep -q {new_version} Changelog.md"
 
-        [[after_push]]
+        [[@key_prefix@after_push]]
         name = "After push"
         cmd = "cargo publish"
-    """
-    )
+"""
+
+
+@pytest.fixture()
+def hook_tbump_toml_config() -> str:
+    return HOOK_TEMPLATE.replace("@key_prefix@", "")
+
+
+@pytest.fixture()
+def hook_pyproject_toml_config() -> str:
+    return HOOK_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
+
+
+@pytest.mark.parametrize(
+    "config_filename,config_contents",
+    # fmt: off
+    [
+        pytest.param("tbump.toml", pytest.lazy_fixture("hook_tbump_toml_config"), id="tbump.toml"),  # type: ignore  # noqa
+        pytest.param("pyproject.toml", pytest.lazy_fixture("hook_pyproject_toml_config"), id="pyproject.toml"),  # type: ignore  # noqa
+    ]
+    # fmt: on
+)
+def test_parse_hooks(
+    tmp_path: Path, config_filename: str, config_contents: str
+) -> None:
+    toml_path = tmp_path / config_filename
+    toml_path.write_text(config_contents)
     config = tbump.config.parse(toml_path)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
@@ -146,30 +192,54 @@ def test_parse_hooks(tmp_path: Path) -> None:
     assert isinstance(second_hook, expected_class)
 
 
-def test_retro_compat_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(
-        r"""
-        [version]
+# --------------------------------------------
+
+RETRO_COMPAT_HOOK_CONFIG_TEMPLATE = r"""
+        [@key_prefix@version]
         current = "1.2.3"
         regex = '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 
-        [git]
+        [@key_prefix@git]
         message_template = "Bump to  {new_version}"
         tag_template = "v{new_version}"
 
-        [[file]]
+        [[@key_prefix@file]]
         src = "pub.js"
 
-        [[hook]]
+        [[@key_prefix@hook]]
         name = "very old name"
         cmd = "old command"
 
-        [[before_push]]
+        [[@key_prefix@before_push]]
         name = "deprecated name"
         cmd = "deprecated command"
-      """
-    )
+"""
+
+
+@pytest.fixture()
+def retro_hook_compat_tbump_toml_config() -> str:
+    return RETRO_COMPAT_HOOK_CONFIG_TEMPLATE.replace("@key_prefix@", "")
+
+
+@pytest.fixture()
+def retro_hook_compat_pyproject_toml_config() -> str:
+    return RETRO_COMPAT_HOOK_CONFIG_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
+
+
+@pytest.mark.parametrize(
+    "config_filename,config_contents",
+    # fmt: off
+    [
+        pytest.param("tbump.toml", pytest.lazy_fixture("retro_hook_compat_tbump_toml_config"), id="tbump.toml"),  # type: ignore  # noqa
+        pytest.param("pyproject.toml", pytest.lazy_fixture("retro_hook_compat_pyproject_toml_config"), id="pyproject.toml"),  # type: ignore  # noqa
+    ]
+    # fmt: on
+)
+def test_retro_compat_hooks(
+    tmp_path: Path, config_filename: str, config_contents: str
+) -> None:
+    toml_path = tmp_path / config_filename
+    toml_path.write_text(config_contents)
     config = tbump.config.parse(toml_path)
     first_hook = config.hooks[0]
     assert isinstance(first_hook, tbump.hooks.BeforeCommitHook)
