@@ -113,7 +113,7 @@ def invalid_regex_pyproject_toml_config() -> str:
     return INVALID_REGEX_CONFIG_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
 
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize(  # type: ignore
     "config_filename,config_contents",
     # fmt: off
     [
@@ -166,7 +166,7 @@ def hook_pyproject_toml_config() -> str:
     return HOOK_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
 
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize(  # type: ignore
     "config_filename,config_contents",
     # fmt: off
     [
@@ -226,7 +226,7 @@ def retro_hook_compat_pyproject_toml_config() -> str:
     return RETRO_COMPAT_HOOK_CONFIG_TEMPLATE.replace("@key_prefix@", "tool.tbump.")
 
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize(  # type: ignore
     "config_filename,config_contents",
     # fmt: off
     [
