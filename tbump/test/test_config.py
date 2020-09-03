@@ -11,8 +11,12 @@ import tbump.config
 from tbump.config import Config
 
 
-def test_happy_parse(test_data_path: Path) -> None:
-    config = tbump.config.parse(test_data_path / "tbump.toml")
+@pytest.fixture
+def test_config(test_data_path: Path) -> Config:
+    return tbump.config.parse(test_data_path / "tbump.toml")
+
+
+def test_happy_parse(test_config: Config) -> None:
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
     )
@@ -35,11 +39,11 @@ def test_happy_parse(test_data_path: Path) -> None:
   )?
   """
 
-    assert config.version_regex.pattern == expected_pattern
+    assert test_config.version_regex.pattern == expected_pattern
 
-    assert config.files == [foo_json, version_txt, pub_js, glob]
+    assert test_config.files == [foo_json, version_txt, pub_js, glob]
 
-    assert config.current_version == "1.2.41-alpha-1"
+    assert test_config.current_version == "1.2.41-alpha-1"
 
 
 def assert_validation_error(config: Config, expected_message: str) -> None:
@@ -48,11 +52,6 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
         assert False, "shoud have raise schema error"
     except schema.SchemaError as error:
         assert expected_message in error.args[0]
-
-
-@pytest.fixture
-def test_config(test_data_path: Path) -> Config:
-    return tbump.config.parse(test_data_path / "tbump.toml")
 
 
 def test_invalid_commit_message(test_config: Config) -> None:
