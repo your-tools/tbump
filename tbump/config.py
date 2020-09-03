@@ -125,8 +125,34 @@ def validate_config(cfg: Config) -> None:
         validate_hook_cmd(hook.cmd)
 
 
-def parse(cfg_path: Path) -> Config:
+def parse_tbump_toml(cfg_path: Path) -> Any:
     parsed = tomlkit.loads(cfg_path.read_text())
+    return parsed
+
+
+def parse_pyproject_toml(cfg_path: Path) -> Any:
+    # tbump.toml used to contain "flat" keys while pyproject.toml contains nested keys.
+    # For example:
+    #
+    #       [[file]]
+    # vs
+    #       [[tool.tbump.file]]
+    #
+    # In order to minimize the number of changes that are needed for this switch
+    # we parse `pyproject.toml` and use it to create a new `tomlkit.Document()` with
+    # a flat structure
+    # TODO handle KeyErrors when "tool" and "tbump" are missing.
+    parsed_pyproject = tomlkit.loads(cfg_path.text())["tool"]["tbump"]
+    parsed = tomlkit.document()
+    parsed.update(parsed_pyproject)
+    return parsed
+
+
+def parse(cfg_path: Path) -> Config:
+    if cfg_path.name == "pyproject.toml":
+        parsed = parse_pyproject_toml(cfg_path)
+    else:
+        parsed = parse_tbump_toml(cfg_path)
     parsed = validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]

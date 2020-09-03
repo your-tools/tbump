@@ -1,0 +1,34 @@
+[tool.tbump.version]
+current = "1.2.41-alpha-1"
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (
+    -
+    (?P<channel>alpha|beta)
+    -
+    (?P<release>\d+)
+  )?
+  '''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.file]]
+src = "package.json"
+search = '"version": "{current_version}"'
+
+[[tool.tbump.file]]
+src = "VERSION"
+
+[[tool.tbump.file]]
+src = "pub.js"
+version_template = "{major}.{minor}.{patch}"
+
+[[tool.tbump.file]]
+src = "glob*.?"
+search = 'version_[a-z]+ = "{current_version}"'

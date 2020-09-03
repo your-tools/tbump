@@ -11,9 +11,9 @@ import tbump.config
 from tbump.config import Config
 
 
-@pytest.fixture
-def test_config(test_data_path: Path) -> Config:
-    return tbump.config.parse(test_data_path / "tbump.toml")
+@pytest.fixture(params=["tbump.toml", "pyproject.toml"])
+def test_config(request, test_data_path: Path) -> Config:
+    return tbump.config.parse(test_data_path / request.param)
 
 
 def test_happy_parse(test_config: Config) -> None:
