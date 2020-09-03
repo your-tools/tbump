@@ -11,6 +11,14 @@ import tbump.config
 from tbump.config import Config
 
 
+def assert_validation_error(config: Config, expected_message: str) -> None:
+    try:
+        tbump.config.validate_config(config)
+        assert False, "shoud have raise schema error"
+    except schema.SchemaError as error:
+        assert expected_message in error.args[0]
+
+
 @pytest.fixture(params=["tbump.toml", "pyproject.toml"])
 def test_config(request, test_data_path: Path) -> Config:
     return tbump.config.parse(test_data_path / request.param)
@@ -46,12 +54,14 @@ def test_happy_parse(test_config: Config) -> None:
     assert test_config.current_version == "1.2.41-alpha-1"
 
 
-def assert_validation_error(config: Config, expected_message: str) -> None:
-    try:
-        tbump.config.validate_config(config)
-        assert False, "shoud have raise schema error"
-    except schema.SchemaError as error:
-        assert expected_message in error.args[0]
+def test_invalid_custom_template(test_config: Config) -> None:
+    first_file = test_config.files[0]
+    first_file.src = "pub.js"
+    first_file.version_template = "{major}.{minor}.{no_such_group}"
+    assert_validation_error(
+        test_config,
+        "version template for 'pub.js' contains unknown group: 'no_such_group'",
+    )
 
 
 def test_invalid_commit_message(test_config: Config) -> None:
@@ -98,16 +108,6 @@ def test_invalid_regex() -> None:
     with pytest.raises(schema.SchemaError) as e:
         tbump.config.validate_basic_schema(data)
     print(e)
-
-
-def test_invalid_custom_template(test_config: Config) -> None:
-    first_file = test_config.files[0]
-    first_file.src = "pub.js"
-    first_file.version_template = "{major}.{minor}.{no_such_group}"
-    assert_validation_error(
-        test_config,
-        "version template for 'pub.js' contains unknown group: 'no_such_group'",
-    )
 
 
 def test_parse_hooks(tmp_path: Path) -> None:
