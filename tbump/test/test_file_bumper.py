@@ -39,10 +39,11 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
 
     # Make sure package.json contain CRLF line endings
     lines = package_json.read_text().splitlines(keepends=False)
-    package_json.write_text("\r\n".join(lines))
+    package_json.write_bytes(b"\r\n".join([x.encode() for x in lines]))
 
     bumper.set_config(config)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
+    assert patches
     for patch in patches:
         patch.apply()
 
