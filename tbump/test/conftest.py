@@ -1,7 +1,8 @@
+import shutil
 from typing import Any, Iterator
 import os
 
-from path import Path
+from pathlib import Path
 import pytest
 
 import tbump.git
@@ -24,7 +25,7 @@ def tmp_path(tmpdir: Any) -> Path:
 
 @pytest.fixture
 def test_data_path() -> Path:
-    this_dir = Path(__file__).abspath().parent
+    this_dir = Path(__file__).absolute().parent
     return this_dir / "data"
 
 
@@ -44,7 +45,7 @@ def file_contains(path: Path, text: str) -> bool:
 
 def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
     src_path = tmp_path / "src"
-    test_data_path.copytree(src_path)
+    shutil.copytree(test_data_path, src_path)
     tbump.git.run_git(src_path, "init")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
@@ -62,7 +63,7 @@ def setup_remote(tmp_path: Path) -> Path:
     tbump.git.run_git(remote_path, "init", "--bare")
 
     src_path = tmp_path / "src"
-    tbump.git.run_git(src_path, "remote", "add", "origin", remote_path)
+    tbump.git.run_git(src_path, "remote", "add", "origin", str(remote_path))
     tbump.git.run_git(src_path, "push", "-u", "origin", "master")
     return src_path
 

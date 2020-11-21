@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from path import Path
+from pathlib import Path
 import cli_ui as ui
 
 import tbump.action
@@ -56,8 +56,7 @@ class Command(tbump.action.Action):
         self.run()
 
     def run(self) -> None:
-        full_args = [self.repo_path] + self.cmd
-        return tbump.git.run_git(*full_args, verbose=False)
+        return tbump.git.run_git(self.repo_path, *self.cmd, verbose=False)
 
 
 class GitBumper:
@@ -77,12 +76,10 @@ class GitBumper:
         self.message_template = config.git_message_template
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
-        full_args = [self.repo_path] + list(args)
-        return tbump.git.run_git(*full_args, verbose=verbose)
+        return tbump.git.run_git(self.repo_path, *args, verbose=verbose)
 
     def run_git_captured(self, *args: str, check: bool = True) -> Tuple[int, str]:
-        full_args = [self.repo_path] + list(args)
-        return tbump.git.run_git_captured(*full_args, check=check)
+        return tbump.git.run_git_captured(self.repo_path, *args, check=check)
 
     def check_dirty(self) -> None:
         _, out = self.run_git_captured("status", "--porcelain")

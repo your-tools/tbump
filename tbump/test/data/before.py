@@ -4,7 +4,7 @@ so that test code can check if the hook ran
 """
 
 import sys
-from path import Path
+from pathlib import Path
 
 
 def main() -> None:

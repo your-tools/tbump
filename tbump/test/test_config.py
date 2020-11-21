@@ -1,7 +1,7 @@
 import textwrap
 import re
 
-from path import Path
+from pathlib import Path
 import schema
 import tomlkit
 import pytest

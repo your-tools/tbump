@@ -1,6 +1,6 @@
 import pytest
 
-from path import Path
+from pathlib import Path
 import tbump.file_bumper
 from tbump.test.conftest import file_contains
 
@@ -27,7 +27,7 @@ def test_patcher_preserve_endings(tmp_path: Path) -> None:
     foo_txt.write_bytes(old_contents)
     patch = tbump.file_bumper.Patch(tmp_path, "foo.txt", 1, "v=42", "v=43")
     patch.apply()
-    actual_contents = foo_txt.bytes()
+    actual_contents = foo_txt.read_bytes()
     expected_contents = old_contents.replace(b"42", b"43")
     assert actual_contents == expected_contents
 
@@ -39,14 +39,14 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
 
     # Make sure package.json contain CRLF line endings
     lines = package_json.read_text().splitlines(keepends=False)
-    package_json.write_text("\r\n".join(lines), linesep=None)
+    package_json.write_bytes(b"\r\n".join([x.encode() for x in lines]))
 
     bumper.set_config(config)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
     for patch in patches:
         patch.apply()
 
-    actual = package_json.bytes()
+    actual = package_json.read_bytes()
     assert b'version": "1.2.41-alpha-2",\r\n' in actual
 
 
