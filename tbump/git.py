@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 import subprocess
 
-from path import Path
+from pathlib import Path
 import cli_ui as ui
 
 import tbump

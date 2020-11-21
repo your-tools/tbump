@@ -3,10 +3,10 @@ from typing import cast, Any, Dict, List, Optional, Pattern  # noqa
 
 import attr
 import schema
-from path import Path
+from pathlib import Path
 import tomlkit
 
-from .hooks import HOOKS_CLASSES, Hook, BeforeCommitHook, AfterPushHook  # noqa
+from .hooks import HOOKS_CLASSES, Hook
 
 
 @attr.s

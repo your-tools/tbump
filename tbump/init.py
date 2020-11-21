@@ -2,7 +2,7 @@ import textwrap
 from typing import List
 
 import cli_ui as ui
-from path import Path
+from pathlib import Path
 
 import tbump.git
 

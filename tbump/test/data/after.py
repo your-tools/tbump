@@ -3,7 +3,7 @@ Just write a file named after-hook.stamp when called,
 so that test code can check if the hook ran
 """
 
-from path import Path
+from pathlib import Path
 
 
 def main() -> None:

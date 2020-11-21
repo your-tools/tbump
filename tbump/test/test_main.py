@@ -3,7 +3,7 @@ import tomlkit
 from cli_ui.tests import MessageRecorder
 from tbump.test.conftest import file_contains
 
-from path import Path
+from pathlib import Path
 import pytest
 
 import tbump.hooks
@@ -109,7 +109,7 @@ def only_patch_done(test_repo: Path, previous_commit: str) -> bool:
 
 def test_end_to_end(test_repo: Path) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+    tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
     assert bump_done(test_repo, previous_commit)
 
@@ -118,7 +118,7 @@ def test_dry_run_interactive(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
-    tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--dry-run"])
+    tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--dry-run"])
     assert bump_not_done(test_repo, previous_commit)
 
 
@@ -127,7 +127,7 @@ def test_dry_run_non_interactive(
 ) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     tbump.main.main(
-        ["-C", test_repo, "1.2.41-alpha-2", "--dry-run", "--non-interactive"]
+        ["-C", str(test_repo), "1.2.41-alpha-2", "--dry-run", "--non-interactive"]
     )
 
     assert bump_not_done(test_repo, previous_commit)
@@ -136,7 +136,7 @@ def test_dry_run_non_interactive(
 def test_only_patch(test_repo: Path) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     tbump.main.main(
-        ["-C", test_repo, "1.2.41-alpha-2", "--non-interactive", "--only-patch"]
+        ["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive", "--only-patch"]
     )
 
     assert only_patch_done(test_repo, previous_commit)
@@ -154,7 +154,7 @@ def test_on_outdated_branch(test_repo: Path) -> None:
     tbump.git.run_git(test_repo, "reset", "--hard", "HEAD~1")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     assert not tag_pushed(test_repo)
 
 
@@ -162,9 +162,9 @@ def test_tbump_toml_not_found(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     toml_path = test_repo / "tbump.toml"
-    toml_path.remove()
+    toml_path.unlink()
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("No such file")
 
 
@@ -176,7 +176,7 @@ def test_tbump_toml_bad_syntax(
     del bad_toml["git"]
     toml_path.write_text(tomlkit.dumps(bad_toml))
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("Invalid config")
 
 
@@ -184,18 +184,18 @@ def test_new_version_does_not_match(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41a2", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41a2", "--non-interactive"])
     assert message_recorder.find("Could not parse 1.2.41a2")
 
 
 def test_abort_if_file_does_not_exist(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
-    (test_repo / "package.json").remove()
+    (test_repo / "package.json").unlink()
     tbump.git.run_git(test_repo, "add", "--update")
     tbump.git.run_git(test_repo, "commit", "--message", "remove package.json")
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("package.json does not exist")
 
 
@@ -204,7 +204,7 @@ def test_interactive_abort(test_repo: Path, mocker: Any) -> None:
     ask_mock.return_value = False
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2"])
 
     ask_mock.assert_called_with("Looking good?", default=False)
     assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
@@ -213,10 +213,12 @@ def test_interactive_abort(test_repo: Path, mocker: Any) -> None:
 
 
 def test_abort_if_dirty(test_repo: Path, message_recorder: MessageRecorder) -> None:
-    (test_repo / "VERSION").write_text("unstaged changes\n", append=True)
+    version_path = test_repo / "VERSION"
+    with version_path.open("a") as f:
+        f.write("unstaged changes\n")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41-alpha-2", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     assert message_recorder.find("dirty")
 
 
@@ -226,7 +228,7 @@ def test_abort_if_tag_exists(
     tbump.git.run_git(test_repo, "tag", "v1.2.42")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("1.2.42 already exists")
 
 
@@ -236,18 +238,18 @@ def test_abort_if_file_does_not_match(
     invalid_src = test_repo / "foo.txt"
     invalid_src.write_text("this is foo")
     tbump_path = test_repo / "tbump.toml"
-    tbump_path.write_text(
-        """\
-    [[file]]
-    src = "foo.txt"
-    """,
-        append=True,
-    )
+    with tbump_path.open("a") as f:
+        f.write(
+            """\
+        [[file]]
+        src = "foo.txt"
+        """
+        )
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "add foo.txt")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("not found")
     assert file_contains(test_repo / "VERSION", "1.2.41-alpha-1")
 
@@ -258,7 +260,7 @@ def test_no_tracked_branch_but_ref_exists(
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.41-alpha-1"])
+        tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-1"])
     assert message_recorder.find("already exists")
 
 
@@ -268,7 +270,7 @@ def test_no_tracked_branch_non_interactive(
     tbump.git.run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("Cannot push")
 
 
@@ -276,7 +278,7 @@ def test_interactive_proceed(test_repo: Path, mocker: Any) -> None:
     ask_mock = mocker.patch("cli_ui.ask_yes_no")
 
     ask_mock.return_value = [True]
-    tbump.main.main(["-C", test_repo, "1.2.42"])
+    tbump.main.main(["-C", str(test_repo), "1.2.42"])
     ask_mock.assert_called_with("Looking good?", default=False)
     _, out = tbump.git.run_git_captured(test_repo, "ls-remote")
     assert "tags/v1.2.42" in out
@@ -284,7 +286,7 @@ def test_interactive_proceed(test_repo: Path, mocker: Any) -> None:
 
 def test_do_not_add_untracked_files(test_repo: Path) -> None:
     (test_repo / "untracked.txt").write_text("please don't add me")
-    tbump.main.main(["-C", test_repo, "1.2.42", "--non-interactive"])
+    tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
 
@@ -297,5 +299,5 @@ def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) ->
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update repo")
     with pytest.raises(SystemExit):
-        tbump.main.main(["-C", test_repo, "1.2.42"])
+        tbump.main.main(["-C", str(test_repo), "1.2.42"])
     assert message_recorder.find("refusing to replace by version containing 'None'")
