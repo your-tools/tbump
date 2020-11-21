@@ -5,7 +5,7 @@ import urllib.parse
 
 import attr
 import docopt
-from path import Path
+from pathlib import Path
 import cli_ui as ui
 
 import tbump
@@ -19,7 +19,7 @@ from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
 
 
-TBUMP_VERSION = "6.1.1"
+TBUMP_VERSION = "1.2.42"
 
 USAGE = textwrap.dedent(
     """
@@ -86,7 +86,7 @@ def run(cmd: List[str]) -> None:
     if opt_dict["--cwd"]:
         working_path = Path(opt_dict["--cwd"])
     else:
-        working_path = Path.getcwd()
+        working_path = Path.cwd()
 
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]

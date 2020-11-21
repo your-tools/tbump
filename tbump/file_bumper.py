@@ -3,7 +3,7 @@ import attr
 import re
 import glob
 
-from path import Path
+from pathlib import Path
 import cli_ui as ui
 
 import tbump
@@ -61,11 +61,12 @@ class Patch(tbump.action.Action):
 
     def apply(self) -> None:
         file_path = self.working_path / self.src
-        contents = file_path.bytes()
+        contents = file_path.read_bytes()
         lines = contents.splitlines(keepends=True)
         old_line = lines[self.lineno]
         lines[self.lineno] = self.new_line.encode() + Patch.get_ending(old_line)
-        file_path.write_lines(lines, linesep=None)
+        text = b"".join(lines)
+        file_path.write_bytes(text)
 
 
 class BadSubstitution(tbump.Error):
@@ -184,7 +185,7 @@ class FileBumper:
         assert self.files
         for file in self.files:
             expected_path = self.working_path / file.src
-            files_found = glob.glob(expected_path, recursive=True)
+            files_found = glob.glob(str(expected_path), recursive=True)
             if not files_found:
                 raise SourceFileNotFound(src=file.src)
 
@@ -213,16 +214,16 @@ class FileBumper:
         patches = []
 
         file_path_glob = self.working_path / change_request.src
-        for file_path_str in glob.glob(file_path_glob, recursive=True):
+        for file_path_str in glob.glob(str(file_path_glob), recursive=True):
             file_path = Path(file_path_str)
-            expanded_src = file_path.relpath(self.working_path)
+            expanded_src = file_path.relative_to(self.working_path)
             old_lines = file_path.read_text().splitlines(keepends=False)
 
             for i, old_line in enumerate(old_lines):
                 if should_replace(old_line, old_string, search):
                     new_line = old_line.replace(old_string, new_string)
                     patch = Patch(
-                        self.working_path, expanded_src, i, old_line, new_line
+                        self.working_path, str(expanded_src), i, old_line, new_line
                     )
                     patches.append(patch)
         if not patches:
@@ -269,7 +270,7 @@ class FileBumper:
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
 
-def bump_files(new_version: str, repo_path: Path = None) -> None:
+def bump_files(new_version: str, repo_path: Optional[Path] = None) -> None:
     repo_path = repo_path or Path(".")
     bumper = FileBumper(repo_path)
     cfg = tbump.config.parse(repo_path / "tbump.toml")
