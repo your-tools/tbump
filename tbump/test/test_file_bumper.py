@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import pytest
 
-from pathlib import Path
 import tbump.file_bumper
 from tbump.test.conftest import file_contains
 

@@ -1,15 +1,15 @@
-from typing import Dict, List, Optional, Pattern
-import attr
-import re
 import glob
-
+import re
 from pathlib import Path
+from typing import Dict, List, Optional, Pattern
+
+import attr
 import cli_ui as ui
 
 import tbump
 import tbump.action
-import tbump.git
 import tbump.config
+import tbump.git
 
 
 @attr.s

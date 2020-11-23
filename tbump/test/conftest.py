@@ -1,13 +1,12 @@
-import shutil
-from typing import Any, Iterator
 import os
-
+import shutil
 from pathlib import Path
+from typing import Any, Iterator
+
 import pytest
+from cli_ui.tests import MessageRecorder
 
 import tbump.git
-
-from cli_ui.tests import MessageRecorder
 
 
 @pytest.fixture()

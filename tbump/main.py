@@ -1,12 +1,12 @@
-from typing import List, Optional
 import sys
 import textwrap
 import urllib.parse
+from pathlib import Path
+from typing import List, Optional
 
 import attr
-import docopt
-from pathlib import Path
 import cli_ui as ui
+import docopt
 
 import tbump
 import tbump.config
@@ -17,7 +17,6 @@ from tbump.executor import Executor
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
-
 
 TBUMP_VERSION = "6.1.1"
 

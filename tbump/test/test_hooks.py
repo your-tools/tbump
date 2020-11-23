@@ -1,7 +1,8 @@
-from pathlib import Path
 import sys
-import tomlkit
+from pathlib import Path
+
 import pytest
+import tomlkit
 
 import tbump.git
 import tbump.hooks
@@ -9,9 +10,7 @@ import tbump.main
 
 
 def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
-    """ Patch the configuration file so that we can also test hooks.
-
-    """
+    """Patch the configuration file so that we can also test hooks."""
     cfg_path = test_repo / "tbump.toml"
     parsed = tomlkit.loads(cfg_path.read_text())
     if after_push:
@@ -31,7 +30,7 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
 
 
 def add_before_hook(test_repo: Path) -> None:
-    """ Patch config to add a working `before_commit` hook
+    """Patch config to add a working `before_commit` hook
     that runs tbump/test/data/before.py
 
     """
@@ -43,7 +42,7 @@ def add_before_hook(test_repo: Path) -> None:
 
 
 def add_after_hook(test_repo: Path) -> None:
-    """ Patch config to add a working `after_push` hook
+    """Patch config to add a working `after_push` hook
     that runs tbump/test/data/after.py
 
     """
@@ -51,7 +50,7 @@ def add_after_hook(test_repo: Path) -> None:
 
 
 def add_crashing_hook(test_repo: Path) -> None:
-    """ Patch config to add a `before_commit` hook
+    """Patch config to add a `before_commit` hook
     that runs a command that fails
     """
     add_hook(test_repo, "crashing hook", sys.executable + " nosuchfile.py")

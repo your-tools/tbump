@@ -1,11 +1,11 @@
 from pathlib import Path
 
+import pytest
+
 import tbump.config
 import tbump.git
 import tbump.git_bumper
 from tbump.git_bumper import GitBumper
-
-import pytest
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
-from typing import List, Optional, Tuple
 import subprocess
-
 from pathlib import Path
+from typing import List, Optional, Tuple
+
 import cli_ui as ui
 
 import tbump
@@ -30,7 +30,7 @@ def print_git_command(cmd: List[str]) -> None:
 
 
 def run_git(working_path: Path, *cmd: str, verbose: bool = False) -> None:
-    """ Run git `cmd` in given `working_path`
+    """Run git `cmd` in given `working_path`
 
     Displays the command ran if `verbose` is True
 
@@ -50,7 +50,7 @@ def run_git(working_path: Path, *cmd: str, verbose: bool = False) -> None:
 def run_git_captured(
     working_path: Path, *cmd: str, check: bool = True
 ) -> Tuple[int, str]:
-    """ Run git `cmd` in given `working_path`, capturing the output
+    """Run git `cmd` in given `working_path`, capturing the output
 
     Return a tuple (returncode, output).
 

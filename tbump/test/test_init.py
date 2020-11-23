@@ -1,11 +1,11 @@
 from pathlib import Path
+
+import pytest
 import tomlkit
+from cli_ui.tests import MessageRecorder
 
 import tbump.config
 import tbump.main
-
-import pytest
-from cli_ui.tests import MessageRecorder
 
 
 def test_creates_config(test_repo: Path) -> None:
