@@ -1,7 +1,7 @@
-from typing import List, Optional  # noqa
 import subprocess
-
 from pathlib import Path
+from typing import List, Optional  # noqa
+
 import cli_ui as ui
 
 import tbump

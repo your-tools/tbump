@@ -1,14 +1,14 @@
+from pathlib import Path
 from typing import Any
+
+import pytest
 import tomlkit
 from cli_ui.tests import MessageRecorder
-from tbump.test.conftest import file_contains
 
-from pathlib import Path
-import pytest
-
+import tbump.git
 import tbump.hooks
 import tbump.main
-import tbump.git
+from tbump.test.conftest import file_contains
 
 
 def files_bumped(test_repo: Path) -> bool:

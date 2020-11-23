@@ -1,9 +1,9 @@
 import re
-from typing import cast, Any, Dict, List, Optional, Pattern  # noqa
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Pattern, cast  # noqa
 
 import attr
 import schema
-from pathlib import Path
 import tomlkit
 
 from .hooks import HOOKS_CLASSES, Hook
@@ -96,7 +96,7 @@ def validate_basic_schema(config: Dict[str, Any]) -> Config:
 
 
 def validate_config(cfg: Config) -> None:
-    """ Second pass of validation, using the Config
+    """Second pass of validation, using the Config
     class.
 
     """

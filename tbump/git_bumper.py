@@ -1,10 +1,11 @@
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
+
 import cli_ui as ui
 
 import tbump.action
-from tbump.config import Config
 import tbump.git
+from tbump.config import Config
 
 
 class DirtyRepository(tbump.git.GitError):

@@ -1,14 +1,14 @@
-import textwrap
 import re
-
+import textwrap
 from pathlib import Path
+
+import pytest
 import schema
 import tomlkit
-import pytest
 
-from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 import tbump.config
 from tbump.config import Config
+from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 
 
 def test_happy_parse(test_data_path: Path) -> None:

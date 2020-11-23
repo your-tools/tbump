@@ -1,8 +1,8 @@
 import textwrap
+from pathlib import Path
 from typing import List
 
 import cli_ui as ui
-from pathlib import Path
 
 import tbump.git
 
