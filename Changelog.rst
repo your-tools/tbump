@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v6.2.0 (2020-11-24)
+-------------------
+
+* Drop dependency on ``Path Pie``
+* Drop support for Python 3.5, add support for Python 3.9
+
 v6.1.1 (2020-07-23)
 -------------------
 
