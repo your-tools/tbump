@@ -12,7 +12,8 @@ from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 
 
 def test_happy_parse(test_data_path: Path) -> None:
-    config = tbump.config.parse(test_data_path / "tbump.toml")
+    config_file = tbump.config.get_config_file(test_data_path)
+    config = config_file.get_config()
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
     )
@@ -42,6 +43,70 @@ def test_happy_parse(test_data_path: Path) -> None:
     assert config.current_version == "1.2.41-alpha-1"
 
 
+def test_uses_pyproject_if_tbump_toml_is_missing(
+    test_data_path: Path, tmp_path: Path
+) -> None:
+
+    expected_file = tbump.config.get_config_file(test_data_path)
+    parsed_config = expected_file.get_parsed()
+    tools_config = tomlkit.table()
+    tools_config.add("tbump", parsed_config)
+
+    pyproject_config = tomlkit.table()
+    pyproject_config.add("tool", tools_config)
+    to_write = tomlkit.dumps(pyproject_config)
+
+    pyproject_toml = tmp_path / "pyproject.toml"
+    pyproject_toml.write_text(to_write)
+
+    actual_file = tbump.config.get_config_file(tmp_path)
+    assert actual_file.get_config() == expected_file.get_config()
+
+
+def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> None:
+    pyproject_toml = tmp_path / "pyproject.toml"
+    to_write = textwrap.dedent(
+        r"""
+    [tool.isort]
+    profile = "black"
+    """
+    )
+    pyproject_toml.write_text(to_write)
+
+    with pytest.raises(tbump.config.ConfigNotFound):
+        tbump.config.get_config_file(tmp_path)
+
+
+def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
+    pyproject_toml = tmp_path / "pyproject.toml"
+    to_write = textwrap.dedent(
+        r"""
+        [[tool.tbump.file]]
+        search = '"version": "{current_version}"'
+        src = "package.json"
+
+        [tool.tbump.git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [tool.tbump.version]
+        # Note: missing 'current'
+        regex = '''
+          (?P<major>\d+)
+          \.
+          (?P<minor>\d+)
+          \.
+          (?P<patch>\d+)
+          '''
+       """
+    )
+    pyproject_toml.write_text(to_write)
+
+    with pytest.raises(tbump.config.InvalidConfig) as e:
+        tbump.config.get_config_file(tmp_path)
+    assert "'current'" in str(e.value.parse_error)
+
+
 def assert_validation_error(config: Config, expected_message: str) -> None:
     try:
         tbump.config.validate_config(config)
@@ -52,7 +117,8 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 @pytest.fixture
 def test_config(test_data_path: Path) -> Config:
-    return tbump.config.parse(test_data_path / "tbump.toml")
+    config_file = tbump.config.get_config_file(test_data_path)
+    return config_file.get_config()
 
 
 def test_invalid_commit_message(test_config: Config) -> None:
@@ -111,9 +177,8 @@ def test_invalid_custom_template(test_config: Config) -> None:
     )
 
 
-def test_parse_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(
+def test_parse_hooks() -> None:
+    contents = textwrap.dedent(
         r"""
         [version]
         current = "1.2.3"
@@ -135,7 +200,8 @@ def test_parse_hooks(tmp_path: Path) -> None:
         cmd = "cargo publish"
     """
     )
-    config = tbump.config.parse(toml_path)
+    parsed = tomlkit.loads(contents)
+    config = tbump.config.from_parsed_config(parsed)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
     assert first_hook.cmd == "grep -q {new_version} Changelog.md"
@@ -147,9 +213,8 @@ def test_parse_hooks(tmp_path: Path) -> None:
     assert isinstance(second_hook, expected_class)
 
 
-def test_retro_compat_hooks(tmp_path: Path) -> None:
-    toml_path = tmp_path / "tbump.toml"
-    toml_path.write_text(
+def test_retro_compat_hooks() -> None:
+    contents = textwrap.dedent(
         r"""
         [version]
         current = "1.2.3"
@@ -171,6 +236,7 @@ def test_retro_compat_hooks(tmp_path: Path) -> None:
         cmd = "deprecated command"
       """
     )
-    config = tbump.config.parse(toml_path)
+    parsed = tomlkit.parse(contents)
+    config = tbump.config.from_parsed_config(parsed)
     first_hook = config.hooks[0]
     assert isinstance(first_hook, tbump.hooks.BeforeCommitHook)

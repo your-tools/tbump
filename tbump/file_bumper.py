@@ -166,6 +166,7 @@ class FileBumper:
         self.current_groups: Dict[str, str] = {}
         self.new_version = ""
         self.new_groups: Dict[str, str] = {}
+        self.config_file: Optional[tbump.config.ConfigFile] = None
 
     def parse_version(self, version: str) -> Dict[str, str]:
         assert self.version_regex
@@ -174,7 +175,9 @@ class FileBumper:
             raise InvalidVersion(version=version, regex=self.version_regex)
         return match.groupdict()
 
-    def set_config(self, config: tbump.config.Config) -> None:
+    def set_config_file(self, config_file: tbump.config.ConfigFile) -> None:
+        self.config_file = config_file
+        config = config_file.get_config()
         self.files = config.files
         self.check_files_exist()
         self.version_regex = config.version_regex
@@ -193,10 +196,6 @@ class FileBumper:
         self.new_version = new_version
         self.new_groups = self.parse_version(self.new_version)
         change_requests = self.compute_change_requests()
-        tbump_toml_change = ChangeRequest(
-            "tbump.toml", self.current_version, new_version
-        )
-        change_requests.append(tbump_toml_change)
         patches = []
         for change_request in change_requests:
             patches_for_request = self.compute_patches_for_change_request(
@@ -233,10 +232,21 @@ class FileBumper:
         return patches
 
     def compute_change_requests(self) -> List[ChangeRequest]:
+        # When bumping files in a project, we need to bump:
+        #  * every file listed in the config file
+        #  * and the `current_version` value in tbump's config file
+        assert self.config_file
         change_requests = []
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
             change_requests.append(change_request)
+        rel_path = self.config_file.path.relative_to(self.working_path)
+        config_file_change = ChangeRequest(
+            str(rel_path),
+            self.current_version,
+            self.new_version,
+        )
+        change_requests.append(config_file_change)
         return change_requests
 
     def compute_change_request_for_file(self, file: tbump.config.File) -> ChangeRequest:
@@ -273,8 +283,8 @@ class FileBumper:
 def bump_files(new_version: str, repo_path: Optional[Path] = None) -> None:
     repo_path = repo_path or Path(".")
     bumper = FileBumper(repo_path)
-    cfg = tbump.config.parse(repo_path / "tbump.toml")
-    bumper.set_config(cfg)
+    config_file = tbump.config.get_config_file(repo_path)
+    bumper.set_config_file(config_file)
     patches = bumper.get_patches(new_version=new_version)
     n = len(patches)
     for i, patch in enumerate(patches):

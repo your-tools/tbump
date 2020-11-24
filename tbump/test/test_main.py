@@ -11,10 +11,17 @@ import tbump.main
 from tbump.test.conftest import file_contains
 
 
-def files_bumped(test_repo: Path) -> bool:
-    toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.read_text())
-    assert new_toml["version"]["current"] == "1.2.41-alpha-2"
+def files_bumped(test_repo: Path, using_pyproject: bool = False) -> bool:
+    if using_pyproject:
+        cfg_path = test_repo / "pyproject.toml"
+        new_toml = tomlkit.loads(cfg_path.read_text())
+        current_version = new_toml["tool"]["tbump"]["version"]["current"]
+    else:
+        cfg_path = test_repo / "tbump.toml"
+        new_toml = tomlkit.loads(cfg_path.read_text())
+        current_version = new_toml["version"]["current"]
+
+    assert current_version == "1.2.41-alpha-2"
 
     return all(
         (
@@ -71,10 +78,12 @@ def branch_pushed(test_repo: Path, previous_commit: str) -> bool:
     return remote_commit == local_commit
 
 
-def bump_done(test_repo: Path, previous_commit: str) -> bool:
+def bump_done(
+    test_repo: Path, previous_commit: str, *, using_pyproject: bool = False
+) -> bool:
     return all(
         (
-            files_bumped(test_repo),
+            files_bumped(test_repo, using_pyproject=using_pyproject),
             commit_created(test_repo),
             tag_created(test_repo),
             branch_pushed(test_repo, previous_commit),
@@ -107,11 +116,37 @@ def only_patch_done(test_repo: Path, previous_commit: str) -> bool:
     )
 
 
-def test_end_to_end(test_repo: Path) -> None:
+def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
     tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
     assert bump_done(test_repo, previous_commit)
+
+
+def test_end_to_end_using_pyproject_toml(test_repo: Path) -> None:
+    tbump_toml_path = test_repo / "tbump.toml"
+
+    # Convert tbump config to a config inside a tool.tbump section:
+    tbump_config = tomlkit.loads(tbump_toml_path.read_text())
+    tools_config = tomlkit.table()
+    tools_config.add("tbump", tbump_config)
+    pyproject_config = tomlkit.table()
+    pyproject_config.add("tool", tools_config)
+    to_write = tomlkit.dumps(pyproject_config)
+
+    # Write the pyproject.toml and remove tbump.toml
+    pyproject_toml_path = test_repo / "pyproject.toml"
+    pyproject_toml_path.write_text(to_write)
+    tbump_toml_path.unlink()
+    tbump.git.run_git(test_repo, "add", ".")
+    tbump.git.run_git(
+        test_repo, "commit", "--message", "move tbump config inside pyproject.toml"
+    )
+
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
+
+    assert bump_done(test_repo, previous_commit, using_pyproject=True)
 
 
 def test_dry_run_interactive(
@@ -165,7 +200,7 @@ def test_tbump_toml_not_found(
     toml_path.unlink()
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
-    assert message_recorder.find("No such file")
+    assert message_recorder.find("No configuration for tbump")
 
 
 def test_tbump_toml_bad_syntax(

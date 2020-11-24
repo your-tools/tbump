@@ -1,10 +1,15 @@
+import abc
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Pattern, cast
+from typing import Any, Dict, List, Optional, Pattern
 
 import attr
+import cli_ui as ui
 import schema
 import tomlkit
+from tomlkit.toml_document import TOMLDocument
+
+import tbump
 
 from .hooks import HOOKS_CLASSES, Hook
 
@@ -28,6 +33,51 @@ class Config:
     hooks: List[Hook] = attr.ib()
 
     github_url: Optional[str] = attr.ib()
+
+
+class ConfigFile(metaclass=abc.ABCMeta):
+    """ Base class representing a config file """
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    @abc.abstractmethod
+    def get_parsed(self) -> Any:
+        """Return a plain dictionnary, suitable for validation
+        by the `schema` library
+        """
+        pass
+
+    def get_config(self) -> Config:
+        """Return a validated Config instance"""
+        parsed = self.get_parsed()
+        res = from_parsed_config(parsed)
+        validate_config(res)
+        return res
+
+
+class TbumpTomlConfig(ConfigFile):
+    """Represent config inside a tbump.toml file"""
+
+    def __init__(self, path: Path, doc: TOMLDocument):
+        super().__init__(path)
+        self.doc = doc
+
+    def get_parsed(self) -> Any:
+        return self.doc.value
+
+
+class PyprojectConfig(ConfigFile):
+    """Represent a config inside a pyproject.toml file,
+    under the [tool.tbump] key
+    """
+
+    def __init__(self, path: Path, doc: TOMLDocument):
+        self.doc = doc
+        super().__init__(path)
+
+    def get_parsed(self) -> Any:
+        return self.doc["tool"]["tbump"].value
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:
@@ -62,7 +112,7 @@ def validate_hook_cmd(cmd: str) -> None:
         raise schema.SchemaError(message)
 
 
-def validate_basic_schema(config: Dict[str, Any]) -> Config:
+def validate_basic_schema(config: Any) -> None:
     """ First pass of validation, using schema """
     # Note: asserts that we won't get KeyError or invalid types
     # when building or initial Config instance
@@ -92,7 +142,7 @@ def validate_basic_schema(config: Dict[str, Any]) -> Config:
             schema.Optional("github_url"): str,
         }
     )
-    return cast(Config, tbump_schema.validate(config))
+    tbump_schema.validate(config)
 
 
 def validate_config(cfg: Config) -> None:
@@ -125,9 +175,39 @@ def validate_config(cfg: Config) -> None:
         validate_hook_cmd(hook.cmd)
 
 
-def parse(cfg_path: Path) -> Config:
-    parsed = tomlkit.loads(cfg_path.read_text())
-    parsed = validate_basic_schema(parsed)
+def get_config_file(project_path: Path) -> ConfigFile:
+    try:
+        res = _get_config_file(project_path)
+        # Check that the config is valid before returning it,
+        # so that problems in config file are reported early
+        res.get_config()
+        return res
+    except IOError as io_error:
+        raise InvalidConfig(io_error=io_error)
+    except schema.SchemaError as parse_error:
+        raise InvalidConfig(parse_error=parse_error)
+
+
+def _get_config_file(project_path: Path) -> ConfigFile:
+    toml_path = project_path / "tbump.toml"
+    if toml_path.exists():
+        doc = tomlkit.loads(toml_path.read_text())
+        return TbumpTomlConfig(toml_path, doc)
+
+    pyproject_path = project_path / "pyproject.toml"
+    if pyproject_path.exists():
+        doc = tomlkit.loads(pyproject_path.read_text())
+        try:
+            doc["tool"]["tbump"]
+        except KeyError:
+            raise ConfigNotFound(project_path)
+        return PyprojectConfig(pyproject_path, doc)
+
+    raise ConfigNotFound(project_path)
+
+
+def from_parsed_config(parsed: Any) -> Config:
+    validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]
     git_tag_template = parsed["git"]["tag_template"]
@@ -164,3 +244,30 @@ def parse(cfg_path: Path) -> Config:
     validate_config(config)
 
     return config
+
+
+class ConfigNotFound(tbump.Error):
+    def __init__(self, project_path: Path):
+        self.project_path = project_path
+
+    def print_error(self) -> None:
+        ui.error("No configuration for tbump fond in", self.project_path)
+        ui.info("Please run `tbump init` to create a tbump.toml file")
+        ui.info("Or add a [tool.tbump] section in the pyproject.toml file")
+
+
+class InvalidConfig(tbump.Error):
+    def __init__(
+        self,
+        io_error: Optional[IOError] = None,
+        parse_error: Optional[Exception] = None,
+    ):
+        super().__init__()
+        self.io_error = io_error
+        self.parse_error = parse_error
+
+    def print_error(self) -> None:
+        if self.io_error:
+            ui.error("Could not read config file:", self.io_error)
+        if self.parse_error:
+            ui.error("Invalid config:", self.parse_error)
