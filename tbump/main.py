@@ -12,7 +12,6 @@ import tbump
 import tbump.config
 import tbump.git
 import tbump.init
-from tbump.config import Config
 from tbump.executor import Executor
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
@@ -37,23 +36,6 @@ Options:
    --only-patch       Only patches files, skipping any git operations or hook commands.
 """
 )
-
-
-class InvalidConfig(tbump.Error):
-    def __init__(
-        self,
-        io_error: Optional[IOError] = None,
-        parse_error: Optional[Exception] = None,
-    ):
-        super().__init__()
-        self.io_error = io_error
-        self.parse_error = parse_error
-
-    def print_error(self) -> None:
-        if self.io_error:
-            ui.error("Could not read config file:", self.io_error)
-        if self.parse_error:
-            ui.error("Invalid config:", self.parse_error)
 
 
 class Cancelled(tbump.Error):
@@ -103,17 +85,6 @@ def run(cmd: List[str]) -> None:
     bump(bump_options)
 
 
-def parse_config(working_path: Path) -> Config:
-    tbump_path = working_path / "tbump.toml"
-    try:
-        config = tbump.config.parse(tbump_path)
-    except IOError as io_error:
-        raise InvalidConfig(io_error=io_error)
-    except Exception as parse_error:
-        raise InvalidConfig(parse_error=parse_error)
-    return config
-
-
 def bump(options: BumpOptions) -> None:
     working_path = options.working_path
     new_version = options.new_version
@@ -121,7 +92,8 @@ def bump(options: BumpOptions) -> None:
     only_patch = options.only_patch
     dry_run = options.dry_run
 
-    config = parse_config(options.working_path)
+    config_file = tbump.config.get_config_file(options.working_path)
+    config = config_file.get_config()
 
     # fmt: off
     ui.info_1(
@@ -144,7 +116,7 @@ def bump(options: BumpOptions) -> None:
             raise
 
     file_bumper = FileBumper(working_path)
-    file_bumper.set_config(config)
+    file_bumper.set_config_file(config_file)
 
     hooks_runner = HooksRunner(working_path, config.current_version)
     if not only_patch:
