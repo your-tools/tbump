@@ -67,7 +67,7 @@ class GitBumper:
         self.message_template = ""
         self.remote_name = ""
         self.remote_branch = ""
-        self.commands = []  # type: List[Command]
+        self.commands: List[Command] = []
 
     def get_tag_name(self, new_version: str) -> str:
         return self.tag_template.format(new_version=new_version)
@@ -126,7 +126,7 @@ class GitBumper:
         commands.append(command)
 
     def get_commands(self, new_version: str) -> List[Command]:
-        res = []  # type: List[Command]
+        res: List[Command] = []
         self.add_command(res, "add", "--update")
         commit_message = self.message_template.format(new_version=new_version)
         self.add_command(res, "commit", "--message", commit_message)

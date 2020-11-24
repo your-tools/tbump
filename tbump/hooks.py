@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import List, Optional  # noqa
+from typing import List, Optional
 
 import cli_ui as ui
 
@@ -11,7 +11,7 @@ import tbump.action
 class Hook(tbump.action.Action):
     def __init__(self, name: str, cmd: str):
         super().__init__()
-        self.working_path = None  # type: Optional[Path]
+        self.working_path: Optional[Path] = None
         self.name = name
         self.cmd = cmd
 
@@ -56,7 +56,7 @@ class HookError(tbump.Error):
 
 class HooksRunner:
     def __init__(self, working_path: Path, current_version: str):
-        self.hooks = []  # type: List[Hook]
+        self.hooks: List[Hook] = []
         self.working_path = working_path
         self.current_version = current_version
 

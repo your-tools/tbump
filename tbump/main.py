@@ -63,11 +63,11 @@ class Cancelled(tbump.Error):
 
 @attr.s
 class BumpOptions:
-    working_path = attr.ib()  # type: Path
-    new_version = attr.ib()  # type: str
-    interactive = attr.ib(default=True)  # type: bool
-    dry_run = attr.ib(default=False)  # type: bool
-    only_patch = attr.ib(default=False)  # type: bool
+    working_path: Path = attr.ib()
+    new_version: str = attr.ib()
+    interactive: bool = attr.ib(default=True)
+    dry_run: bool = attr.ib(default=False)
+    only_patch: bool = attr.ib(default=False)
 
 
 def run(cmd: List[str]) -> None:

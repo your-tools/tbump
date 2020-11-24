@@ -14,10 +14,10 @@ import tbump.git
 
 @attr.s
 class ChangeRequest:
-    src = attr.ib()  # type: str
-    old_string = attr.ib()  # type: str
-    new_string = attr.ib()  # type: str
-    search = attr.ib(default=None)  # type: Optional[str]
+    src: str = attr.ib()
+    old_string: str = attr.ib()
+    new_string: str = attr.ib()
+    search: Optional[str] = attr.ib(default=None)
 
 
 class Patch(tbump.action.Action):
@@ -160,12 +160,12 @@ def on_version_containing_none(
 class FileBumper:
     def __init__(self, working_path: Path):
         self.working_path = working_path
-        self.files = []  # type: List[tbump.config.File]
+        self.files: List[tbump.config.File] = []
         self.version_regex = re.compile(".")
         self.current_version = ""
-        self.current_groups = {}  # type: Dict[str, str]
+        self.current_groups: Dict[str, str] = {}
         self.new_version = ""
-        self.new_groups = {}  # type: Dict[str, str]
+        self.new_groups: Dict[str, str] = {}
 
     def parse_version(self, version: str) -> Dict[str, str]:
         assert self.version_regex

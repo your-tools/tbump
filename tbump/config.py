@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Pattern, cast  # noqa
+from typing import Any, Dict, List, Optional, Pattern, cast
 
 import attr
 import schema
@@ -10,24 +10,24 @@ from .hooks import HOOKS_CLASSES, Hook
 
 
 @attr.s
-class Config:
-    current_version = attr.ib()  # type: str
-    version_regex = attr.ib()  # type: Pattern[str]
-
-    git_tag_template = attr.ib()  # type: str
-    git_message_template = attr.ib()  # type: str
-
-    files = attr.ib()  # type: List[File]
-    hooks = attr.ib()  # type: List[Hook]
-
-    github_url = attr.ib()  # type: Optional[str]
+class File:
+    src: str = attr.ib()
+    search: Optional[str] = attr.ib(default=None)
+    version_template: Optional[str] = attr.ib(default=None)
 
 
 @attr.s
-class File:
-    src = attr.ib()  # type: str
-    search = attr.ib(default=None)  # type: Optional[str]
-    version_template = attr.ib(default=None)  # type: Optional[str]
+class Config:
+    current_version: str = attr.ib()
+    version_regex: Pattern[str] = attr.ib()
+
+    git_tag_template: str = attr.ib()
+    git_message_template: str = attr.ib()
+
+    files: List[File] = attr.ib()
+    hooks: List[Hook] = attr.ib()
+
+    github_url: Optional[str] = attr.ib()
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:
