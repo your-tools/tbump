@@ -7,8 +7,6 @@ from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
 
-_ = List
-
 
 class ActionGroup:
     def __init__(
@@ -44,7 +42,7 @@ class ActionGroup:
 class Executor:
     def __init__(self, new_version: str, file_bumper: FileBumper):
         self.new_version = new_version
-        self.work = []  # type: List[ActionGroup]
+        self.work: List[ActionGroup] = []
 
         patches = ActionGroup(
             "Would patch these files",
