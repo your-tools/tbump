@@ -55,10 +55,11 @@ class HookError(tbump.Error):
 
 
 class HooksRunner:
-    def __init__(self, working_path: Path, current_version: str):
+    def __init__(self, working_path: Path, current_version: str, operations: List[str]):
         self.hooks: List[Hook] = []
         self.working_path = working_path
         self.current_version = current_version
+        self.operations = operations
 
     def add_hook(self, hook: Hook) -> None:
         hook.working_path = self.working_path
@@ -68,7 +69,10 @@ class HooksRunner:
         return self._get_hooks_for_new_version_by_type(new_version, "before_commit")
 
     def get_after_hooks(self, new_version: str) -> List[Hook]:
-        return self._get_hooks_for_new_version_by_type(new_version, "after_push")
+        if "push" in self.operations:
+            return self._get_hooks_for_new_version_by_type(new_version, "after_push")
+        else:
+            return []
 
     def _get_hooks_for_new_version_by_type(
         self, new_version: str, type_: str
