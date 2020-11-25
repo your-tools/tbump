@@ -85,7 +85,9 @@ Here's what a typical usage of ``tbump`` looks like:
 Usage
 ------
 
-First, run ``tbump init``. This will create a ``tbump.toml`` file looking like this:
+First, run ``tbump init <current_version>``, where ``current_version``
+is the current version of your program. This will create a
+``tbump.toml`` file looking like this:
 
 .. code-block:: ini
 
@@ -110,9 +112,20 @@ First, run ``tbump init``. This will create a ``tbump.toml`` file looking like t
 .. note::
 
  * The file uses `toml syntax <https://github.com/toml-lang/toml>`_.
- * Strings should be templated using curly brackets, to be used with Python's built-in ``.format()`` method.
- * Paths may contain unix-style `globs <https://docs.python.org/3/library/glob.html>`_, e.g. ``src = "a/**/script.?s"`` matches both ``a/b/script.js`` and ``a/b/c/script.ts``.
- * The version regular expression will be used in `verbose mode <https://docs.python.org/3/library/re.html#re.VERBOSE>`_ and can contain named groups (see below).
+ * Strings should be templated using curly brackets, to be used with
+   Python's built-in ``.format()`` method.
+ * Paths may contain unix-style `globs
+   <https://docs.python.org/3/library/glob.html>`_, e.g. ``src =
+   "a/**/script.?s"`` matches both ``a/b/script.js`` and
+   ``a/b/c/script.ts``.
+ * The version regular expression will be used in `verbose mode
+   <https://docs.python.org/3/library/re.html#re.VERBOSE>`_ and can
+   contain named groups (see below).
+ * tbump will also look for a ``[tool.tbump]`` section in the
+   `pyproject.toml` file if its exists. You can use ``tbump init`` with
+   the ``--pyproject`` option to append the configuration in this file
+   instead of creating a new file.
+
 
 Then run:
 
