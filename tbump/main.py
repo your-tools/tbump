@@ -23,7 +23,7 @@ USAGE = textwrap.dedent(
     """
 Usage:
   tbump [options] <new_version>
-  tbump [options] init <current_version>
+  tbump [options] init [--pyproject] <current_version>
   tbump --help
   tbump --version
 
@@ -71,7 +71,10 @@ def run(cmd: List[str]) -> None:
 
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
-        tbump.init.init(working_path, current_version=current_version)
+        use_pyproject = opt_dict["--pyproject"]
+        tbump.init.init(
+            working_path, current_version=current_version, use_pyproject=use_pyproject
+        )
         return
 
     new_version = opt_dict["<new_version>"]
