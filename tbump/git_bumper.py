@@ -61,12 +61,13 @@ class Command(tbump.action.Action):
 
 
 class GitBumper:
-    def __init__(self, repo_path: Path):
+    def __init__(self, repo_path: Path, operations: List[str]):
         self.repo_path = repo_path
         self.tag_template = ""
         self.message_template = ""
         self.remote_name = ""
         self.remote_branch = ""
+        self.operations = operations
         self.commands: List[Command] = []
 
     def get_tag_name(self, new_version: str) -> str:
@@ -83,6 +84,8 @@ class GitBumper:
         return tbump.git.run_git_captured(self.repo_path, *args, check=check)
 
     def check_dirty(self) -> None:
+        if "commit" not in self.operations:
+            return
         _, out = self.run_git_captured("status", "--porcelain")
         dirty = False
         for line in out.splitlines():
@@ -114,12 +117,16 @@ class GitBumper:
             raise RefAlreadyExists(ref=tag_name)
 
     def check_branch_state(self, new_version: str) -> None:
-        self.get_current_branch()
-        tag_name = self.get_tag_name(new_version)
-        self.check_ref_does_not_exists(tag_name)
+        if "commit" not in self.operations:
+            return
+        if "tag" in self.operations:
+            tag_name = self.get_tag_name(new_version)
+            self.check_ref_does_not_exists(tag_name)
 
-        tracking_ref = self.get_tracking_ref()
-        self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
+        if "push" in self.operations:
+            self.get_current_branch()
+            tracking_ref = self.get_tracking_ref()
+            self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
 
     def add_command(self, commands: List[Command], *cmd: str) -> None:
         command = Command(self.repo_path, list(cmd))
@@ -127,12 +134,19 @@ class GitBumper:
 
     def get_commands(self, new_version: str) -> List[Command]:
         res: List[Command] = []
+        if "commit" not in self.operations:
+            return res
         self.add_command(res, "add", "--update")
         commit_message = self.message_template.format(new_version=new_version)
         self.add_command(res, "commit", "--message", commit_message)
         tag_name = self.get_tag_name(new_version)
         tag_message = tag_name
-        self.add_command(res, "tag", "--annotate", "--message", tag_message, tag_name)
-        self.add_command(res, "push", self.remote_name, self.remote_branch)
-        self.add_command(res, "push", self.remote_name, tag_name)
+        if "tag" in self.operations:
+            self.add_command(
+                res, "tag", "--annotate", "--message", tag_message, tag_name
+            )
+        if "push" in self.operations:
+            self.add_command(res, "push", self.remote_name, self.remote_branch)
+            if "tag" in self.operations:
+                self.add_command(res, "push", self.remote_name, tag_name)
         return res

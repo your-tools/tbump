@@ -336,3 +336,48 @@ def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) ->
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", str(test_repo), "1.2.42"])
     assert message_recorder.find("refusing to replace by version containing 'None'")
+
+
+def test_no_push(test_repo: Path) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    # We're not supposed to push anything, so we should not even check that the
+    # current branch tracks something.
+    tbump.git.run_git(test_repo, "branch", "--unset-upstream")
+
+    tbump.main.main(
+        ["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive", "--no-push"]
+    )
+
+    assert commit_created(test_repo)
+    assert tag_created(test_repo)
+    assert not branch_pushed(test_repo, previous_commit)
+
+
+def test_no_tag(test_repo: Path) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+
+    tbump.main.main(
+        ["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive", "--no-tag"]
+    )
+
+    assert commit_created(test_repo)
+    assert not tag_created(test_repo)
+
+
+def test_no_tag_no_push(test_repo: Path) -> None:
+    _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+    tbump.git.run_git(test_repo, "branch", "--unset-upstream")
+
+    tbump.main.main(
+        [
+            "-C",
+            str(test_repo),
+            "1.2.41-alpha-2",
+            "--non-interactive",
+            "--no-tag",
+            "--no-push",
+        ]
+    )
+
+    assert commit_created(test_repo)
+    assert not tag_created(test_repo)
