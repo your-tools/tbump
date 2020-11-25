@@ -64,7 +64,7 @@ class Executor:
 
         git_commands = ActionGroup(
             "Would run these git commands",
-            "Making bump commit and push matching tag",
+            "Performing git operations",
             git_bumper.get_commands(new_version),
         )
         self.work.append(git_commands)

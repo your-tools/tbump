@@ -34,6 +34,8 @@ Options:
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
+   --no-tag           Do not create a tag
+   --no-push          DO not push after creating the commit and/or tag
 """
 )
 
@@ -83,16 +85,21 @@ def run(cmd: List[str]) -> None:
         bump_options.dry_run = True
     if opt_dict["--non-interactive"]:
         bump_options.interactive = False
+
+    operations = ["patch", "hooks", "commit", "tag", "push"]
     if opt_dict["--only-patch"]:
-        bump_options.only_patch = True
-    bump(bump_options)
+        operations = ["patch"]
+    if opt_dict["--no-push"]:
+        operations.remove("push")
+    if opt_dict["--no-tag"]:
+        operations.remove("tag")
+    bump(bump_options, operations)
 
 
-def bump(options: BumpOptions) -> None:
+def bump(options: BumpOptions, operations: List[str]) -> None:
     working_path = options.working_path
     new_version = options.new_version
     interactive = options.interactive
-    only_patch = options.only_patch
     dry_run = options.dry_run
 
     config_file = tbump.config.get_config_file(options.working_path)
@@ -105,13 +112,12 @@ def bump(options: BumpOptions) -> None:
     )
     # fmt: on
 
-    git_bumper = GitBumper(working_path)
+    git_bumper = GitBumper(working_path, operations)
     git_bumper.set_config(config)
     git_state_error = None
     try:
-        git_bumper.check_dirty()  # Avoid data loss
-        if not only_patch:
-            git_bumper.check_branch_state(new_version)
+        git_bumper.check_dirty()
+        git_bumper.check_branch_state(new_version)
     except tbump.git.GitError as e:
         if dry_run:
             git_state_error = e
@@ -121,14 +127,14 @@ def bump(options: BumpOptions) -> None:
     file_bumper = FileBumper(working_path)
     file_bumper.set_config_file(config_file)
 
-    hooks_runner = HooksRunner(working_path, config.current_version)
-    if not only_patch:
+    executor = Executor(new_version, file_bumper)
+
+    hooks_runner = HooksRunner(working_path, config.current_version, operations)
+    if "hooks" in operations:
         for hook in config.hooks:
             hooks_runner.add_hook(hook)
 
-    executor = Executor(new_version, file_bumper)
-    if not only_patch:
-        executor.add_git_and_hook_actions(new_version, git_bumper, hooks_runner)
+    executor.add_git_and_hook_actions(new_version, git_bumper, hooks_runner)
 
     if interactive:
         executor.print_self(dry_run=True)
@@ -148,7 +154,7 @@ def bump(options: BumpOptions) -> None:
     executor.print_self(dry_run=False)
     executor.run()
 
-    if config.github_url:
+    if config.github_url and "push" in operations:
         tag_name = git_bumper.get_tag_name(new_version)
         suggest_creating_github_release(config.github_url, tag_name)
 
