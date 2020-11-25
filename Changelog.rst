@@ -4,6 +4,19 @@ Changelog
 Next release
 -------------
 
+More flexible workflow
++++++++++++++++++++++++
+
+* Add a ``--no-push`` option to create the commit and the tag, but not push them
+* Add a ``--no-tag`` option to skip creating the tag
+
+Note that if you want to create a commit and run the hooks but nothing else, you
+must use ``tbump --no-tag --no-push <new version>``.
+
+If you only want to patch the files use ``tbump --only-patch``.
+
+See #65 for more details
+
 pyproject.toml support
 ++++++++++++++++++++++
 
