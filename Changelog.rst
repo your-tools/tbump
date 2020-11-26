@@ -1,6 +1,21 @@
 Changelog
 =========
 
+Next release
+-------------
+
+pyproject.toml support
+++++++++++++++++++++++
+
+Idea and initial implementation by @pmav99
+
+* If no ``tbump.toml`` file is present, but a ``pyproject.toml`` file
+  containing a ``tool.tbump`` section exists, read the configuration from
+  there.
+
+* ``tbump init``: add a ``--pyproject`` option to append configuration into
+  an existing ``pyproject.toml`` instead of generating the ``tbump.toml`` file
+
 v6.2.0 (2020-11-24)
 -------------------
 
