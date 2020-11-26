@@ -151,7 +151,6 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
         else:
             return
 
-    executor.print_self(dry_run=False)
     executor.run()
 
     if config.github_url and "push" in operations:
