@@ -28,7 +28,7 @@ def init(working_path: Path, *, current_version: str) -> None:
     template = textwrap.dedent(
         """\
         # Uncomment this if your project is hosted on GitHub:
-        # github_url = https://github.com/<user or organization>/<project>/
+        # github_url = "https://github.com/<user or organization>/<project>/"
 
         [version]
         current = "@current_version@"
