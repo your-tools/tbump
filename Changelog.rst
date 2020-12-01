@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v6.2.1 (2020-12-01)
+-------------------
+
+* Fix invalid syntax in generated config file.
+  (`#80 <https://github.com/TankerHQ/tbump/pull/80>`_).
+  Patch by `@snadorp`.
+
 v6.2.0 (2020-11-24)
 -------------------
 
