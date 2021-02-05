@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Next release
--------------
+6.3.0 (2021-02-05)
+------------------
 
 More flexible workflow
 +++++++++++++++++++++++
@@ -15,7 +15,7 @@ must use ``tbump --no-tag --no-push <new version>``.
 
 If you only want to patch the files use ``tbump --only-patch``.
 
-See #65 for more details
+See `#65 <https://github.com/TankerHQ/tbump/issues/65>`_ for more details
 
 pyproject.toml support
 ++++++++++++++++++++++
@@ -28,6 +28,11 @@ Idea and initial implementation by @pmav99
 
 * ``tbump init``: add a ``--pyproject`` option to append configuration into
   an existing ``pyproject.toml`` instead of generating the ``tbump.toml`` file
+
+Bug fixes
++++++++++
+
+*  Fix invalid syntax in generated config file (`#80 <https://github.com/TankerHQ/tbump/pull/80>`_). Patch by `@snadorp`.
 
 v6.2.0 (2020-11-24)
 -------------------
