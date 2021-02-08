@@ -35,7 +35,8 @@ Options:
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
    --no-tag           Do not create a tag
-   --no-push          DO not push after creating the commit and/or tag
+   --no-push          Do not push after creating the commit and/or tag
+   --no-tag-push      Create a tag, but don't push it
 """
 )
 
@@ -86,13 +87,19 @@ def run(cmd: List[str]) -> None:
     if opt_dict["--non-interactive"]:
         bump_options.interactive = False
 
-    operations = ["patch", "hooks", "commit", "tag", "push"]
+    operations = ["patch", "hooks", "commit", "tag", "push_commit", "push_tag"]
     if opt_dict["--only-patch"]:
         operations = ["patch"]
     if opt_dict["--no-push"]:
-        operations.remove("push")
+        operations.remove("push_commit")
+        operations.remove("push_tag")
+    if opt_dict["--no-tag-push"]:
+        operations.remove("push_tag")
     if opt_dict["--no-tag"]:
         operations.remove("tag")
+        # Also remove push_tag if it's still in the list:
+        if "push_tag" in operations:
+            operations.remove("push_tag")
     bump(bump_options, operations)
 
 
@@ -153,7 +160,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
 
     executor.run()
 
-    if config.github_url and "push" in operations:
+    if config.github_url and "push_tag" in operations:
         tag_name = git_bumper.get_tag_name(new_version)
         suggest_creating_github_release(config.github_url, tag_name)
 

@@ -123,7 +123,7 @@ class GitBumper:
             tag_name = self.get_tag_name(new_version)
             self.check_ref_does_not_exists(tag_name)
 
-        if "push" in self.operations:
+        if "push_commit" in self.operations:
             self.get_current_branch()
             tracking_ref = self.get_tracking_ref()
             self.remote_name, self.remote_branch = tracking_ref.split("/", maxsplit=1)
@@ -145,8 +145,8 @@ class GitBumper:
             self.add_command(
                 res, "tag", "--annotate", "--message", tag_message, tag_name
             )
-        if "push" in self.operations:
+        if "push_commit" in self.operations:
             self.add_command(res, "push", self.remote_name, self.remote_branch)
-            if "tag" in self.operations:
+            if "push_tag" in self.operations:
                 self.add_command(res, "push", self.remote_name, tag_name)
         return res

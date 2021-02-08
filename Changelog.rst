@@ -1,6 +1,11 @@
 Changelog
 =========
 
+6.3.1 (2021-02-05)
+------------------
+
+* Add a ``--no-tag-push`` option to create the tag but not push it
+
 6.3.0 (2021-02-05)
 ------------------
 
