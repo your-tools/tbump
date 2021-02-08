@@ -69,7 +69,7 @@ class HooksRunner:
         return self._get_hooks_for_new_version_by_type(new_version, "before_commit")
 
     def get_after_hooks(self, new_version: str) -> List[Hook]:
-        if "push" in self.operations:
+        if "push_tag" in self.operations or "push_commit" in self.operations:
             return self._get_hooks_for_new_version_by_type(new_version, "after_push")
         else:
             return []
