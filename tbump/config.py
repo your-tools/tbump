@@ -18,6 +18,7 @@ from .hooks import HOOKS_CLASSES, Hook
 class File:
     src: str = attr.ib()
     search: Optional[str] = attr.ib(default=None)
+    multiline_re_search: Optional[re.Pattern] = attr.ib(default=None)
     version_template: Optional[str] = attr.ib(default=None)
 
 
@@ -68,7 +69,7 @@ class TbumpTomlConfig(ConfigFile):
 
 
 class PyprojectConfig(ConfigFile):
-    """Represent a config inside a pyproject.toml file,
+    """Repeesent a config inside a pyproject.toml file,
     under the [tool.tbump] key
     """
 
@@ -112,6 +113,11 @@ def validate_hook_cmd(cmd: str) -> None:
         raise schema.SchemaError(message)
 
 
+def validate_re(regex: str) -> str:
+    re.compile(regex, re.VERBOSE)
+    return regex
+
+
 def validate_basic_schema(config: Any) -> None:
     """ First pass of validation, using schema """
     # Note: asserts that we won't get KeyError or invalid types
@@ -120,15 +126,12 @@ def validate_basic_schema(config: Any) -> None:
         {
             "src": str,
             schema.Optional("search"): str,
+            schema.Optional("multiline_re_search"): schema.Use(validate_re),
             schema.Optional("version_template"): str,
         }
     )
 
     hook_schema = schema.Schema({"name": str, "cmd": str})
-
-    def validate_re(regex: str) -> str:
-        re.compile(regex, re.VERBOSE)
-        return regex
 
     tbump_schema = schema.Schema(
         {
@@ -217,6 +220,9 @@ def from_parsed_config(parsed: Any) -> Config:
         file_config = File(
             src=file_dict["src"],
             search=file_dict.get("search"),
+            multiline_re_search=re.compile(
+                file_dict.get("multiline_re_search"), re.MULTILINE
+            ),
             version_template=file_dict.get("version_template"),
         )
         files.append(file_config)

@@ -18,6 +18,7 @@ class ChangeRequest:
     old_string: str = attr.ib()
     new_string: str = attr.ib()
     search: Optional[str] = attr.ib(default=None)
+    multiline_re_search: Optional[re.Pattern] = attr.ib(default=None)
 
 
 class Patch(tbump.action.Action):
@@ -216,6 +217,7 @@ class FileBumper:
         for file_path_str in glob.glob(str(file_path_glob), recursive=True):
             file_path = Path(file_path_str)
             expanded_src = file_path.relative_to(self.working_path)
+            breakpoint()
             old_lines = file_path.read_text().splitlines(keepends=False)
 
             for i, old_line in enumerate(old_lines):
@@ -277,7 +279,13 @@ class FileBumper:
         if file.search:
             to_search = file.search.format(current_version=re.escape(current_version))
 
-        return ChangeRequest(file.src, current_version, new_version, search=to_search)
+        return ChangeRequest(
+            file.src,
+            current_version,
+            new_version,
+            search=to_search,
+            multiline_re_search=file.multiline_re_search,
+        )
 
 
 def bump_files(new_version: str, repo_path: Optional[Path] = None) -> None:

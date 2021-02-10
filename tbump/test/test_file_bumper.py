@@ -1,4 +1,5 @@
 from pathlib import Path
+import textwrap
 
 import pytest
 
@@ -208,3 +209,62 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
 
     assert file_contains(tmp_path / foo_c, '#define FULL_VERSION "1.3.0"')
     assert file_contains(tmp_path / foo_c, '#define PUBLIC_VERSION "1.3"')
+
+
+def test_multiline_regex_search(tmp_path: Path) -> None:
+    cargo_lock = tmp_path / "Cargo.lock"
+    cargo_lock.write_text(
+        textwrap.dedent(
+            """
+        [[package]]
+        name = "my-project"
+        version = "1.1.0"
+
+        [[package]]
+        name = "scopeguard"
+        version = "1.1.0"
+        """
+        )
+    )
+    tbump_path = tmp_path / "tbump.toml"
+    tbump_path.write_text(
+        r"""
+        [version]
+        current = "1.1.0"
+        regex = '''
+            (?P<major>\d+)
+            \.
+            (?P<minor>\d+)
+            (
+              \.
+              (?P<patch>\d+)
+            )?
+        '''
+
+        [git]
+        message_template = "Bump to {new_version}"
+        tag_template = "v{new_version}"
+
+        [[file]]
+        src = "Cargo.lock"
+        multiline_re_search = '^name = "my-project"\nversion = "{current_version}"'
+        """
+    )
+    bumper = tbump.file_bumper.FileBumper(tmp_path)
+    config_file = tbump.config.get_config_file(tmp_path)
+    bumper.set_config_file(config_file)
+    patches = bumper.get_patches(new_version="1.1.1")
+    for patch in patches:
+        patch.do()
+    actual = cargo_lock.read_text()
+    assert actual == textwrap.dedent(
+        """
+        [[package]]
+        name = "my-project"
+        version = "1.1.1"
+
+        [[package]]
+        name = "scopeguard"
+        version = "1.1.0"
+        """
+    )
