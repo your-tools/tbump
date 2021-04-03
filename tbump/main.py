@@ -52,7 +52,6 @@ class BumpOptions:
     new_version: str = attr.ib()
     interactive: bool = attr.ib(default=True)
     dry_run: bool = attr.ib(default=False)
-    only_patch: bool = attr.ib(default=False)
 
 
 def run(cmd: List[str]) -> None:
