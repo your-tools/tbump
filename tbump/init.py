@@ -25,14 +25,16 @@ def init(
     """ Interactively creates a new tbump.toml """
     ui.info_1("Generating tbump config file")
     if use_pyproject:
+        text = "[tool.tbump]\n"
         key_prefix = "tool.tbump."
         cfg_path = working_path / "pyproject.toml"
     else:
+        text = ""
         key_prefix = ""
         cfg_path = working_path / "tbump.toml"
         if cfg_path.exists():
             ui.fatal(cfg_path, "already exists")
-    text = textwrap.dedent(
+    text += textwrap.dedent(
         """\
         # Uncomment this if your project is hosted on GitHub:
         # github_url = "https://github.com/<user or organization>/<project>/"
