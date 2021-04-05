@@ -185,7 +185,6 @@ class FileBumper:
         self.current_groups = self.parse_version(self.current_version)
 
     def check_files_exist(self) -> None:
-        assert self.files
         for file in self.files:
             expected_path = self.working_path / file.src
             files_found = glob.glob(str(expected_path), recursive=True)

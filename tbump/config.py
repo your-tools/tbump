@@ -134,7 +134,7 @@ def validate_basic_schema(config: Any) -> None:
         {
             "version": {"current": str, "regex": schema.Use(validate_re)},
             "git": {"message_template": str, "tag_template": str},
-            "file": [file_schema],
+            schema.Optional("file"): [file_schema],
             schema.Optional("hook"): [hook_schema],  # retro-compat
             schema.Optional("before_push"): [hook_schema],  # retro-compat
             schema.Optional("before_commit"): [hook_schema],
@@ -213,7 +213,7 @@ def from_parsed_config(parsed: Any) -> Config:
     git_tag_template = parsed["git"]["tag_template"]
     version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
-    for file_dict in parsed["file"]:
+    for file_dict in parsed.get("file", []):
         file_config = File(
             src=file_dict["src"],
             search=file_dict.get("search"),
