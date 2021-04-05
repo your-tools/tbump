@@ -209,8 +209,8 @@ def _get_config_file(project_path: Path) -> ConfigFile:
 def from_parsed_config(parsed: Any) -> Config:
     validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
-    git_message_template = parsed["git"]["message_template"]
-    git_tag_template = parsed["git"]["tag_template"]
+    git_message_template = parsed.get("git", {}).get("message_template", "Bump to {new_version}")
+    git_tag_template = parsed.get("git", {}).get("tag_template", "v{new_version}")
     version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
     for file_dict in parsed.get("file", []):
