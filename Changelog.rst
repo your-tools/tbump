@@ -20,7 +20,7 @@ must use ``tbump --no-tag --no-push <new version>``.
 
 If you only want to patch the files use ``tbump --only-patch``.
 
-See `#65 <https://github.com/TankerHQ/tbump/issues/65>`_ for more details
+See `#65 <https://github.com/dmerejkowsky/tbump/issues/65>`_ for more details
 
 pyproject.toml support
 ++++++++++++++++++++++
@@ -37,7 +37,7 @@ Idea and initial implementation by @pmav99
 Bug fixes
 +++++++++
 
-*  Fix invalid syntax in generated config file (`#80 <https://github.com/TankerHQ/tbump/pull/80>`_). Patch by `@snadorp`.
+*  Fix invalid syntax in generated config file (`#80 <https://github.com/dmerejkowsky/tbump/pull/80>`_). Patch by `@snadorp`.
 
 v6.2.0 (2020-11-24)
 -------------------
@@ -81,12 +81,12 @@ v6.0.3 (2020-01-23)
 v6.0.2 (2019-07-19)
 -------------------
 
-* Implement `#36 <https://github.com/TankerHQ/tbump/issues/36>`_: The ``--only-patch`` flag now allows skipping any git operations or hook commands.
+* Implement `#36 <https://github.com/dmerejkowsky/tbump/issues/36>`_: The ``--only-patch`` flag now allows skipping any git operations or hook commands.
 
 v6.0.1 (2019-07-16)
 -------------------
 
-* Fix `#41 <https://github.com/TankerHQ/tbump/issues/41>`_: When run with ``--dry-run``, don't abort if git state is incorrect, just print the error message at the end.
+* Fix `#41 <https://github.com/dmerejkowsky/tbump/issues/41>`_: When run with ``--dry-run``, don't abort if git state is incorrect, just print the error message at the end.
 
 v6.0.0 (2019-07-15)
 -------------------
@@ -152,7 +152,7 @@ v4.0.0 (2018-07-13)
 v3.0.1 (2018-07-12)
 -------------------
 
-* Bug fix: make sure to push the tag *after* the branch. See `#20 <https://github.com/TankerHQ/tbump/issues/20>`_ for the details.
+* Bug fix: make sure to push the tag *after* the branch. See `#20 <https://github.com/dmerejkowsky/tbump/issues/20>`_ for the details.
 
 v3.0.0 (2018-05-14)
 --------------------
@@ -183,7 +183,7 @@ v1.0.1 (2018-04-05)
 -------------------
 
 
-* Use annotated tags instead of lightweight tags. Patch by @tux3. See `PR #7 <https://github.com/TankerHQ/tbump/pull/7>`_ for the rationale.
+* Use annotated tags instead of lightweight tags. Patch by @tux3. See `PR #7 <https://github.com/dmerejkowsky/tbump/pull/7>`_ for the rationale.
 * When the current branch does not track anything, ask if we should proceed with file replacements and automatic commit and tag (but do not push) instead of aborting immediately.
 
 v1.0.0 (2018-01-16)
