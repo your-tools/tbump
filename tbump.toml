@@ -2,7 +2,7 @@ github_url = "https://github.com/dmerejkowsky/tbump"
 
 
 [version]
-current = "6.3.1"
+current = "6.3.2"
 regex = '''
   (?P<major>\d+)
   \.
