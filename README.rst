@@ -1,25 +1,17 @@
-.. image::  https://tanker.io/images/github-logo.png
-   :target: #readme
-
-|
-
 .. image:: https://img.shields.io/pypi/v/tbump.svg
   :target: https://pypi.org/project/tbump/
 
-.. image:: https://img.shields.io/github/license/TankerHQ/tbump.svg
-  :target: https://github.com/TankerHQ/tbump/blob/master/LICENSE
+.. image:: https://img.shields.io/github/license/dmerejkowsky/tbump.svg
+  :target: https://github.com/dmerejkowsky/tbump/blob/master/LICENSE
 
-.. image:: https://github.com/TankerHQ/tbump/workflows/tests/badge.svg
-   :target: https://github.com/TankerHQ/tbump/actions
+.. image:: https://github.com/dmerejkowsky/tbump/workflows/tests/badge.svg
+   :target: https://github.com/dmerejkowsky/tbump/actions
 
-.. image:: https://github.com/TankerHQ/tbump/workflows/linters/badge.svg
-   :target: https://github.com/TankerHQ/tbump/actions
-
-.. image:: https://img.shields.io/codecov/c/github/TankerHQ/tbump.svg?label=Coverage
-   :target: https://codecov.io/gh/TankerHQ/tbump
+.. image:: https://github.com/dmerejkowsky/tbump/workflows/linters/badge.svg
+   :target: https://github.com/dmerejkowsky/tbump/actions
 
 .. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-   :target: https://github.com/TankerHQ/tbump/workflows/safety/
+   :target: https://github.com/dmerejkowsky/tbump/workflows/safety/
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
    :target: https://github.com/psf/black
@@ -31,9 +23,16 @@
 tbump: bump software releases
 =============================
 
+Note
+----
+
+This project was originally hosted on the `TankerHQ
+<https://github.com/TankerHQ>`_ organization, which was my employer from 2016
+to 2021. They kindly agreed to give back ownership of this project to
+me. Thanks!
+
 Installation
 ------------
-
 
 The recommended way to install ``tbump`` is to use `pipx <https://pipxproject.github.io/pipx/>`_
 
