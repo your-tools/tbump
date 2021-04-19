@@ -37,9 +37,4 @@ jobs:
         # a proper git identity for that
         git config --global user.email "test@tbump-tests.com"
         git config --global user.name "Tasty Test"
-        python -m poetry run pytest --cov . --cov-report xml
-
-    - name: Send coverage to codecov.io
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        python -m poetry run pytest --cov . --cov-report term
