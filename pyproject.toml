@@ -7,6 +7,11 @@ version = "6.3.1"
 description = "Bump software releases"
 authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
+repository = "https://github.com/dmerejkowsky/tbump"
+
+[tool.poetry.urls]
+Changelog = "https://github.com/dmerejkowsky/tbump/blob/master/Changelog.rst"
+Issues = "https://github.com/dmerejkowsky/tbump/issues"
 
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
