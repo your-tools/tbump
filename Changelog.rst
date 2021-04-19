@@ -1,6 +1,13 @@
 Changelog
 =========
 
+6.3.2 (2021-04-19)
+------------------
+
+* Move out of the TankerHQ organization
+* Fix bug in ``tbump init --pyproject``
+* Allow usage of newer ``tomlkit`` versions
+
 6.3.1 (2021-02-05)
 ------------------
 
