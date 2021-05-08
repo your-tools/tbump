@@ -5,8 +5,9 @@ profile = "black"
 name = "tbump"
 version = "6.3.2"
 description = "Bump software releases"
-authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
 readme = "README.rst"
+authors = ["Dimitri Merejkowsky <dimitri@dmerej.info>"]
+license = "BSD-3-Clause"
 repository = "https://github.com/dmerejkowsky/tbump"
 
 [tool.poetry.urls]
@@ -38,5 +39,5 @@ safety = "^1.9.0"
 tbump = "tbump.main:main"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
