@@ -110,7 +110,7 @@ def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
 def assert_validation_error(config: Config, expected_message: str) -> None:
     try:
         tbump.config.validate_config(config)
-        assert False, "shoud have raise schema error"
+        pytest.fail("shoud have raise schema error")
     except schema.SchemaError as error:
         assert expected_message in error.args[0]
 
