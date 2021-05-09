@@ -22,7 +22,7 @@ def find_files(working_path: Path, current_version: str) -> List[str]:
 def init(
     working_path: Path, *, current_version: str, use_pyproject: bool = False
 ) -> None:
-    """ Interactively creates a new tbump.toml """
+    """Interactively creates a new tbump.toml"""
     ui.info_1("Generating tbump config file")
     if use_pyproject:
         text = "[tool.tbump]\n"

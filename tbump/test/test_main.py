@@ -178,7 +178,7 @@ def test_only_patch(test_repo: Path) -> None:
 
 
 def test_on_outdated_branch(test_repo: Path) -> None:
-    """ Make sure no tag is pushed when running tbump on an outdated branch"""
+    """Make sure no tag is pushed when running tbump on an outdated branch"""
     # See https://github.com/dmerejkowsky/tbump/issues/20 ¨ for details
 
     # Make sure the branch is out of date

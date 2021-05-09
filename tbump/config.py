@@ -36,7 +36,7 @@ class Config:
 
 
 class ConfigFile(metaclass=abc.ABCMeta):
-    """ Base class representing a config file """
+    """Base class representing a config file"""
 
     def __init__(self, path: Path):
         self.path = path
@@ -113,7 +113,7 @@ def validate_hook_cmd(cmd: str) -> None:
 
 
 def validate_basic_schema(config: Any) -> None:
-    """ First pass of validation, using schema """
+    """First pass of validation, using schema"""
     # Note: asserts that we won't get KeyError or invalid types
     # when building or initial Config instance
     file_schema = schema.Schema(
