@@ -11,7 +11,7 @@ license = "BSD-3-Clause"
 repository = "https://github.com/dmerejkowsky/tbump"
 
 [tool.poetry.urls]
-Changelog = "https://github.com/dmerejkowsky/tbump/blob/master/Changelog.rst"
+Changelog = "https://github.com/dmerejkowsky/tbump/blob/main/Changelog.rst"
 Issues = "https://github.com/dmerejkowsky/tbump/issues"
 
 [tool.poetry.dependencies]

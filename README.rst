@@ -2,7 +2,7 @@
   :target: https://pypi.org/project/tbump/
 
 .. image:: https://img.shields.io/github/license/dmerejkowsky/tbump.svg
-  :target: https://github.com/dmerejkowsky/tbump/blob/master/LICENSE
+  :target: https://github.com/dmerejkowsky/tbump/blob/main/LICENSE
 
 .. image:: https://github.com/dmerejkowsky/tbump/workflows/tests/badge.svg
    :target: https://github.com/dmerejkowsky/tbump/actions

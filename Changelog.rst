@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Next release
+------------
+
+Default development branch is now called `main`.
+
 6.3.2 (2021-04-19)
 ------------------
 
