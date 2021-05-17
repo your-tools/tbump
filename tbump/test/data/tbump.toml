@@ -23,6 +23,10 @@ src = "package.json"
 search = '"version": "{current_version}"'
 
 [[file]]
+src = "Cargo.toml"
+search = 'name = "my-project"\nversion = "{current_version}"'
+
+[[file]]
 src = "VERSION"
 
 [[file]]

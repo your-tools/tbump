@@ -21,6 +21,10 @@ def test_file_bumper_simple(test_repo: Path) -> None:
     assert file_contains(test_repo / "glob-one.c", 'version_one = "1.2.41-alpha-2"')
     assert file_contains(test_repo / "glob-two.v", 'version_two = "1.2.41-alpha-2"')
 
+    # one occurence is bumped up, others remain unchanged
+    assert file_contains(test_repo / "Cargo.toml", 'version = "1.2.41-alpha-2"')
+    assert file_contains(test_repo / "Cargo.toml", 'version = "1.2.41-alpha-1"')
+
 
 def test_patcher_preserve_endings(tmp_path: Path) -> None:
     foo_txt = tmp_path / "foo.txt"

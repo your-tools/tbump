@@ -19,6 +19,10 @@ def test_happy_parse(test_data_path: Path) -> None:
     )
     version_txt = tbump.config.File(src="VERSION")
     pub_js = tbump.config.File(src="pub.js", version_template="{major}.{minor}.{patch}")
+    cargo_toml = tbump.config.File(
+        src="Cargo.toml",
+        search='name = "my-project"\\nversion = "{current_version}"',
+    )
     glob = tbump.config.File(
         src="glob*.?", search='version_[a-z]+ = "{current_version}"'
     )
@@ -38,7 +42,7 @@ def test_happy_parse(test_data_path: Path) -> None:
 
     assert config.version_regex.pattern == expected_pattern
 
-    assert config.files == [foo_json, version_txt, pub_js, glob]
+    assert config.files == [foo_json, cargo_toml, version_txt, pub_js, glob]
 
     assert config.current_version == "1.2.41-alpha-1"
 

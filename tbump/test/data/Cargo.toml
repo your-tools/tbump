@@ -1,0 +1,11 @@
+[[package]]
+name = "my-project"
+version = "1.2.41-alpha-1"
+
+[[package]]
+name = "rustc-hash"
+version = "1.2.41-alpha-1"
+
+[[package]]
+name = "scopeguard"
+version = "1.2.41-alpha-1"

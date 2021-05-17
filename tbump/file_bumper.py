@@ -20,6 +20,44 @@ class ChangeRequest:
     search: Optional[str] = attr.ib(default=None)
 
 
+class MultilinePatch(tbump.action.Action):
+    def __init__(
+            self, working_path: Path, src: str, new_lines: str, matches:
+            List[str], new_phrase: str
+    ):
+        super().__init__()
+        self.working_path = working_path
+        self.src = src
+        self.new_lines = new_lines
+        self.matches = matches
+        self.new_phrase = new_phrase
+
+    def print_self(self) -> None:
+        for match in self.matches:
+            # fmt: off
+            ui.info(
+                ui.red, "- ", ui.reset,
+                ui.bold, self.src,  ui.reset,
+                " ", ui.red, re.escape(match.strip()),
+                sep="",
+            )
+            ui.info(
+                ui.green, "+ ", ui.reset,
+                ui.bold, self.src, ui.reset,
+                " ", ui.green, re.escape(self.new_phrase.strip()),
+                sep="",
+            )
+            # fmt: on
+
+    def do(self) -> None:
+        self.apply()
+
+    def apply(self) -> None:
+        file_path = self.working_path / self.src
+        with open(file_path, "w") as f:
+            f.write(self.new_lines)
+
+
 class Patch(tbump.action.Action):
     def __init__(
         self, working_path: Path, src: str, lineno: int, old_line: str, new_line: str
@@ -212,19 +250,39 @@ class FileBumper:
         search = change_request.search
         patches = []
 
-        file_path_glob = self.working_path / change_request.src
-        for file_path_str in glob.glob(str(file_path_glob), recursive=True):
-            file_path = Path(file_path_str)
-            expanded_src = file_path.relative_to(self.working_path)
-            old_lines = file_path.read_text().splitlines(keepends=False)
-
-            for i, old_line in enumerate(old_lines):
-                if should_replace(old_line, old_string, search):
-                    new_line = old_line.replace(old_string, new_string)
-                    patch = Patch(
-                        self.working_path, str(expanded_src), i, old_line, new_line
-                    )
+        # Checking for multi-line search phrase
+        if search is not None and "\\n" in search:
+            # OK, this is a multi-line search
+            file_path_glob = self.working_path / change_request.src
+            for file_path_str in glob.glob(str(file_path_glob), recursive=True):
+                file_path = Path(file_path_str)
+                expanded_src = file_path.relative_to(self.working_path)
+                old_lines = file_path.read_text()
+                match = re.findall(search, old_lines, re.DOTALL | re.MULTILINE)
+                if len(match) > 0:
+                    replacement = search.replace(old_string, new_string)
+                    new_lines = re.sub(search,  replacement, old_lines, re.DOTALL | re.MULTILINE)
+                    # we're using a dedicated multi-line patch class for this case
+                    patch = MultilinePatch(
+                                self.working_path, str(expanded_src), new_lines, match, replacement
+                            )
                     patches.append(patch)
+
+        else:
+            file_path_glob = self.working_path / change_request.src
+            for file_path_str in glob.glob(str(file_path_glob), recursive=True):
+                file_path = Path(file_path_str)
+                expanded_src = file_path.relative_to(self.working_path)
+                old_lines = file_path.read_text().splitlines(keepends=False)
+
+                for i, old_line in enumerate(old_lines):
+                    if should_replace(old_line, old_string, search):
+                        new_line = old_line.replace(old_string, new_string)
+                        patch = Patch(
+                            self.working_path, str(expanded_src), i, old_line, new_line
+                        )
+                        patches.append(patch)
+
         if not patches:
             raise CurrentVersionNotFound(
                 src=change_request.src, current_version_string=old_string
@@ -275,7 +333,7 @@ class FileBumper:
 
         to_search = None
         if file.search:
-            to_search = file.search.format(current_version=re.escape(current_version))
+            to_search = file.search.format(current_version=current_version)
 
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
