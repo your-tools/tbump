@@ -259,9 +259,9 @@ class FileBumper:
                 expanded_src = file_path.relative_to(self.working_path)
                 old_lines = file_path.read_text()
                 match = re.findall(search, old_lines, re.DOTALL | re.MULTILINE)
-                if len(match) > 0:
-                    replacement = search.replace(old_string, new_string)
-                    new_lines = re.sub(search,  replacement, old_lines, re.DOTALL | re.MULTILINE)
+                for m in match:
+                    replacement = m.replace(old_string, new_string)
+                    new_lines = old_lines.replace(m, replacement)
                     # we're using a dedicated multi-line patch class for this case
                     patch = MultilinePatch(
                                 self.working_path, str(expanded_src), new_lines, match, replacement
