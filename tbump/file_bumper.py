@@ -22,8 +22,12 @@ class ChangeRequest:
 
 class MultilinePatch(tbump.action.Action):
     def __init__(
-            self, working_path: Path, src: str, new_lines: str, matches:
-            List[str], new_phrase: str
+        self,
+        working_path: Path,
+        src: str,
+        new_lines: str,
+        matches: List[str],
+        new_phrase: str,
     ):
         super().__init__()
         self.working_path = working_path
@@ -34,17 +38,18 @@ class MultilinePatch(tbump.action.Action):
 
     def print_self(self) -> None:
         for match in self.matches:
+            removed_lines = "\n".join([f"- {m}" for m in match.strip().split("\n")])
+            added_lines = "\n".join(
+                [f"+ {m}" for m in self.new_phrase.strip().split("\n")]
+            )
             # fmt: off
+            ui.info(ui.bold, self.src, ui.reset)
             ui.info(
-                ui.red, "- ", ui.reset,
-                ui.bold, self.src,  ui.reset,
-                " ", ui.red, re.escape(match.strip()),
+                ui.red, removed_lines, ui.reset,
                 sep="",
             )
             ui.info(
-                ui.green, "+ ", ui.reset,
-                ui.bold, self.src, ui.reset,
-                " ", ui.green, re.escape(self.new_phrase.strip()),
+                ui.green, added_lines, ui.reset,
                 sep="",
             )
             # fmt: on
@@ -71,18 +76,15 @@ class Patch(tbump.action.Action):
 
     def print_self(self) -> None:
         # fmt: off
+        ui.info(ui.bold, self.src, ui.reset, ":", self.lineno + 1, ui.reset,sep="")
         ui.info(
             ui.red, "- ", ui.reset,
-            ui.bold, self.src, ":", ui.reset,
-            ui.darkgray, self.lineno + 1, ui.reset,
-            " ", ui.red, self.old_line.strip(),
+            ui.red, self.old_line.strip(),
             sep="",
         )
         ui.info(
             ui.green, "+ ", ui.reset,
-            ui.bold, self.src, ":", ui.reset,
-            ui.darkgray, self.lineno + 1, ui.reset,
-            " ", ui.green, self.new_line.strip(),
+            ui.green, self.new_line.strip(),
             sep="",
         )
         # fmt: on
@@ -115,7 +117,7 @@ class BadSubstitution(tbump.Error):
         verb: str,
         groups: Dict[str, str],
         template: str,
-        version: str
+        version: str,
     ):
         super().__init__()
         self.src = src
@@ -264,8 +266,12 @@ class FileBumper:
                     new_lines = old_lines.replace(m, replacement)
                     # we're using a dedicated multi-line patch class for this case
                     patch = MultilinePatch(
-                                self.working_path, str(expanded_src), new_lines, match, replacement
-                            )
+                        self.working_path,
+                        str(expanded_src),
+                        new_lines,
+                        match,
+                        replacement,
+                    )
                     patches.append(patch)
 
         else:
