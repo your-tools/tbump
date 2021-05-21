@@ -280,10 +280,14 @@ class FileBumper:
         return ChangeRequest(file.src, current_version, new_version, search=to_search)
 
 
-def bump_files(new_version: str, repo_path: Optional[Path] = None) -> None:
+def bump_files(
+    new_version: str,
+    repo_path: Optional[Path] = None,
+    config_file_path: Optional[Path] = None,
+) -> None:
     repo_path = repo_path or Path(".")
     bumper = FileBumper(repo_path)
-    config_file = tbump.config.get_config_file(repo_path)
+    config_file = tbump.config.get_config_file(repo_path, config_file_path)
     bumper.set_config_file(config_file)
     patches = bumper.get_patches(new_version=new_version)
     n = len(patches)

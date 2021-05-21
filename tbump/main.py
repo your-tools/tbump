@@ -4,10 +4,10 @@ import urllib.parse
 from pathlib import Path
 from typing import List, Optional
 
-import attr
 import cli_ui as ui
 import docopt
 
+import attr
 import tbump
 import tbump.config
 import tbump.git
@@ -31,6 +31,7 @@ Options:
    -h --help          Show this screen.
    -v --version       Show version.
    -C --cwd=<path>    Set working directory to <path>.
+   -c --config=<path> Use specified toml config file. When not set, `tbump.toml` from working directory is assumed.
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
@@ -52,6 +53,7 @@ class BumpOptions:
     new_version: str = attr.ib()
     interactive: bool = attr.ib(default=True)
     dry_run: bool = attr.ib(default=False)
+    config_file_path: Optional[Path] = attr.ib(default=None)
 
 
 def run(cmd: List[str]) -> None:
@@ -74,13 +76,26 @@ def run(cmd: List[str]) -> None:
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
         use_pyproject = opt_dict["--pyproject"]
+        specified_config_path = opt_dict["--config"]
+        specified_config_path = (
+            Path(specified_config_path) if specified_config_path is not None else None
+        )
         tbump.init.init(
-            working_path, current_version=current_version, use_pyproject=use_pyproject
+            working_path,
+            current_version=current_version,
+            use_pyproject=use_pyproject,
+            specified_config_path=specified_config_path,
         )
         return
 
     new_version = opt_dict["<new_version>"]
     bump_options = BumpOptions(working_path=working_path, new_version=new_version)
+    if opt_dict["--config"]:
+        specified_config_path = opt_dict["--config"]
+        specified_config_path = (
+            Path(specified_config_path) if specified_config_path is not None else None
+        )
+        bump_options.config_file_path = specified_config_path
     if opt_dict["--dry-run"]:
         bump_options.dry_run = True
     if opt_dict["--non-interactive"]:
@@ -108,7 +123,9 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     interactive = options.interactive
     dry_run = options.dry_run
 
-    config_file = tbump.config.get_config_file(options.working_path)
+    config_file = tbump.config.get_config_file(
+        options.working_path, options.config_file_path
+    )
     config = config_file.get_config()
 
     # fmt: off

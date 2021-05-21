@@ -175,9 +175,11 @@ def validate_config(cfg: Config) -> None:
         validate_hook_cmd(hook.cmd)
 
 
-def get_config_file(project_path: Path) -> ConfigFile:
+def get_config_file(
+    project_path: Path, specified_config_path: Optional[Path]
+) -> ConfigFile:
     try:
-        res = _get_config_file(project_path)
+        res = _get_config_file(project_path, specified_config_path)
         # Check that the config is valid before returning it,
         # so that problems in config file are reported early
         res.get_config()
@@ -188,8 +190,14 @@ def get_config_file(project_path: Path) -> ConfigFile:
         raise InvalidConfig(parse_error=parse_error)
 
 
-def _get_config_file(project_path: Path) -> ConfigFile:
-    toml_path = project_path / "tbump.toml"
+def _get_config_file(
+    project_path: Path, specified_config_path: Optional[Path]
+) -> ConfigFile:
+    if specified_config_path is not None:
+        toml_path = specified_config_path
+    else:
+        toml_path = project_path / "tbump.toml"
+
     if toml_path.exists():
         doc = tomlkit.loads(toml_path.read_text())
         return TbumpTomlConfig(toml_path, doc)

@@ -8,7 +8,7 @@ from tbump.test.conftest import file_contains
 
 def test_file_bumper_simple(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
-    config_file = tbump.config.get_config_file(test_repo)
+    config_file = tbump.config.get_config_file(test_repo, None)
     assert bumper.working_path == test_repo
     bumper.set_config_file(config_file)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
@@ -35,7 +35,7 @@ def test_patcher_preserve_endings(tmp_path: Path) -> None:
 
 def test_file_bumper_preserve_endings(test_repo: Path) -> None:
     bumper = tbump.file_bumper.FileBumper(test_repo)
-    config_file = tbump.config.get_config_file(test_repo)
+    config_file = tbump.config.get_config_file(test_repo, None)
     package_json = test_repo / "package.json"
 
     # Make sure package.json contain CRLF line endings
@@ -83,7 +83,7 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
         version = "1.2"
         """
     )
-    config_file = tbump.config.get_config_file(tmp_path)
+    config_file = tbump.config.get_config_file(tmp_path, None)
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config_file(config_file)
     with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
@@ -110,7 +110,7 @@ def test_current_version_not_found(tmp_path: Path) -> None:
     )
     version_txt_path = tmp_path / "version.txt"
     version_txt_path.write_text("nope")
-    config_file = tbump.config.get_config_file(tmp_path)
+    config_file = tbump.config.get_config_file(tmp_path, None)
 
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     bumper.set_config_file(config_file)
@@ -153,7 +153,7 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
     )
 
     bumper = tbump.file_bumper.FileBumper(tmp_path)
-    config_file = tbump.config.get_config_file(tmp_path)
+    config_file = tbump.config.get_config_file(tmp_path, None)
     bumper.set_config_file(config_file)
     with pytest.raises(tbump.file_bumper.BadSubstitution) as e:
         bumper.get_patches(new_version="1.3")
@@ -200,7 +200,7 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
         """
     )
     bumper = tbump.file_bumper.FileBumper(tmp_path)
-    config_file = tbump.config.get_config_file(tmp_path)
+    config_file = tbump.config.get_config_file(tmp_path, None)
     bumper.set_config_file(config_file)
     patches = bumper.get_patches(new_version="1.3.0")
     for patch in patches:

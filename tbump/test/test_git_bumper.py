@@ -10,7 +10,7 @@ from tbump.git_bumper import GitBumper
 
 @pytest.fixture
 def test_git_bumper(test_repo: Path) -> GitBumper:
-    config_file = tbump.config.get_config_file(test_repo)
+    config_file = tbump.config.get_config_file(test_repo, None)
     config = config_file.get_config()
     git_bumper = tbump.git_bumper.GitBumper(
         test_repo, operations=["commit", "tag", "push_commit", "push_tag"]

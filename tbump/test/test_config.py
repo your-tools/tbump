@@ -12,7 +12,7 @@ from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 
 
 def test_happy_parse(test_data_path: Path) -> None:
-    config_file = tbump.config.get_config_file(test_data_path)
+    config_file = tbump.config.get_config_file(test_data_path, None)
     config = config_file.get_config()
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
@@ -47,7 +47,7 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     test_data_path: Path, tmp_path: Path
 ) -> None:
 
-    expected_file = tbump.config.get_config_file(test_data_path)
+    expected_file = tbump.config.get_config_file(test_data_path, None)
     parsed_config = expected_file.get_parsed()
     tools_config = tomlkit.table()
     tools_config.add("tbump", parsed_config)
@@ -59,7 +59,7 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     pyproject_toml = tmp_path / "pyproject.toml"
     pyproject_toml.write_text(to_write)
 
-    actual_file = tbump.config.get_config_file(tmp_path)
+    actual_file = tbump.config.get_config_file(tmp_path, None)
     assert actual_file.get_config() == expected_file.get_config()
 
 
@@ -74,7 +74,7 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
     pyproject_toml.write_text(to_write)
 
     with pytest.raises(tbump.config.ConfigNotFound):
-        tbump.config.get_config_file(tmp_path)
+        tbump.config.get_config_file(tmp_path, None)
 
 
 def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
@@ -103,7 +103,7 @@ def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
     pyproject_toml.write_text(to_write)
 
     with pytest.raises(tbump.config.InvalidConfig) as e:
-        tbump.config.get_config_file(tmp_path)
+        tbump.config.get_config_file(tmp_path, None)
     assert "'current'" in str(e.value.parse_error)
 
 
@@ -117,7 +117,7 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 @pytest.fixture
 def test_config(test_data_path: Path) -> Config:
-    config_file = tbump.config.get_config_file(test_data_path)
+    config_file = tbump.config.get_config_file(test_data_path, None)
     return config_file.get_config()
 
 
