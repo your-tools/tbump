@@ -12,7 +12,7 @@ import tbump.main
 def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
     """Patch the configuration file so that we can also test hooks."""
     cfg_path = test_repo / "tbump.toml"
-    parsed = tomlkit.loads(cfg_path.read_text())
+    parsed = tomlkit.loads(cfg_path.read_text(encoding="utf-8"))
     if after_push:
         key = "after_push"
     else:
@@ -24,7 +24,7 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     hook_config.add("name", name)
     parsed[key].append(hook_config)
 
-    cfg_path.write_text(tomlkit.dumps(parsed))
+    cfg_path.write_text(tomlkit.dumps(parsed), encoding="utf-8")
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
 
@@ -64,7 +64,7 @@ def test_working_hook(test_repo: Path) -> None:
     add_before_hook(test_repo)
     tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     hook_stamp = test_repo / "before-hook.stamp"
-    assert hook_stamp.read_text() == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
+    assert hook_stamp.read_text(encoding="utf-8") == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
 
 
 def test_hook_fails(test_repo: Path) -> None:

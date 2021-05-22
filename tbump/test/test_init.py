@@ -17,7 +17,7 @@ def test_creates_tbump_toml_config(test_repo: Path) -> None:
     tbump.main.main(["-C", str(test_repo), "init", current_version])
 
     assert tbump_path.exists()
-    config = tomlkit.loads(tbump_path.read_text())
+    config = tomlkit.loads(tbump_path.read_text(encoding="utf-8"))
     assert config["version"]["current"] == "1.2.41-alpha1"
 
 
@@ -29,13 +29,13 @@ def test_append_to_pyproject(test_repo: Path) -> None:
         profile = "black"
         """
     )
-    cfg_path.write_text(isort_config)
+    cfg_path.write_text(isort_config, encoding="utf-8")
     current_version = "1.2.41-alpha1"
 
     tbump.main.main(["-C", str(test_repo), "init", "--pyproject", current_version])
 
     assert cfg_path.exists()
-    config = tomlkit.loads(cfg_path.read_text())
+    config = tomlkit.loads(cfg_path.read_text(encoding="utf-8"))
     assert config["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha1"
     assert config["tool"]["isort"]["profile"] == "black"
 

@@ -25,7 +25,7 @@ def test_git_bumper_happy_path(test_repo: Path, test_git_bumper: GitBumper) -> N
     test_git_bumper.check_branch_state(new_version)
     # Make sure git add does not fail:
     # we could use file_bumper here instead
-    (test_repo / "VERSION").write_text(new_version)
+    (test_repo / "VERSION").write_text(new_version, encoding="utf-8")
     commands = test_git_bumper.get_commands(new_version)
     for command in commands:
         command.run()

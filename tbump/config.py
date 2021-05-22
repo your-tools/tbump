@@ -191,12 +191,12 @@ def get_config_file(project_path: Path) -> ConfigFile:
 def _get_config_file(project_path: Path) -> ConfigFile:
     toml_path = project_path / "tbump.toml"
     if toml_path.exists():
-        doc = tomlkit.loads(toml_path.read_text())
+        doc = tomlkit.loads(toml_path.read_text(encoding="utf-8"))
         return TbumpTomlConfig(toml_path, doc)
 
     pyproject_path = project_path / "pyproject.toml"
     if pyproject_path.exists():
-        doc = tomlkit.loads(pyproject_path.read_text())
+        doc = tomlkit.loads(pyproject_path.read_text(encoding="utf-8"))
         try:
             doc["tool"]["tbump"]
         except KeyError:

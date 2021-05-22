@@ -39,7 +39,7 @@ def test_file_bumper_preserve_endings(test_repo: Path) -> None:
     package_json = test_repo / "package.json"
 
     # Make sure package.json contain CRLF line endings
-    lines = package_json.read_text().splitlines(keepends=False)
+    lines = package_json.read_text(encoding="utf-8").splitlines(keepends=False)
     package_json.write_bytes(b"\r\n".join([x.encode() for x in lines]))
 
     bumper.set_config_file(config_file)
@@ -75,13 +75,15 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
         src = "foo"
         version_template = "{major}.{minor}.{patch}"
 
-        """
+        """,
+        encoding="utf-8",
     )
     foo_path = tmp_path / "foo"
     foo_path.write_text(
         """
         version = "1.2"
-        """
+        """,
+        encoding="utf-8",
     )
     config_file = tbump.config.get_config_file(tmp_path)
     bumper = tbump.file_bumper.FileBumper(tmp_path)
@@ -106,10 +108,11 @@ def test_current_version_not_found(tmp_path: Path) -> None:
 
         [[file]]
         src = "version.txt"
-        """
+        """,
+        encoding="utf-8",
     )
     version_txt_path = tmp_path / "version.txt"
-    version_txt_path.write_text("nope")
+    version_txt_path.write_text("nope", encoding="utf-8")
     config_file = tbump.config.get_config_file(tmp_path)
 
     bumper = tbump.file_bumper.FileBumper(tmp_path)
@@ -143,13 +146,15 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
         src = "foo"
         version_template = "{major}.{minor}.{patch}"
 
-        """
+        """,
+        encoding="utf-8",
     )
     foo_path = tmp_path / "foo"
     foo_path.write_text(
         """
         version = "1.2.3"
-        """
+        """,
+        encoding="utf-8",
     )
 
     bumper = tbump.file_bumper.FileBumper(tmp_path)
@@ -189,7 +194,8 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
         src = "foo.c"
         search = "FULL_VERSION"
 
-        """
+        """,
+        encoding="utf-8",
     )
 
     foo_c = tmp_path / "foo.c"
@@ -197,7 +203,8 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
         """
         #define FULL_VERSION "1.2.3"
         #define PUBLIC_VERSION "1.2"
-        """
+        """,
+        encoding="utf-8",
     )
     bumper = tbump.file_bumper.FileBumper(tmp_path)
     config_file = tbump.config.get_config_file(tmp_path)

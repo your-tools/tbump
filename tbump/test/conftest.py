@@ -36,7 +36,7 @@ def restore_cwd() -> Iterator[None]:
 
 
 def file_contains(path: Path, text: str) -> bool:
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if text in line:
             return True
     return False

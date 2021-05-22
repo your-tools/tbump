@@ -57,7 +57,7 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     to_write = tomlkit.dumps(pyproject_config)
 
     pyproject_toml = tmp_path / "pyproject.toml"
-    pyproject_toml.write_text(to_write)
+    pyproject_toml.write_text(to_write, encoding="utf-8")
 
     actual_file = tbump.config.get_config_file(tmp_path)
     assert actual_file.get_config() == expected_file.get_config()
@@ -71,7 +71,7 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
     profile = "black"
     """
     )
-    pyproject_toml.write_text(to_write)
+    pyproject_toml.write_text(to_write, encoding="utf-8")
 
     with pytest.raises(tbump.config.ConfigNotFound):
         tbump.config.get_config_file(tmp_path)
@@ -100,7 +100,7 @@ def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
           '''
        """
     )
-    pyproject_toml.write_text(to_write)
+    pyproject_toml.write_text(to_write, encoding="utf-8")
 
     with pytest.raises(tbump.config.InvalidConfig) as e:
         tbump.config.get_config_file(tmp_path)

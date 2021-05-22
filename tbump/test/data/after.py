@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def main() -> None:
-    Path("after-hook.stamp").write_text("")
+    Path("after-hook.stamp").write_text("", encoding="utf-8")
 
 
 if __name__ == "__main__":

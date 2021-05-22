@@ -6,6 +6,8 @@ Next release
 
 Default development branch is now called `main`.
 
+Always use `utf-8` encoding explicitly
+
 6.3.2 (2021-04-19)
 ------------------
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 def main() -> None:
     current, new = sys.argv[1:]
-    Path("before-hook.stamp").write_text(current + " -> " + new)
+    Path("before-hook.stamp").write_text(current + " -> " + new, encoding="utf-8")
 
 
 if __name__ == "__main__":

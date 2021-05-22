@@ -14,11 +14,11 @@ from tbump.test.conftest import file_contains
 def files_bumped(test_repo: Path, using_pyproject: bool = False) -> bool:
     if using_pyproject:
         cfg_path = test_repo / "pyproject.toml"
-        new_toml = tomlkit.loads(cfg_path.read_text())
+        new_toml = tomlkit.loads(cfg_path.read_text(encoding="utf-8"))
         current_version = new_toml["tool"]["tbump"]["version"]["current"]
     else:
         cfg_path = test_repo / "tbump.toml"
-        new_toml = tomlkit.loads(cfg_path.read_text())
+        new_toml = tomlkit.loads(cfg_path.read_text(encoding="utf-8"))
         current_version = new_toml["version"]["current"]
 
     assert current_version == "1.2.41-alpha-2"
@@ -34,7 +34,7 @@ def files_bumped(test_repo: Path, using_pyproject: bool = False) -> bool:
 
 def files_not_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.read_text())
+    new_toml = tomlkit.loads(toml_path.read_text(encoding="utf-8"))
     assert new_toml["version"]["current"] == "1.2.41-alpha-1"
 
     return all(
@@ -127,7 +127,7 @@ def test_end_to_end_using_pyproject_toml(test_repo: Path) -> None:
     tbump_toml_path = test_repo / "tbump.toml"
 
     # Convert tbump config to a config inside a tool.tbump section:
-    tbump_config = tomlkit.loads(tbump_toml_path.read_text())
+    tbump_config = tomlkit.loads(tbump_toml_path.read_text(encoding="utf-8"))
     tools_config = tomlkit.table()
     tools_config.add("tbump", tbump_config)
     pyproject_config = tomlkit.table()
@@ -136,7 +136,7 @@ def test_end_to_end_using_pyproject_toml(test_repo: Path) -> None:
 
     # Write the pyproject.toml and remove tbump.toml
     pyproject_toml_path = test_repo / "pyproject.toml"
-    pyproject_toml_path.write_text(to_write)
+    pyproject_toml_path.write_text(to_write, encoding="utf-8")
     tbump_toml_path.unlink()
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(
@@ -207,9 +207,9 @@ def test_tbump_toml_bad_syntax(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     toml_path = test_repo / "tbump.toml"
-    bad_toml = tomlkit.loads(toml_path.read_text())
+    bad_toml = tomlkit.loads(toml_path.read_text(encoding="utf-8"))
     del bad_toml["git"]
-    toml_path.write_text(tomlkit.dumps(bad_toml))
+    toml_path.write_text(tomlkit.dumps(bad_toml), encoding="utf-8")
     with pytest.raises(SystemExit):
         tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     assert message_recorder.find("Invalid config")
@@ -271,7 +271,7 @@ def test_abort_if_file_does_not_match(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     invalid_src = test_repo / "foo.txt"
-    invalid_src.write_text("this is foo")
+    invalid_src.write_text("this is foo", encoding="utf-8")
     tbump_path = test_repo / "tbump.toml"
     with tbump_path.open("a") as f:
         f.write(
@@ -320,7 +320,7 @@ def test_interactive_proceed(test_repo: Path, mocker: Any) -> None:
 
 
 def test_do_not_add_untracked_files(test_repo: Path) -> None:
-    (test_repo / "untracked.txt").write_text("please don't add me")
+    (test_repo / "untracked.txt").write_text("please don't add me", encoding="utf-8")
     tbump.main.main(["-C", str(test_repo), "1.2.42", "--non-interactive"])
     _, out = tbump.git.run_git_captured(test_repo, "show", "--stat", "HEAD")
     assert "untracked.txt" not in out
@@ -328,9 +328,9 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 
 def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) -> None:
     toml_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(toml_path.read_text())
+    new_toml = tomlkit.loads(toml_path.read_text(encoding="utf-8"))
     new_toml["file"][0]["version_template"] = "{release}"
-    toml_path.write_text(tomlkit.dumps(new_toml))
+    toml_path.write_text(tomlkit.dumps(new_toml), encoding="utf-8")
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update repo")
     with pytest.raises(SystemExit):
