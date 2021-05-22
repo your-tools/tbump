@@ -45,7 +45,7 @@ def file_contains(path: Path, text: str) -> bool:
 def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
     src_path = tmp_path / "src"
     shutil.copytree(test_data_path, src_path)
-    tbump.git.run_git(src_path, "init")
+    tbump.git.run_git(src_path, "init", "--initial-branch", "master")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
     tbump.git.run_git(
@@ -59,7 +59,7 @@ def setup_remote(tmp_path: Path) -> Path:
     git_path.mkdir()
     remote_path = git_path / "repo.git"
     remote_path.mkdir()
-    tbump.git.run_git(remote_path, "init", "--bare")
+    tbump.git.run_git(remote_path, "init", "--bare", "--initial-branch", "master")
 
     src_path = tmp_path / "src"
     tbump.git.run_git(src_path, "remote", "add", "origin", str(remote_path))
