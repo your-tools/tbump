@@ -1,0 +1,13 @@
+rules:
+  - id: python-no-implicit-encoding-when-reading
+    languages:
+      - python
+    message: Specify encoding when using read_text()
+    pattern: $OBJECT.read_text()
+    severity: ERROR
+  - id: python-no-implicit-encoding-when-writing
+    languages:
+      - python
+    message: Specify encoding when using write_text()
+    pattern: $OBJECT.write_text($X)
+    severity: ERROR

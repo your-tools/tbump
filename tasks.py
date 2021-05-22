@@ -40,6 +40,12 @@ def mypy(c, machine_readable=False):
 
 
 @task
+def semgrep(c):
+    print("Running semgrep")
+    c.run("semgrep -c semgrep.yml")
+
+
+@task
 def test(c):
     print("Running pytest")
     c.run("pytest -n auto")
@@ -47,6 +53,7 @@ def test(c):
 
 @task(
     pre=[
+        call(semgrep),
         call(black, check=True),
         call(isort, check=True),
         call(flake8),

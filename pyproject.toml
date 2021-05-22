@@ -37,6 +37,7 @@ pytest = "^6.2.1"
 pytest-cov = "^2.8.1"
 pytest-mock = "^2.0.0"
 safety = "^1.9.0"
+semgrep = "^0.52.0"
 
 [tool.poetry.scripts]
 tbump = "tbump.main:main"
