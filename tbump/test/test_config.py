@@ -77,7 +77,7 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
         tbump.config.get_config_file(tmp_path)
 
 
-def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
+def test_validate_schema_in_pyprpoject_toml(tmp_path: Path) -> None:
     pyproject_toml = tmp_path / "pyproject.toml"
     to_write = textwrap.dedent(
         r"""
@@ -110,7 +110,7 @@ def test_validate_schema_in_pyrpoject_toml(tmp_path: Path) -> None:
 def assert_validation_error(config: Config, expected_message: str) -> None:
     try:
         tbump.config.validate_config(config)
-        pytest.fail("shoud have raise schema error")
+        pytest.fail("should have raised schema error")
     except schema.SchemaError as error:
         assert expected_message in error.args[0]
 

@@ -43,7 +43,7 @@ class ConfigFile(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_parsed(self) -> Any:
-        """Return a plain dictionnary, suitable for validation
+        """Return a plain dictionary, suitable for validation
         by the `schema` library
         """
         pass

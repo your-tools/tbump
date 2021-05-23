@@ -61,7 +61,7 @@ def run(cmd: List[str]) -> None:
         return
 
     # when running `tbump init` (with current_version missing),
-    # docopt thinks we are runnig `tbump` with new_version = "init"
+    # docopt thinks we are running `tbump` with new_version = "init"
     # bail out early in this case
     if opt_dict["<new_version>"] == "init":
         sys.exit(USAGE)
@@ -175,7 +175,7 @@ def suggest_creating_github_release(github_url: str, tag_name: str) -> None:
 
 
 def main(args: Optional[List[str]] = None) -> None:
-    # Supress backtrace if exception derives from tbump.Error
+    # Suppress backtrace if exception derives from tbump.Error
     if not args:
         args = sys.argv[1:]
     try:
