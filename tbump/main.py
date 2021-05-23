@@ -4,10 +4,10 @@ import urllib.parse
 from pathlib import Path
 from typing import List, Optional
 
+import attr
 import cli_ui as ui
 import docopt
 
-import attr
 import tbump
 import tbump.config
 import tbump.git
@@ -31,7 +31,7 @@ Options:
    -h --help          Show this screen.
    -v --version       Show version.
    -C --cwd=<path>    Set working directory to <path>.
-   -c --config=<path> Use specified toml config file. When not set, `tbump.toml` from working directory is assumed.
+   -c --config=<path> Use specified toml config file. When not set, `tbump.toml` is assumed.
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
