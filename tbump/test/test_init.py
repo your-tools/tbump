@@ -27,7 +27,7 @@ def test_creates_tbump_toml_config_when_config_path_specified(test_repo: Path) -
     current_version = "1.2.41-alpha1"
 
     tbump.main.main(
-        ["-C", str(test_repo), "--config", tbump_path, "init", current_version]
+        ["-C", str(test_repo), "--config", str(tbump_path), "init", current_version]
     )
 
     assert tbump_path.exists()

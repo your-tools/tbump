@@ -209,7 +209,14 @@ def test_tbump_toml_not_found_when_config_specified(
     toml_path = test_repo / "non-existing.toml"
     with pytest.raises(SystemExit):
         tbump.main.main(
-            ["-C", str(test_repo), "--config", toml_path, "1.2.42", "--non-interactive"]
+            [
+                "-C",
+                str(test_repo),
+                "--config",
+                str(toml_path),
+                "1.2.42",
+                "--non-interactive",
+            ]
         )
     assert message_recorder.find("No configuration for tbump")
 
