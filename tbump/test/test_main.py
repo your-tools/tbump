@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+import shutil
 from typing import Any
 
 import pytest
@@ -219,6 +221,24 @@ def test_tbump_toml_not_found_when_config_specified(
             ]
         )
     assert message_recorder.find("No configuration for tbump")
+
+
+def test_tbump_using_custom_relative_configuration_path(
+    test_repo: Path, message_recorder: MessageRecorder
+) -> None:
+    toml_path = test_repo / "tbump.toml"
+    other_path = test_repo / "other.toml"
+    shutil.move(toml_path, other_path)
+    os.chdir(test_repo)
+    # fmt: off
+    tbump.main.main(
+        [
+        "--config", "other.toml",
+        "--non-interactive", "--only-patch",
+         "1.2.42",
+        ]
+    )
+    # fmt: on
 
 
 def test_tbump_toml_bad_syntax(
