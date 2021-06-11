@@ -35,13 +35,13 @@ pytest-cov = "^2.10"
 pytest-mock = "^2.0.0"
 
 # Linters
-black = "21.5b2"
-flake8 = "^3.9.2"
+black = "21.6b0"
+flake8 = "3.9.2"
 flake8-bugbear = "^21.4.3"
 flake8-comprehensions = "^3.4.0"
 pep8-naming = "^0.11.1"
 isort = "^5.7.0"
-mypy = "^0.800"
+mypy = "0.800"
 
 # Deps scanning
 safety = "^1.9.0"
