@@ -179,11 +179,11 @@ def validate_config(cfg: Config) -> None:
 
 def get_config_file(project_path: Path) -> ConfigFile:
     try:
-        res = _get_config_file(project_path)
+        config_file = _get_config_file(project_path)
         # Check that the config is valid before returning it,
         # so that problems in config file are reported early
-        res.get_config()
-        return res
+        config_file.get_config()
+        return config_file
     except IOError as io_error:
         raise InvalidConfig(io_error=io_error)
     except schema.SchemaError as parse_error:
