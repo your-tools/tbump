@@ -77,7 +77,7 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
         tbump.config.get_config_file(tmp_path)
 
 
-def test_validate_schema_in_pyprpoject_toml(tmp_path: Path) -> None:
+def test_validate_schema_in_pyproject_toml(tmp_path: Path) -> None:
     pyproject_toml = tmp_path / "pyproject.toml"
     to_write = textwrap.dedent(
         r"""

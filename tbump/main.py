@@ -41,9 +41,9 @@ Options:
 )
 
 
-class Cancelled(tbump.Error):
+class Canceled(tbump.Error):
     def print_error(self) -> None:
-        ui.error("Cancelled by user")
+        ui.error("Canceled by user")
 
 
 @attr.s
@@ -147,7 +147,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
         if not dry_run:
             proceed = ui.ask_yes_no("Looking good?", default=False)
             if not proceed:
-                raise Cancelled()
+                raise Canceled()
 
     if dry_run:
         if git_state_error:
