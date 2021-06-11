@@ -64,6 +64,7 @@ class TbumpTomlConfig(ConfigFile):
         self.doc = doc
 
     def get_parsed(self) -> Any:
+        # Document -> dict
         return self.doc.value
 
 
@@ -77,7 +78,8 @@ class PyprojectConfig(ConfigFile):
         super().__init__(path)
 
     def get_parsed(self) -> Any:
-        return self.doc["tool"]["tbump"].value
+        # Document -> Container -> dict
+        return self.doc["tool"]["tbump"].value.value
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:
