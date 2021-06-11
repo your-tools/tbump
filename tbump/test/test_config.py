@@ -52,8 +52,8 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     tools_config = tomlkit.table()
     tools_config.add("tbump", parsed_config)
 
-    pyproject_config = tomlkit.table()
-    pyproject_config.add("tool", tools_config)
+    pyproject_config = tomlkit.document()
+    pyproject_config["tool"] = tools_config
     to_write = tomlkit.dumps(pyproject_config)
 
     pyproject_toml = tmp_path / "pyproject.toml"
@@ -163,7 +163,7 @@ def test_invalid_regex() -> None:
     )
     data = tomlkit.loads(contents)
     with pytest.raises(schema.SchemaError) as e:
-        tbump.config.validate_basic_schema(data)
+        tbump.config.validate_basic_schema(data.value)
     print(e)
 
 
@@ -201,7 +201,7 @@ def test_parse_hooks() -> None:
     """
     )
     parsed = tomlkit.loads(contents)
-    config = tbump.config.from_parsed_config(parsed)
+    config = tbump.config.from_parsed_config(parsed.value)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
     assert first_hook.cmd == "grep -q {new_version} Changelog.md"
@@ -237,6 +237,6 @@ def test_retro_compat_hooks() -> None:
       """
     )
     parsed = tomlkit.parse(contents)
-    config = tbump.config.from_parsed_config(parsed)
+    config = tbump.config.from_parsed_config(parsed.value)
     first_hook = config.hooks[0]
     assert isinstance(first_hook, tbump.hooks.BeforeCommitHook)

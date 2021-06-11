@@ -15,11 +15,11 @@ def files_bumped(test_repo: Path, using_pyproject: bool = False) -> bool:
     if using_pyproject:
         cfg_path = test_repo / "pyproject.toml"
         new_toml = tomlkit.loads(cfg_path.read_text())
-        current_version = new_toml["tool"]["tbump"]["version"]["current"]
+        current_version = new_toml["tool"]["tbump"]["version"]["current"]  # type: ignore
     else:
         cfg_path = test_repo / "tbump.toml"
         new_toml = tomlkit.loads(cfg_path.read_text())
-        current_version = new_toml["version"]["current"]
+        current_version = new_toml["version"]["current"]  # type: ignore
 
     assert current_version == "1.2.41-alpha-2"
 
@@ -35,7 +35,7 @@ def files_bumped(test_repo: Path, using_pyproject: bool = False) -> bool:
 def files_not_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
-    assert new_toml["version"]["current"] == "1.2.41-alpha-1"
+    assert new_toml["version"]["current"] == "1.2.41-alpha-1"  # type: ignore
 
     return all(
         (
@@ -127,11 +127,10 @@ def test_end_to_end_using_pyproject_toml(test_repo: Path) -> None:
     tbump_toml_path = test_repo / "tbump.toml"
 
     # Convert tbump config to a config inside a tool.tbump section:
+    pyproject_config = tomlkit.document()
+    pyproject_config["tool"] = tomlkit.table()
     tbump_config = tomlkit.loads(tbump_toml_path.read_text())
-    tools_config = tomlkit.table()
-    tools_config.add("tbump", tbump_config)
-    pyproject_config = tomlkit.table()
-    pyproject_config.add("tool", tools_config)
+    pyproject_config["tool"]["tbump"] = tbump_config.value  # type: ignore
     to_write = tomlkit.dumps(pyproject_config)
 
     # Write the pyproject.toml and remove tbump.toml
@@ -144,6 +143,7 @@ def test_end_to_end_using_pyproject_toml(test_repo: Path) -> None:
     )
 
     _, previous_commit = tbump.git.run_git_captured(test_repo, "rev-parse", "HEAD")
+
     tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
     assert bump_done(test_repo, previous_commit, using_pyproject=True)
@@ -329,7 +329,7 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) -> None:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
-    new_toml["file"][0]["version_template"] = "{release}"
+    new_toml["file"][0]["version_template"] = "{release}"  # type: ignore
     toml_path.write_text(tomlkit.dumps(new_toml))
     tbump.git.run_git(test_repo, "add", ".")
     tbump.git.run_git(test_repo, "commit", "--message", "update repo")

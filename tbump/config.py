@@ -1,7 +1,7 @@
 import abc
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Pattern
+from typing import Dict, List, Optional, Pattern
 
 import attr
 import cli_ui as ui
@@ -42,7 +42,7 @@ class ConfigFile(metaclass=abc.ABCMeta):
         self.path = path
 
     @abc.abstractmethod
-    def get_parsed(self) -> Any:
+    def get_parsed(self) -> dict:
         """Return a plain dictionary, suitable for validation
         by the `schema` library
         """
@@ -63,7 +63,7 @@ class TbumpTomlConfig(ConfigFile):
         super().__init__(path)
         self.doc = doc
 
-    def get_parsed(self) -> Any:
+    def get_parsed(self) -> dict:
         # Document -> dict
         return self.doc.value
 
@@ -77,9 +77,8 @@ class PyprojectConfig(ConfigFile):
         self.doc = doc
         super().__init__(path)
 
-    def get_parsed(self) -> Any:
-        # Document -> Container -> dict
-        return self.doc["tool"]["tbump"].value.value
+    def get_parsed(self) -> dict:
+        return self.doc["tool"]["tbump"].value.value  # type: ignore
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:
@@ -114,7 +113,7 @@ def validate_hook_cmd(cmd: str) -> None:
         raise schema.SchemaError(message)
 
 
-def validate_basic_schema(config: Any) -> None:
+def validate_basic_schema(config: dict) -> None:
     """First pass of validation, using schema"""
     # Note: asserts that we won't get KeyError or invalid types
     # when building or initial Config instance
@@ -200,7 +199,7 @@ def _get_config_file(project_path: Path) -> ConfigFile:
     if pyproject_path.exists():
         doc = tomlkit.loads(pyproject_path.read_text())
         try:
-            doc["tool"]["tbump"]
+            doc["tool"]["tbump"]  # type: ignore
         except KeyError:
             raise ConfigNotFound(project_path)
         return PyprojectConfig(pyproject_path, doc)
@@ -208,7 +207,7 @@ def _get_config_file(project_path: Path) -> ConfigFile:
     raise ConfigNotFound(project_path)
 
 
-def from_parsed_config(parsed: Any) -> Config:
+def from_parsed_config(parsed: dict) -> Config:
     validate_basic_schema(parsed)
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]
