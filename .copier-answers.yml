@@ -1,8 +1,9 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v1.0.0-5-gdac243b
+_commit: v1.1.0
 _src_path: git+https://git.sr.ht/~dmerej/copier-python
 author_email: dimitri@dmerej.info
 author_name: Dimitri Merejkowsky
+package_import_name: tbump
 project_description: Bump software releases
 project_name: tbump
 project_version: 6.3.2
