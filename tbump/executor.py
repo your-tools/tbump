@@ -16,7 +16,7 @@ class ActionGroup:
         desc: str,
         actions: Sequence[Action],
         *,
-        should_enumerate: bool = False
+        should_enumerate: bool = False,
     ):
         self.should_enumerate = should_enumerate
         self.desc = desc
@@ -26,9 +26,9 @@ class ActionGroup:
     def print_group(self, dry_run: bool = False) -> None:
         if not self.actions:
             return
-        if dry_run:
+        if dry_run and self.dry_run_desc:
             ui.info_2(self.dry_run_desc)
-        else:
+        if not dry_run and self.desc:
             ui.info_2(self.desc)
         for i, action in enumerate(self.actions):
             if self.should_enumerate:
@@ -46,9 +46,15 @@ class UpdateConfig(Action):
         self.new_version = new_version
 
     def print_self(self) -> None:
-        pass
+        return
 
     def do(self) -> None:
+        # fmt: off
+        ui.info_3(
+            "Set current version to", ui.blue, self.new_version, ui.reset,
+            "in", ui.bold, self.config_file.path.name
+        )
+        # fmt: on
         self.config_file.set_new_version(self.new_version)
 
 
@@ -57,11 +63,15 @@ class Executor:
         self.new_version = new_version
         self.work: List[ActionGroup] = []
 
-        assert file_bumper.config_file
-        update_config = UpdateConfig(file_bumper.config_file, new_version)
+        config_file = file_bumper.config_file
+        assert config_file
+        update_config = UpdateConfig(config_file, new_version)
 
         update_config_group = ActionGroup(
-            "", "", [update_config], should_enumerate=False
+            f"Would update current version in {config_file.path.name}",
+            "Updating current version",
+            [update_config],
+            should_enumerate=False,
         )
         self.work.append(update_config_group)
 
