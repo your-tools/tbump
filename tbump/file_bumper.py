@@ -240,13 +240,6 @@ class FileBumper:
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
             change_requests.append(change_request)
-        rel_path = self.config_file.path.relative_to(self.working_path)
-        config_file_change = ChangeRequest(
-            str(rel_path),
-            self.current_version,
-            self.new_version,
-        )
-        change_requests.append(config_file_change)
         return change_requests
 
     def compute_change_request_for_file(self, file: tbump.config.File) -> ChangeRequest:

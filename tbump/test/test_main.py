@@ -126,7 +126,14 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
 
     tbump.main.main(["-C", str(test_pyproject_repo), "0.2.0", "--non-interactive"])
 
-    assert bump_done(test_pyproject_repo, previous_commit)
+    pyproject_toml = test_pyproject_repo / "pyproject.toml"
+    doc = tomlkit.loads(pyproject_toml.read_text())
+    assert doc["tool"]["tbump"]["version"]["current"] == "0.2.0"  # type: ignore
+    assert doc["tool"]["poetry"]["version"] == "0.2.0"  # type: ignore
+
+    foo_py = test_pyproject_repo / "foo" / "__init__.py"
+    actual = foo_py.read_text()
+    assert "0.2.0" in actual
 
 
 def test_dry_run_interactive(
