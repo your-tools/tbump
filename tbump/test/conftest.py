@@ -23,9 +23,9 @@ def tmp_path(tmpdir: Any) -> Path:
 
 
 @pytest.fixture
-def test_data_path() -> Path:
+def test_project() -> Path:
     this_dir = Path(__file__).absolute().parent
-    return this_dir / "data"
+    return this_dir / "project"
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -42,9 +42,9 @@ def file_contains(path: Path, text: str) -> bool:
     return False
 
 
-def setup_repo(tmp_path: Path, test_data_path: Path) -> Path:
+def setup_repo(tmp_path: Path, test_project: Path) -> Path:
     src_path = tmp_path / "src"
-    shutil.copytree(test_data_path, src_path)
+    shutil.copytree(test_project, src_path)
     tbump.git.run_git(src_path, "init", "--initial-branch", "master")
     tbump.git.run_git(src_path, "add", ".")
     tbump.git.run_git(src_path, "commit", "--message", "initial commit")
@@ -68,7 +68,7 @@ def setup_remote(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def test_repo(tmp_path: Path, test_data_path: Path) -> Path:
-    res = setup_repo(tmp_path, test_data_path)
+def test_repo(tmp_path: Path, test_project: Path) -> Path:
+    res = setup_repo(tmp_path, test_project)
     setup_remote(tmp_path)
     return res

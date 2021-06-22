@@ -11,8 +11,8 @@ from tbump.config import Config
 from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 
 
-def test_happy_parse(test_data_path: Path) -> None:
-    config_file = tbump.config.get_config_file(test_data_path)
+def test_happy_parse(test_project: Path) -> None:
+    config_file = tbump.config.get_config_file(test_project)
     config = config_file.get_config()
     foo_json = tbump.config.File(
         src="package.json", search='"version": "{current_version}"'
@@ -44,10 +44,10 @@ def test_happy_parse(test_data_path: Path) -> None:
 
 
 def test_uses_pyproject_if_tbump_toml_is_missing(
-    test_data_path: Path, tmp_path: Path
+    test_project: Path, tmp_path: Path
 ) -> None:
 
-    expected_file = tbump.config.get_config_file(test_data_path)
+    expected_file = tbump.config.get_config_file(test_project)
     parsed_config = expected_file.get_parsed()
     tools_config = tomlkit.table()
     tools_config.add("tbump", parsed_config)
@@ -116,8 +116,8 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 
 @pytest.fixture
-def test_config(test_data_path: Path) -> Config:
-    config_file = tbump.config.get_config_file(test_data_path)
+def test_config(test_project: Path) -> Config:
+    config_file = tbump.config.get_config_file(test_project)
     return config_file.get_config()
 
 
