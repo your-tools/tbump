@@ -28,6 +28,12 @@ def test_project() -> Path:
     return this_dir / "project"
 
 
+@pytest.fixture
+def test_pyproject() -> Path:
+    this_dir = Path(__file__).absolute().parent
+    return this_dir / "pyproject"
+
+
 @pytest.fixture(autouse=True, scope="session")
 def restore_cwd() -> Iterator[None]:
     old_cwd = os.getcwd()
@@ -70,5 +76,12 @@ def setup_remote(tmp_path: Path) -> Path:
 @pytest.fixture
 def test_repo(tmp_path: Path, test_project: Path) -> Path:
     res = setup_repo(tmp_path, test_project)
+    setup_remote(tmp_path)
+    return res
+
+
+@pytest.fixture
+def test_pyproject_repo(tmp_path: Path, test_pyproject: Path) -> Path:
+    res = setup_repo(tmp_path, test_pyproject)
     setup_remote(tmp_path)
     return res
