@@ -3,6 +3,7 @@ from typing import List, Sequence
 import cli_ui as ui
 
 from tbump.action import Action
+from tbump.config import ConfigFile
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
@@ -39,10 +40,30 @@ class ActionGroup:
             action.do()
 
 
+class UpdateConfig(Action):
+    def __init__(self, config_file: ConfigFile, new_version: str):
+        self.config_file = config_file
+        self.new_version = new_version
+
+    def print_self(self) -> None:
+        pass
+
+    def do(self) -> None:
+        self.config_file.set_new_version(self.new_version)
+
+
 class Executor:
     def __init__(self, new_version: str, file_bumper: FileBumper):
         self.new_version = new_version
         self.work: List[ActionGroup] = []
+
+        assert file_bumper.config_file
+        update_config = UpdateConfig(file_bumper.config_file, new_version)
+
+        update_config_group = ActionGroup(
+            "", "", [update_config], should_enumerate=False
+        )
+        self.work.append(update_config_group)
 
         patches = ActionGroup(
             "Would patch these files",

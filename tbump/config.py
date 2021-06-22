@@ -38,14 +38,23 @@ class Config:
 class ConfigFile(metaclass=abc.ABCMeta):
     """Base class representing a config file"""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, doc: TOMLDocument):
         self.path = path
+        self.doc = doc
+
+    def save(self) -> None:
+        as_string = tomlkit.dumps(self.doc)
+        self.path.write_text(as_string)
 
     @abc.abstractmethod
     def get_parsed(self) -> dict:
         """Return a plain dictionary, suitable for validation
         by the `schema` library
         """
+        pass
+
+    @abc.abstractclassmethod
+    def set_new_version(self, version: str) -> None:
         pass
 
     def get_config(self) -> Config:
@@ -60,12 +69,15 @@ class TbumpTomlConfig(ConfigFile):
     """Represent config inside a tbump.toml file"""
 
     def __init__(self, path: Path, doc: TOMLDocument):
-        super().__init__(path)
-        self.doc = doc
+        super().__init__(path, doc)
 
     def get_parsed(self) -> dict:
         # Document -> dict
         return self.doc.value
+
+    def set_new_version(self, new_version: str) -> None:
+        self.doc["version"]["current"] = new_version  # type: ignore
+        self.save()
 
 
 class PyprojectConfig(ConfigFile):
@@ -74,11 +86,14 @@ class PyprojectConfig(ConfigFile):
     """
 
     def __init__(self, path: Path, doc: TOMLDocument):
-        self.doc = doc
-        super().__init__(path)
+        super().__init__(path, doc)
 
     def get_parsed(self) -> dict:
         return self.doc["tool"]["tbump"].value.value  # type: ignore
+
+    def set_new_version(self, new_version: str) -> None:
+        self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore
+        self.save()
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:
