@@ -1,10 +1,35 @@
 Changelog
 =========
 
-Next release
-------------
+6.4.0 (2021-06-22)
+-------------------
 
-Default development branch is now called `main`.
+Breaking change
++++++++++++++++
+
+If you are using `tbump` with a `pyproject.toml` to bump a project using `poetry`,
+you may have found that the `version` key in `[tool.poetry]` was implicitly bumped.
+
+This was considered to be a, which means you now have to tell `tbump` about `poetry` explicitly:
+
+.. code-block:: toml
+
+   # new
+   [[tool.tbump.file]]
+   src = "pyproject.toml"
+   search = 'version = "{current_version}"'
+
+Bug fixes
++++++++++
+
+* Fix #103: Invalid config: Key 'file' error using pyproject.toml,
+  caused by an update in `tomlkit`
+* Fix #93: Do not patch version in `[tool.poetry]` implicitly
+
+Misc
+++++
+
+* Default development branch is now called `main`.
 
 6.3.2 (2021-04-19)
 ------------------
