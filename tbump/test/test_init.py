@@ -5,7 +5,7 @@ import pytest
 import tomlkit
 from cli_ui.tests import MessageRecorder
 
-from tbump.main import main
+from tbump.main import run as run_tbump
 
 
 def test_creates_tbump_toml_config(test_repo: Path) -> None:
@@ -13,7 +13,7 @@ def test_creates_tbump_toml_config(test_repo: Path) -> None:
     tbump_path.unlink()
     current_version = "1.2.41-alpha1"
 
-    main(["-C", str(test_repo), "init", current_version])
+    run_tbump(["-C", str(test_repo), "init", current_version])
 
     assert tbump_path.exists()
     config = tomlkit.loads(tbump_path.read_text())
@@ -31,7 +31,7 @@ def test_append_to_pyproject(test_repo: Path) -> None:
     cfg_path.write_text(isort_config)
     current_version = "1.2.41-alpha1"
 
-    main(["-C", str(test_repo), "init", "--pyproject", current_version])
+    run_tbump(["-C", str(test_repo), "init", "--pyproject", current_version])
 
     assert cfg_path.exists()
     config = tomlkit.loads(cfg_path.read_text())
@@ -43,5 +43,5 @@ def test_abort_if_tbump_toml_exists(
     test_repo: Path, message_recorder: MessageRecorder
 ) -> None:
     with pytest.raises(SystemExit):
-        main(["-C", str(test_repo), "init", "1.2.41-alpha1"])
+        run_tbump(["-C", str(test_repo), "init", "1.2.41-alpha1"])
     assert message_recorder.find("already exists")
