@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 
 import cli_ui as ui
 
-from tbump import Error
+from tbump.error import Error
 
 
 class GitError(Error):

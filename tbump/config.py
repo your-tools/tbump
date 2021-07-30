@@ -9,7 +9,7 @@ import schema
 import tomlkit
 from tomlkit.toml_document import TOMLDocument
 
-from tbump import Error
+from tbump.error import Error
 from tbump.hooks import HOOKS_CLASSES, Hook
 
 

@@ -4,8 +4,8 @@ from typing import List, Optional
 
 import cli_ui as ui
 
-from tbump import Error
 from tbump.action import Action
+from tbump.error import Error
 
 
 class Hook(Action):
