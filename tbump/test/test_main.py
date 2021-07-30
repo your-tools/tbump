@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 import tomlkit
 
+from tbump.cli import run as run_tbump
 from tbump.config import ConfigNotFound, InvalidConfig
 from tbump.error import Error
 from tbump.file_bumper import (
@@ -14,7 +15,6 @@ from tbump.file_bumper import (
 )
 from tbump.git import run_git, run_git_captured
 from tbump.git_bumper import DirtyRepository, NoTrackedBranch, RefAlreadyExists
-from tbump.main import run as run_tbump
 from tbump.test.conftest import file_contains
 
 

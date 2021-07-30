@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 import tomlkit
 
+from tbump.cli import run as run_tbump
 from tbump.git import run_git
 from tbump.hooks import HookError
-from tbump.main import run as run_tbump
 
 
 def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
