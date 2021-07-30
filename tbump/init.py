@@ -4,7 +4,17 @@ from typing import List
 
 import cli_ui as ui
 
+from tbump.error import Error
 from tbump.git import run_git_captured
+
+
+class TbumpTomlAlreadyExists(Error):
+    def __init__(self, cfg_path: Path):
+        super().__init__()
+        self.cfg_path = cfg_path
+
+    def print_error(self) -> None:
+        ui.error(self.cfg_path, "already exists")
 
 
 def find_files(working_path: Path, current_version: str) -> List[str]:
@@ -23,7 +33,6 @@ def init(
     working_path: Path, *, current_version: str, use_pyproject: bool = False
 ) -> None:
     """Interactively creates a new tbump.toml"""
-    ui.info_1("Generating tbump config file")
     if use_pyproject:
         text = "[tool.tbump]\n"
         key_prefix = "tool.tbump."
@@ -33,7 +42,8 @@ def init(
         key_prefix = ""
         cfg_path = working_path / "tbump.toml"
         if cfg_path.exists():
-            ui.fatal(cfg_path, "already exists")
+            raise TbumpTomlAlreadyExists(cfg_path)
+    ui.info_1("Generating tbump config file")
     text += textwrap.dedent(
         """\
         # Uncomment this if your project is hosted on GitHub:

@@ -5,6 +5,7 @@ import pytest
 import tomlkit
 from cli_ui.tests import MessageRecorder
 
+from tbump.init import TbumpTomlAlreadyExists
 from tbump.main import run as run_tbump
 
 
@@ -40,8 +41,7 @@ def test_append_to_pyproject(test_repo: Path) -> None:
 
 
 def test_abort_if_tbump_toml_exists(
-    test_repo: Path, message_recorder: MessageRecorder
+    test_repo: Path,
 ) -> None:
-    with pytest.raises(SystemExit):
+    with pytest.raises(TbumpTomlAlreadyExists):
         run_tbump(["-C", str(test_repo), "init", "1.2.41-alpha1"])
-    assert message_recorder.find("already exists")
