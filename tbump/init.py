@@ -4,13 +4,13 @@ from typing import List
 
 import cli_ui as ui
 
-import tbump.git
+from tbump.git import run_git_captured
 
 
 def find_files(working_path: Path, current_version: str) -> List[str]:
     ui.info_2("Looking for files matching", ui.bold, current_version)
     cmd = ["grep", "--fixed-strings", "--files-with-matches", current_version]
-    _, out = tbump.git.run_git_captured(working_path, *cmd, check=True)
+    _, out = run_git_captured(working_path, *cmd, check=True)
     res: List[str] = []
     ui.info("Found following matching files")
     for file in out.splitlines():

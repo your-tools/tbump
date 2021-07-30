@@ -6,7 +6,7 @@ from typing import Any, Iterator
 import pytest
 from cli_ui.tests import MessageRecorder
 
-import tbump.git
+from tbump.git import run_git
 
 
 @pytest.fixture()
@@ -51,10 +51,10 @@ def file_contains(path: Path, text: str) -> bool:
 def setup_repo(tmp_path: Path, test_project: Path) -> Path:
     src_path = tmp_path / "src"
     shutil.copytree(test_project, src_path)
-    tbump.git.run_git(src_path, "init", "--initial-branch", "master")
-    tbump.git.run_git(src_path, "add", ".")
-    tbump.git.run_git(src_path, "commit", "--message", "initial commit")
-    tbump.git.run_git(
+    run_git(src_path, "init", "--initial-branch", "master")
+    run_git(src_path, "add", ".")
+    run_git(src_path, "commit", "--message", "initial commit")
+    run_git(
         src_path, "tag", "--annotate", "--message", "v1.2.41-alpha-1", "v1.2.41-alpha-1"
     )
     return src_path
@@ -65,11 +65,11 @@ def setup_remote(tmp_path: Path) -> Path:
     git_path.mkdir()
     remote_path = git_path / "repo.git"
     remote_path.mkdir()
-    tbump.git.run_git(remote_path, "init", "--bare", "--initial-branch", "master")
+    run_git(remote_path, "init", "--bare", "--initial-branch", "master")
 
     src_path = tmp_path / "src"
-    tbump.git.run_git(src_path, "remote", "add", "origin", str(remote_path))
-    tbump.git.run_git(src_path, "push", "-u", "origin", "master")
+    run_git(src_path, "remote", "add", "origin", str(remote_path))
+    run_git(src_path, "push", "-u", "origin", "master")
     return src_path
 
 

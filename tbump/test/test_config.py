@@ -6,22 +6,26 @@ import pytest
 import schema
 import tomlkit
 
-import tbump.config
-from tbump.config import Config
+from tbump.config import (
+    Config,
+    ConfigNotFound,
+    File,
+    InvalidConfig,
+    from_parsed_config,
+    get_config_file,
+    validate_basic_schema,
+    validate_config,
+)
 from tbump.hooks import HOOKS_CLASSES, BeforeCommitHook
 
 
 def test_happy_parse(test_project: Path) -> None:
-    config_file = tbump.config.get_config_file(test_project)
+    config_file = get_config_file(test_project)
     config = config_file.get_config()
-    foo_json = tbump.config.File(
-        src="package.json", search='"version": "{current_version}"'
-    )
-    version_txt = tbump.config.File(src="VERSION")
-    pub_js = tbump.config.File(src="pub.js", version_template="{major}.{minor}.{patch}")
-    glob = tbump.config.File(
-        src="glob*.?", search='version_[a-z]+ = "{current_version}"'
-    )
+    foo_json = File(src="package.json", search='"version": "{current_version}"')
+    version_txt = File(src="VERSION")
+    pub_js = File(src="pub.js", version_template="{major}.{minor}.{patch}")
+    glob = File(src="glob*.?", search='version_[a-z]+ = "{current_version}"')
 
     expected_pattern = r"""  (?P<major>\d+)
   \.
@@ -47,7 +51,7 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     test_project: Path, tmp_path: Path
 ) -> None:
 
-    expected_file = tbump.config.get_config_file(test_project)
+    expected_file = get_config_file(test_project)
     parsed_config = expected_file.get_parsed()
     tools_config = tomlkit.table()
     tools_config.add("tbump", parsed_config)
@@ -59,7 +63,7 @@ def test_uses_pyproject_if_tbump_toml_is_missing(
     pyproject_toml = tmp_path / "pyproject.toml"
     pyproject_toml.write_text(to_write)
 
-    actual_file = tbump.config.get_config_file(tmp_path)
+    actual_file = get_config_file(tmp_path)
     assert actual_file.get_config() == expected_file.get_config()
 
 
@@ -73,8 +77,8 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
     )
     pyproject_toml.write_text(to_write)
 
-    with pytest.raises(tbump.config.ConfigNotFound):
-        tbump.config.get_config_file(tmp_path)
+    with pytest.raises(ConfigNotFound):
+        get_config_file(tmp_path)
 
 
 def test_validate_schema_in_pyproject_toml(tmp_path: Path) -> None:
@@ -102,14 +106,14 @@ def test_validate_schema_in_pyproject_toml(tmp_path: Path) -> None:
     )
     pyproject_toml.write_text(to_write)
 
-    with pytest.raises(tbump.config.InvalidConfig) as e:
-        tbump.config.get_config_file(tmp_path)
+    with pytest.raises(InvalidConfig) as e:
+        get_config_file(tmp_path)
     assert "'current'" in str(e.value.parse_error)
 
 
 def assert_validation_error(config: Config, expected_message: str) -> None:
     try:
-        tbump.config.validate_config(config)
+        validate_config(config)
         pytest.fail("should have raised schema error")
     except schema.SchemaError as error:
         assert expected_message in error.args[0]
@@ -117,7 +121,7 @@ def assert_validation_error(config: Config, expected_message: str) -> None:
 
 @pytest.fixture
 def test_config(test_project: Path) -> Config:
-    config_file = tbump.config.get_config_file(test_project)
+    config_file = get_config_file(test_project)
     return config_file.get_config()
 
 
@@ -163,7 +167,7 @@ def test_invalid_regex() -> None:
     )
     data = tomlkit.loads(contents)
     with pytest.raises(schema.SchemaError) as e:
-        tbump.config.validate_basic_schema(data.value)
+        validate_basic_schema(data.value)
     print(e)
 
 
@@ -201,7 +205,7 @@ def test_parse_hooks() -> None:
     """
     )
     parsed = tomlkit.loads(contents)
-    config = tbump.config.from_parsed_config(parsed.value)
+    config = from_parsed_config(parsed.value)
     first_hook = config.hooks[0]
     assert first_hook.name == "Check changelog"
     assert first_hook.cmd == "grep -q {new_version} Changelog.md"
@@ -237,6 +241,6 @@ def test_retro_compat_hooks() -> None:
       """
     )
     parsed = tomlkit.parse(contents)
-    config = tbump.config.from_parsed_config(parsed.value)
+    config = from_parsed_config(parsed.value)
     first_hook = config.hooks[0]
-    assert isinstance(first_hook, tbump.hooks.BeforeCommitHook)
+    assert isinstance(first_hook, BeforeCommitHook)

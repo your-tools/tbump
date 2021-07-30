@@ -10,4 +10,5 @@ class Error(Exception):
         return pp.pformat(vars(self))
 
 
-from .file_bumper import bump_files  # noqa
+# Part of the public API, and must be *after* Error is defined
+from tbump.file_bumper import bump_files  # noqa: F401, E402

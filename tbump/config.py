@@ -9,9 +9,8 @@ import schema
 import tomlkit
 from tomlkit.toml_document import TOMLDocument
 
-import tbump
-
-from .hooks import HOOKS_CLASSES, Hook
+from tbump import Error
+from tbump.hooks import HOOKS_CLASSES, Hook
 
 
 @attr.s
@@ -262,7 +261,7 @@ def from_parsed_config(parsed: dict) -> Config:
     return config
 
 
-class ConfigNotFound(tbump.Error):
+class ConfigNotFound(Error):
     def __init__(self, project_path: Path):
         self.project_path = project_path
 
@@ -272,7 +271,7 @@ class ConfigNotFound(tbump.Error):
         ui.info("Or add a [tool.tbump] section in the pyproject.toml file")
 
 
-class InvalidConfig(tbump.Error):
+class InvalidConfig(Error):
     def __init__(
         self,
         io_error: Optional[IOError] = None,
