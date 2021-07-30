@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 import tomlkit
 
+from tbump.cli import run as run_tbump
 from tbump.init import TbumpTomlAlreadyExists
-from tbump.main import run as run_tbump
 
 
 def test_creates_tbump_toml_config(test_repo: Path) -> None:
