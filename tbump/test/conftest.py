@@ -4,17 +4,8 @@ from pathlib import Path
 from typing import Any, Iterator
 
 import pytest
-from cli_ui.tests import MessageRecorder
 
 from tbump.git import run_git
-
-
-@pytest.fixture()
-def message_recorder() -> Iterator[MessageRecorder]:
-    res = MessageRecorder()
-    res.start()
-    yield res
-    res.stop()
 
 
 @pytest.fixture()
