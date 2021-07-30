@@ -8,14 +8,14 @@ import attr
 import cli_ui as ui
 import docopt
 
-import tbump
-import tbump.config
-import tbump.git
-import tbump.init
+from tbump import Error
+from tbump.config import get_config_file
 from tbump.executor import Executor
 from tbump.file_bumper import FileBumper
+from tbump.git import GitError
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
+from tbump.init import init
 
 TBUMP_VERSION = "6.3.2"
 
@@ -41,7 +41,7 @@ Options:
 )
 
 
-class Canceled(tbump.Error):
+class Canceled(Error):
     def print_error(self) -> None:
         ui.error("Canceled by user")
 
@@ -74,9 +74,7 @@ def run(cmd: List[str]) -> None:
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
         use_pyproject = opt_dict["--pyproject"]
-        tbump.init.init(
-            working_path, current_version=current_version, use_pyproject=use_pyproject
-        )
+        init(working_path, current_version=current_version, use_pyproject=use_pyproject)
         return
 
     new_version = opt_dict["<new_version>"]
@@ -108,7 +106,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     interactive = options.interactive
     dry_run = options.dry_run
 
-    config_file = tbump.config.get_config_file(options.working_path)
+    config_file = get_config_file(options.working_path)
     config = config_file.get_config()
 
     # fmt: off
@@ -124,7 +122,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     try:
         git_bumper.check_dirty()
         git_bumper.check_branch_state(new_version)
-    except tbump.git.GitError as e:
+    except GitError as e:
         if dry_run:
             git_state_error = e
         else:
@@ -175,11 +173,11 @@ def suggest_creating_github_release(github_url: str, tag_name: str) -> None:
 
 
 def main(args: Optional[List[str]] = None) -> None:
-    # Suppress backtrace if exception derives from tbump.Error
+    # Suppress backtrace if exception derives from Error
     if not args:
         args = sys.argv[1:]
     try:
         run(args)
-    except tbump.Error as error:
+    except Error as error:
         error.print_error()
         sys.exit(1)

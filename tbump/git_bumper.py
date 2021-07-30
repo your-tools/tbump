@@ -3,12 +3,12 @@ from typing import List, Tuple
 
 import cli_ui as ui
 
-import tbump.action
-import tbump.git
+from tbump.action import Action
 from tbump.config import Config
+from tbump.git import GitError, print_git_command, run_git, run_git_captured
 
 
-class DirtyRepository(tbump.git.GitError):
+class DirtyRepository(GitError):
     def __init__(self, *, git_status_output: str):
         super().__init__()
         self.git_status_output = git_status_output
@@ -18,12 +18,12 @@ class DirtyRepository(tbump.git.GitError):
         ui.info(self.git_status_output)
 
 
-class NotOnAnyBranch(tbump.git.GitError):
+class NotOnAnyBranch(GitError):
     def print_error(self) -> None:
         ui.error("Not on any branch")
 
 
-class NoTrackedBranch(tbump.git.GitError):
+class NoTrackedBranch(GitError):
     def __init__(self, *, branch: str):
         super().__init__()
         self.branch = branch
@@ -34,7 +34,7 @@ class NoTrackedBranch(tbump.git.GitError):
         )
 
 
-class RefAlreadyExists(tbump.git.GitError):
+class RefAlreadyExists(GitError):
     def __init__(self, *, ref: str):
         super().__init__()
         self.ref = ref
@@ -43,7 +43,7 @@ class RefAlreadyExists(tbump.git.GitError):
         ui.error("git ref", self.ref, "already exists")
 
 
-class Command(tbump.action.Action):
+class Command(Action):
     def __init__(self, repo_path: Path, cmd: List[str]):
         super().__init__()
         self.repo_path = repo_path
@@ -51,13 +51,13 @@ class Command(tbump.action.Action):
         self.verbose = True
 
     def print_self(self) -> None:
-        tbump.git.print_git_command(self.cmd)
+        print_git_command(self.cmd)
 
     def do(self) -> None:
         self.run()
 
     def run(self) -> None:
-        return tbump.git.run_git(self.repo_path, *self.cmd, verbose=False)
+        return run_git(self.repo_path, *self.cmd, verbose=False)
 
 
 class GitBumper:
@@ -78,10 +78,10 @@ class GitBumper:
         self.message_template = config.git_message_template
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
-        return tbump.git.run_git(self.repo_path, *args, verbose=verbose)
+        return run_git(self.repo_path, *args, verbose=verbose)
 
     def run_git_captured(self, *args: str, check: bool = True) -> Tuple[int, str]:
-        return tbump.git.run_git_captured(self.repo_path, *args, check=check)
+        return run_git_captured(self.repo_path, *args, check=check)
 
     def check_dirty(self) -> None:
         if "commit" not in self.operations:

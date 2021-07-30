@@ -4,11 +4,11 @@ from typing import List, Optional
 
 import cli_ui as ui
 
-import tbump
-import tbump.action
+from tbump import Error
+from tbump.action import Action
 
 
-class Hook(tbump.action.Action):
+class Hook(Action):
     def __init__(self, name: str, cmd: str):
         super().__init__()
         self.working_path: Optional[Path] = None
@@ -43,7 +43,7 @@ HOOKS_CLASSES = {
 }
 
 
-class HookError(tbump.Error):
+class HookError(Error):
     def __init__(self, *, name: str, cmd: str, rc: int):
         super().__init__()
         self.cmd = cmd

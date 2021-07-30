@@ -4,10 +4,10 @@ from typing import List, Optional, Tuple
 
 import cli_ui as ui
 
-import tbump
+from tbump import Error
 
 
-class GitError(tbump.Error):
+class GitError(Error):
     pass
 
 

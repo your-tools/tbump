@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 import tomlkit
 
-import tbump.git
-import tbump.hooks
-import tbump.main
+from tbump.git import run_git
+from tbump.hooks import HookError
+from tbump.main import main, run
 
 
 def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> None:
@@ -24,8 +24,8 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     hook_config.add("name", name)
     parsed[key].append(hook_config)  # type: ignore
     cfg_path.write_text(tomlkit.dumps(parsed))
-    tbump.git.run_git(test_repo, "add", ".")
-    tbump.git.run_git(test_repo, "commit", "--message", "update hooks")
+    run_git(test_repo, "add", ".")
+    run_git(test_repo, "commit", "--message", "update hooks")
 
 
 def add_before_hook(test_repo: Path) -> None:
@@ -61,7 +61,7 @@ def test_working_hook(test_repo: Path) -> None:
     current and new version
     """
     add_before_hook(test_repo)
-    tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
+    main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     hook_stamp = test_repo / "before-hook.stamp"
     assert hook_stamp.read_text() == "1.2.41-alpha-1 -> 1.2.41-alpha-2"
 
@@ -73,8 +73,8 @@ def test_hook_fails(test_repo: Path) -> None:
     """
     add_before_hook(test_repo)
     add_crashing_hook(test_repo)
-    with pytest.raises(tbump.hooks.HookError):
-        tbump.main.run(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
+    with pytest.raises(HookError):
+        run(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
 
 def test_hooks_after_push(test_repo: Path) -> None:
@@ -84,6 +84,6 @@ def test_hooks_after_push(test_repo: Path) -> None:
     """
     add_before_hook(test_repo)
     add_after_hook(test_repo)
-    tbump.main.main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
+    main(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
     assert (test_repo / "before-hook.stamp").exists()
     assert (test_repo / "after-hook.stamp").exists()
