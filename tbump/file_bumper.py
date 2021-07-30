@@ -6,9 +6,9 @@ from typing import Dict, List, Optional, Pattern
 import attr
 import cli_ui as ui
 
-from tbump import Error
 from tbump.action import Action
 from tbump.config import ConfigFile, File, get_config_file
+from tbump.error import Error
 
 
 @attr.s

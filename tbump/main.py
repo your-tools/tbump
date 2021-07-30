@@ -8,8 +8,8 @@ import attr
 import cli_ui as ui
 import docopt
 
-from tbump import Error
 from tbump.config import get_config_file
+from tbump.error import Error
 from tbump.executor import Executor
 from tbump.file_bumper import FileBumper
 from tbump.git import GitError

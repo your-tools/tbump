@@ -5,6 +5,7 @@ import pytest
 import tomlkit
 from cli_ui.tests import MessageRecorder
 
+from tbump.error import Error
 from tbump.git import run_git, run_git_captured
 from tbump.main import main
 from tbump.test.conftest import file_contains
