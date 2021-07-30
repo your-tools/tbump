@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 import tomlkit
-from cli_ui.tests import MessageRecorder
 
 from tbump.init import TbumpTomlAlreadyExists
 from tbump.main import run as run_tbump

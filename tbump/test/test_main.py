@@ -3,7 +3,6 @@ from typing import Any
 
 import pytest
 import tomlkit
-from cli_ui.tests import MessageRecorder
 
 from tbump.config import ConfigNotFound, InvalidConfig
 from tbump.error import Error
@@ -140,17 +139,13 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
     assert "0.2.0" in actual
 
 
-def test_dry_run_interactive(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_dry_run_interactive(test_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(["-C", str(test_repo), "1.2.41-alpha-2", "--dry-run"])
     assert bump_not_done(test_repo, previous_commit)
 
 
-def test_dry_run_non_interactive(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_dry_run_non_interactive(test_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(
         ["-C", str(test_repo), "1.2.41-alpha-2", "--dry-run", "--non-interactive"]
@@ -182,18 +177,14 @@ def test_on_outdated_branch(test_repo: Path) -> None:
     assert not tag_pushed(test_repo)
 
 
-def test_tbump_toml_not_found(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_tbump_toml_not_found(test_repo: Path) -> None:
     toml_path = test_repo / "tbump.toml"
     toml_path.unlink()
     with pytest.raises(ConfigNotFound):
         run_tbump(["-C", str(test_repo), "1.2.42", "--non-interactive"])
 
 
-def test_tbump_toml_bad_syntax(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_tbump_toml_bad_syntax(test_repo: Path) -> None:
     toml_path = test_repo / "tbump.toml"
     bad_toml = tomlkit.loads(toml_path.read_text())
     del bad_toml["git"]
@@ -202,16 +193,12 @@ def test_tbump_toml_bad_syntax(
         run_tbump(["-C", str(test_repo), "1.2.42", "--non-interactive"])
 
 
-def test_new_version_does_not_match(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_new_version_does_not_match(test_repo: Path) -> None:
     with pytest.raises(InvalidVersion):
         run_tbump(["-C", str(test_repo), "1.2.41a2", "--non-interactive"])
 
 
-def test_abort_if_file_does_not_exist(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_abort_if_file_does_not_exist(test_repo: Path) -> None:
     (test_repo / "package.json").unlink()
     run_git(test_repo, "add", "--update")
     run_git(test_repo, "commit", "--message", "remove package.json")
@@ -232,7 +219,7 @@ def test_interactive_abort(test_repo: Path, mocker: Any) -> None:
     assert "v1.2.42-alpha-2" not in out
 
 
-def test_abort_if_dirty(test_repo: Path, message_recorder: MessageRecorder) -> None:
+def test_abort_if_dirty(test_repo: Path) -> None:
     version_path = test_repo / "VERSION"
     with version_path.open("a") as f:
         f.write("unstaged changes\n")
@@ -241,18 +228,14 @@ def test_abort_if_dirty(test_repo: Path, message_recorder: MessageRecorder) -> N
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
 
-def test_abort_if_tag_exists(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_abort_if_tag_exists(test_repo: Path) -> None:
     run_git(test_repo, "tag", "v1.2.42")
 
     with pytest.raises(RefAlreadyExists):
         run_tbump(["-C", str(test_repo), "1.2.42", "--non-interactive"])
 
 
-def test_abort_if_file_does_not_contain_current_version(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_abort_if_file_does_not_contain_current_version(test_repo: Path) -> None:
     invalid_src = test_repo / "foo.txt"
     invalid_src.write_text("this is foo")
     tbump_path = test_repo / "tbump.toml"
@@ -270,18 +253,14 @@ def test_abort_if_file_does_not_contain_current_version(
         run_tbump(["-C", str(test_repo), "1.2.42", "--non-interactive"])
 
 
-def test_no_tracked_branch_but_ref_exists(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_no_tracked_branch_but_ref_exists(test_repo: Path) -> None:
     run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(RefAlreadyExists):
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-1"])
 
 
-def test_no_tracked_branch_non_interactive(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_no_tracked_branch_non_interactive(test_repo: Path) -> None:
     run_git(test_repo, "checkout", "-b", "devel")
 
     with pytest.raises(NoTrackedBranch):
@@ -305,7 +284,7 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
     assert "untracked.txt" not in out
 
 
-def test_bad_substitution(test_repo: Path, message_recorder: MessageRecorder) -> None:
+def test_bad_substitution(test_repo: Path) -> None:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
     new_toml["file"][0]["version_template"] = "{release}"  # type: ignore
