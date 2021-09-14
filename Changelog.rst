@@ -1,7 +1,7 @@
 Changelog
 =========
 
-6.4.0 (2021-06-22)
+6.4.0 (2021-09-14)
 -------------------
 
 Breaking change
@@ -10,7 +10,7 @@ Breaking change
 If you are using `tbump` with a `pyproject.toml` to bump a project using `poetry`,
 you may have found that the `version` key in `[tool.poetry]` was implicitly bumped.
 
-This was considered to be a, which means you now have to tell `tbump` about `poetry` explicitly:
+This was considered to be a bug, which means you now have to tell `tbump` about `poetry` explicitly:
 
 .. code-block:: toml
 
@@ -30,6 +30,8 @@ Misc
 ++++
 
 * Default development branch is now called `main`.
+* Make all `tbump` imports consistent
+* Fix compatibly with Python 3.10
 
 6.3.2 (2021-04-19)
 ------------------
