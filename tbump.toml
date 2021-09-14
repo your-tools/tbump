@@ -23,7 +23,7 @@ search = 'version = "{current_version}"'
 
 
 [[file]]
-src = "tbump/main.py"
+src = "tbump/cli.py"
 
 [[before_commit]]
 name = "Run CI"
