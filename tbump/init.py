@@ -1,6 +1,6 @@
 import textwrap
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import cli_ui as ui
 
@@ -30,7 +30,11 @@ def find_files(working_path: Path, current_version: str) -> List[str]:
 
 
 def init(
-    working_path: Path, *, current_version: str, use_pyproject: bool = False
+    working_path: Path,
+    *,
+    current_version: str,
+    use_pyproject: bool = False,
+    specified_config_path: Optional[Path] = None,
 ) -> None:
     """Interactively creates a new tbump.toml"""
     if use_pyproject:
@@ -40,7 +44,10 @@ def init(
     else:
         text = ""
         key_prefix = ""
-        cfg_path = working_path / "tbump.toml"
+        if specified_config_path:
+            cfg_path = specified_config_path
+        else:
+            cfg_path = working_path / "tbump.toml"
         if cfg_path.exists():
             raise TbumpTomlAlreadyExists(cfg_path)
     ui.info_1("Generating tbump config file")

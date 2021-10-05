@@ -44,3 +44,19 @@ def test_abort_if_tbump_toml_exists(
 ) -> None:
     with pytest.raises(TbumpTomlAlreadyExists):
         run_tbump(["-C", str(test_repo), "init", "1.2.41-alpha1"])
+
+
+def test_use_specified_path(
+    test_repo: Path,
+) -> None:
+    # fmt: off
+    run_tbump(
+        [
+            "-C", str(test_repo),
+            "--config", str(test_repo / "other.toml"),
+            "init",
+            "1.2.41-alpha1",
+        ]
+    )
+    # fmt: on
+    assert (test_repo / "other.toml").exists()
