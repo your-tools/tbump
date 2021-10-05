@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 import tomlkit
@@ -18,9 +18,9 @@ from tbump.git_bumper import DirtyRepository, NoTrackedBranch, RefAlreadyExists
 from tbump.test.conftest import file_contains
 
 
-def files_bumped(test_repo: Path) -> bool:
-    cfg_path = test_repo / "tbump.toml"
-    new_toml = tomlkit.loads(cfg_path.read_text())
+def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
+    config_path = config_path or test_repo / "tbump.toml"
+    new_toml = tomlkit.loads(config_path.read_text())
     current_version = new_toml["version"]["current"]  # type: ignore
 
     assert current_version == "1.2.41-alpha-2"
@@ -137,6 +137,28 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
     foo_py = test_pyproject_repo / "foo" / "__init__.py"
     actual = foo_py.read_text()
     assert "0.2.0" in actual
+
+
+def test_using_specified_path(
+    test_repo: Path,
+) -> None:
+    run_git(test_repo, "mv", "tbump.toml", "other.toml")
+    run_git(test_repo, "commit", "--message", "rename tbump.toml -> other.toml")
+    config_path = test_repo / "other.toml"
+
+    # fmt: off
+    run_tbump(
+        [
+            "-C", str(test_repo),
+            "--config", str(config_path),
+            "--only-patch",
+            "--non-interactive",
+            "1.2.41-alpha-2",
+        ]
+    )
+    # fmt: on
+
+    assert files_bumped(test_repo, config_path=config_path)
 
 
 def test_dry_run_interactive(test_repo: Path) -> None:

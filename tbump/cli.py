@@ -53,6 +53,7 @@ class BumpOptions:
     new_version: str = attr.ib()
     interactive: bool = attr.ib(default=True)
     dry_run: bool = attr.ib(default=False)
+    config_path: Optional[Path] = attr.ib(default=None)
 
 
 def run(cmd: List[str]) -> None:
@@ -67,6 +68,12 @@ def run(cmd: List[str]) -> None:
     if opt_dict["<new_version>"] == "init":
         sys.exit(USAGE)
 
+    config_opt = opt_dict["--config"]
+    if config_opt:
+        specified_config_path: Optional[Path] = Path(config_opt)
+    else:
+        specified_config_path = None
+
     if opt_dict["--cwd"]:
         working_path = Path(opt_dict["--cwd"])
     else:
@@ -75,12 +82,6 @@ def run(cmd: List[str]) -> None:
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
         use_pyproject = opt_dict["--pyproject"]
-
-        config_opt = opt_dict["--config"]
-        if config_opt:
-            specified_config_path: Optional[Path] = Path(config_opt)
-        else:
-            specified_config_path = None
 
         init(
             working_path,
@@ -91,7 +92,11 @@ def run(cmd: List[str]) -> None:
         return
 
     new_version = opt_dict["<new_version>"]
-    bump_options = BumpOptions(working_path=working_path, new_version=new_version)
+    bump_options = BumpOptions(
+        working_path=working_path,
+        new_version=new_version,
+        config_path=specified_config_path,
+    )
     if opt_dict["--dry-run"]:
         bump_options.dry_run = True
     if opt_dict["--non-interactive"]:
@@ -118,8 +123,11 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     new_version = options.new_version
     interactive = options.interactive
     dry_run = options.dry_run
+    specified_config_path = options.config_path
 
-    config_file = get_config_file(options.working_path)
+    config_file = get_config_file(
+        options.working_path, specified_config_path=specified_config_path
+    )
     config = config_file.get_config()
 
     # fmt: off
