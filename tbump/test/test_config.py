@@ -8,10 +8,10 @@ import tomlkit
 
 from tbump.config import (
     Config,
-    ConfigNotFound,
     Field,
     File,
     InvalidConfig,
+    TbumpTomlConfig,
     from_parsed_config,
     get_config_file,
     validate_basic_schema,
@@ -97,8 +97,21 @@ def test_complain_if_pyproject_does_not_contain_tbump_config(tmp_path: Path) -> 
     )
     pyproject_toml.write_text(to_write)
 
-    with pytest.raises(ConfigNotFound):
+    with pytest.raises(InvalidConfig):
         get_config_file(tmp_path)
+
+
+def test_use_specified_path(tmp_path: Path, test_project: Path) -> None:
+    other_path = tmp_path / "other.toml"
+    test_toml = test_project / "tbump.toml"
+    other_path.write_text(test_toml.read_text())
+    expected_file = get_config_file(tmp_path, specified_config_path=other_path)
+    assert isinstance(expected_file, TbumpTomlConfig)
+
+
+def test_raise_when_specified_path_does_not_exists(tmp_path: Path) -> None:
+    with pytest.raises(InvalidConfig):
+        get_config_file(tmp_path, specified_config_path=tmp_path / "no-such.toml")
 
 
 def test_validate_schema_in_pyproject_toml(tmp_path: Path) -> None:

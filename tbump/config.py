@@ -1,7 +1,7 @@
 import abc
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Pattern, Union
+from typing import Dict, List, Optional, Pattern, Tuple, Union
 
 import attr
 import cli_ui as ui
@@ -95,7 +95,12 @@ class PyprojectConfig(ConfigFile):
         super().__init__(path, doc)
 
     def get_parsed(self) -> dict:
-        return self.doc["tool"]["tbump"].value.value  # type: ignore
+        try:
+            tool_section = self.doc["tool"]["tbump"].value  # type: ignore
+        except KeyError as e:
+            raise InvalidConfig(parse_error=e)
+
+        return tool_section.value  # type: ignore
 
     def set_new_version(self, new_version: str) -> None:
         self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore
@@ -205,35 +210,48 @@ def validate_config(cfg: Config) -> None:
         validate_hook_cmd(hook.cmd)
 
 
-def get_config_file(project_path: Path) -> ConfigFile:
+def get_config_file(
+    project_path: Path, *, specified_config_path: Optional[Path] = None
+) -> ConfigFile:
     try:
-        config_file = _get_config_file(project_path)
-        # Check that the config is valid before returning it,
-        # so that problems in config file are reported early
-        config_file.get_config()
-        return config_file
+        config_type, config_path = _get_config_path_and_type(
+            project_path, specified_config_path
+        )
+        res = _get_config_file(config_type, config_path)
+        # Make sure config is correct before returning it
+        res.get_config()
+        return res
     except IOError as io_error:
         raise InvalidConfig(io_error=io_error)
     except schema.SchemaError as parse_error:
         raise InvalidConfig(parse_error=parse_error)
 
 
-def _get_config_file(project_path: Path) -> ConfigFile:
+def _get_config_path_and_type(
+    project_path: Path, specified_config_path: Optional[Path] = None
+) -> Tuple[str, Path]:
+    if specified_config_path:
+        return "tbump.toml", specified_config_path
+
     toml_path = project_path / "tbump.toml"
     if toml_path.exists():
-        doc = tomlkit.loads(toml_path.read_text())
-        return TbumpTomlConfig(toml_path, doc)
+        return "tbump.toml", toml_path
 
     pyproject_path = project_path / "pyproject.toml"
     if pyproject_path.exists():
-        doc = tomlkit.loads(pyproject_path.read_text())
-        try:
-            doc["tool"]["tbump"]  # type: ignore
-        except KeyError:
-            raise ConfigNotFound(project_path)
-        return PyprojectConfig(pyproject_path, doc)
+        return "pyproject.toml", pyproject_path
 
     raise ConfigNotFound(project_path)
+
+
+def _get_config_file(config_type: str, config_path: Path) -> ConfigFile:
+    if config_type == "tbump.toml":
+        doc = tomlkit.loads(config_path.read_text())
+        return TbumpTomlConfig(config_path, doc)
+    elif config_type == "pyproject.toml":
+        doc = tomlkit.loads(config_path.read_text())
+        return PyprojectConfig(config_path, doc)
+    raise ValueError("unknown config_type: {config_type}")
 
 
 def from_parsed_config(parsed: dict) -> Config:
