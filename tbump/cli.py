@@ -31,6 +31,7 @@ Options:
    -h --help          Show this screen.
    -v --version       Show version.
    -C --cwd=<path>    Set working directory to <path>.
+   -c --config=<path> Use specified toml config file. When not set, `tbump.toml` is assumed.
    --non-interactive  Never prompt for confirmation. Useful for automated scripts.
    --dry-run          Only display the changes that would be made.
    --only-patch       Only patches files, skipping any git operations or hook commands.
@@ -74,7 +75,19 @@ def run(cmd: List[str]) -> None:
     if opt_dict["init"]:
         current_version = opt_dict["<current_version>"]
         use_pyproject = opt_dict["--pyproject"]
-        init(working_path, current_version=current_version, use_pyproject=use_pyproject)
+
+        config_opt = opt_dict["--config"]
+        if config_opt:
+            specified_config_path: Optional[Path] = Path(config_opt)
+        else:
+            specified_config_path = None
+
+        init(
+            working_path,
+            current_version=current_version,
+            use_pyproject=use_pyproject,
+            specified_config_path=specified_config_path,
+        )
         return
 
     new_version = opt_dict["<new_version>"]
