@@ -146,7 +146,9 @@ class GitBumper:
                 res, "tag", "--annotate", "--message", tag_message, tag_name
             )
         if "push_commit" in self.operations and "push_tag" in self.operations:
-            self.add_command(res, "push", "--atomic", self.remote_name, self.remote_branch, tag_name)
+            self.add_command(
+                res, "push", "--atomic", self.remote_name, self.remote_branch, tag_name
+            )
 
         elif "push_commit" in self.operations:
             self.add_command(res, "push", self.remote_name, self.remote_branch)
