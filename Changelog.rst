@@ -1,6 +1,12 @@
 Changelog
 =========
 
+6.5.0 (2021-10-16)
+------------------
+
+Instead of pushing twice, which spawns two workflows, ``tbump`` now runs
+``git push --atomic <remote> <branch> <tag>``. Patch by @InCogNiTo124.
+
 6.4.1 (2021-10-05)
 -------------------
 
