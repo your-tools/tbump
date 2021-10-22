@@ -23,6 +23,8 @@
 tbump: bump software releases
 =============================
 
+tbump helps you bump the version of your project in a easy way.
+
 Note
 ----
 
