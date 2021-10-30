@@ -287,7 +287,7 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 def test_bad_substitution(test_repo: Path) -> None:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
-    new_toml["file"][0]["version_template"] = "{release}"  # type: ignore
+    new_toml["file"][0]["version_template"] = "{build}"  # type: ignore
     toml_path.write_text(tomlkit.dumps(new_toml))
     run_git(test_repo, "add", ".")
     run_git(test_repo, "commit", "--message", "update repo")

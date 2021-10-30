@@ -7,7 +7,7 @@ import attr
 import cli_ui as ui
 
 from tbump.action import Action
-from tbump.config import ConfigFile, File, get_config_file
+from tbump.config import ConfigFile, Field, File, get_config_file
 from tbump.error import Error
 
 
@@ -160,6 +160,7 @@ class FileBumper:
     def __init__(self, working_path: Path):
         self.working_path = working_path
         self.files: List[File] = []
+        self.fields: List[Field] = []
         self.version_regex = re.compile(".")
         self.current_version = ""
         self.current_groups: Dict[str, str] = {}
@@ -172,12 +173,19 @@ class FileBumper:
         match = self.version_regex.fullmatch(version)
         if match is None:
             raise InvalidVersion(version=version, regex=self.version_regex)
-        return match.groupdict()
+        groups = match.groupdict()
+
+        # apply default fields from config
+        for field in self.fields:
+            if groups.get(field.name) is None:
+                groups[field.name] = field.default
+        return groups
 
     def set_config_file(self, config_file: ConfigFile) -> None:
         self.config_file = config_file
         config = config_file.get_config()
         self.files = config.files
+        self.fields = config.fields
         self.check_files_exist()
         self.version_regex = config.version_regex
         self.current_version = config.current_version

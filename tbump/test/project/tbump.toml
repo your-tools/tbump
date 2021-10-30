@@ -12,6 +12,10 @@ regex = '''
     -
     (?P<release>\d+)
   )?
+  (
+    \+
+    (?P<build>[a-z0-9\.]+)
+  )?
   '''
 
 [git]
@@ -32,3 +36,16 @@ version_template = "{major}.{minor}.{patch}"
 [[file]]
 src = "glob*.?"
 search = 'version_[a-z]+ = "{current_version}"'
+
+[[file]]
+src = "version_info.py"
+version_template = '({major}, {minor}, {patch}, "{channel}", {release})'
+search = "version_info = {current_version}"
+
+[[field]]
+name = "channel"
+default = ""
+
+[[field]]
+name = "release"
+default = 0

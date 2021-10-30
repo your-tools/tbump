@@ -9,6 +9,7 @@ import tomlkit
 from tbump.config import (
     Config,
     ConfigNotFound,
+    Field,
     File,
     InvalidConfig,
     from_parsed_config,
@@ -26,6 +27,20 @@ def test_happy_parse(test_project: Path) -> None:
     version_txt = File(src="VERSION")
     pub_js = File(src="pub.js", version_template="{major}.{minor}.{patch}")
     glob = File(src="glob*.?", search='version_[a-z]+ = "{current_version}"')
+    version_info = File(
+        src="version_info.py",
+        search="version_info = {current_version}",
+        version_template='({major}, {minor}, {patch}, "{channel}", {release})',
+    )
+
+    channel = Field(
+        name="channel",
+        default="",
+    )
+    release = Field(
+        name="release",
+        default=0,
+    )
 
     expected_pattern = r"""  (?P<major>\d+)
   \.
@@ -38,11 +53,16 @@ def test_happy_parse(test_project: Path) -> None:
     -
     (?P<release>\d+)
   )?
+  (
+    \+
+    (?P<build>[a-z0-9\.]+)
+  )?
   """
 
     assert config.version_regex.pattern == expected_pattern
 
-    assert config.files == [foo_json, version_txt, pub_js, glob]
+    assert config.files == [foo_json, version_txt, pub_js, glob, version_info]
+    assert config.fields == [channel, release]
 
     assert config.current_version == "1.2.41-alpha-1"
 
