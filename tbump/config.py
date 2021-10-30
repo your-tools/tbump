@@ -1,7 +1,7 @@
 import abc
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Pattern
+from typing import Dict, List, Optional, Pattern, Union
 
 import attr
 import cli_ui as ui
@@ -21,6 +21,12 @@ class File:
 
 
 @attr.s
+class Field:
+    name: str = attr.ib()
+    default: Optional[Union[str, int]] = attr.ib(default=None)
+
+
+@attr.s
 class Config:
     current_version: str = attr.ib()
     version_regex: Pattern[str] = attr.ib()
@@ -30,6 +36,7 @@ class Config:
 
     files: List[File] = attr.ib()
     hooks: List[Hook] = attr.ib()
+    fields: List[Field] = attr.ib()
 
     github_url: Optional[str] = attr.ib()
 
@@ -139,6 +146,13 @@ def validate_basic_schema(config: dict) -> None:
         }
     )
 
+    field_schema = schema.Schema(
+        {
+            "name": str,
+            schema.Optional("default"): schema.Or(str, int),
+        }
+    )
+
     hook_schema = schema.Schema({"name": str, "cmd": str})
 
     def validate_re(regex: str) -> str:
@@ -150,6 +164,7 @@ def validate_basic_schema(config: dict) -> None:
             "version": {"current": str, "regex": schema.Use(validate_re)},
             "git": {"message_template": str, "tag_template": str},
             "file": [file_schema],
+            schema.Optional("field"): [field_schema],
             schema.Optional("hook"): [hook_schema],  # retro-compat
             schema.Optional("before_push"): [hook_schema],  # retro-compat
             schema.Optional("before_commit"): [hook_schema],
@@ -235,7 +250,13 @@ def from_parsed_config(parsed: dict) -> Config:
             version_template=file_dict.get("version_template"),
         )
         files.append(file_config)
-
+    fields = []
+    for field_dict in parsed.get("field", []):
+        field_config = Field(
+            name=field_dict["name"],
+            default=field_dict.get("default"),
+        )
+        fields.append(field_config)
     hooks = []
     for hook_type in ("hook", "before_push", "before_commit", "after_push"):
         cls = HOOKS_CLASSES[hook_type]
@@ -251,6 +272,7 @@ def from_parsed_config(parsed: dict) -> Config:
         version_regex=version_regex,
         git_message_template=git_message_template,
         git_tag_template=git_tag_template,
+        fields=fields,
         files=files,
         hooks=hooks,
         github_url=github_url,
