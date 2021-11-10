@@ -170,15 +170,15 @@ class FileBumper:
 
     def parse_version(self, version: str) -> Dict[str, str]:
         assert self.version_regex
-        match = self.version_regex.fullmatch(version)
-        if match is None:
+        regex_match = self.version_regex.fullmatch(version)
+        if regex_match is None:
             raise InvalidVersion(version=version, regex=self.version_regex)
-        groups = match.groupdict()
+        groups = regex_match.groupdict()
 
         # apply default fields from config
         for field in self.fields:
             if groups.get(field.name) is None:
-                groups[field.name] = field.default
+                groups[field.name] = str(field.default)
         return groups
 
     def set_config_file(self, config_file: ConfigFile) -> None:
