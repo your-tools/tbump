@@ -4,6 +4,15 @@ Changelog
 6.6.0 (unreleased)
 ------------------
 
+Add support for other config paths
+++++++++++++++++++++++++++++++++++
+
+Added `-c, --config` to `tbump` command line, allowing using
+a different config file than `tbump.toml`.
+
+Add support default values for versions fields
+++++++++++++++++++++++++++++++++++++++++++++++
+
 Added new ``[[field]]`` option for setting default values for version fields
 with no match in the version regex (e.g. prerelease fields),
 avoiding errors when these fields are present in a version_template.
@@ -16,6 +25,11 @@ For example:
    [[field]]
    name = "prerelease"
    default = ""
+
+Other
++++++
+
+* Relax dependency on `attrs` - we used to have ``attrs <20, >=19``, now we have ``attrs >= 20``.
 
 6.5.0 (2021-10-16)
 ------------------
