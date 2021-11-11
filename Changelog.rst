@@ -1,7 +1,7 @@
 Changelog
 =========
 
-6.6.0 (unreleased)
+6.6.0 (2021-11-11)
 ------------------
 
 Add support for other config paths
