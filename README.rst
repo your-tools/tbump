@@ -247,3 +247,42 @@ This is useful if you need the command to run on a clean repository, without un-
     [[after_push]]
     name = "Publish to crates.io"
     cmd = "cargo publish"
+
+
+Setting default values for version fields
++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 6.6
+
+If you have a ``version_template`` that includes fields that don't always have a match
+(e.g. prerelease info),
+you can set a default value to use instead of ``None``,
+which would raise an error.
+
+For example:
+
+.. code-block:: ini
+
+    [version]
+    current = "1.2.3"
+    regex = """
+      (?P<major>\d+)
+      \.
+      (?P<minor>\d+)
+      \.
+      (?P<patch>\d+)
+      (\-
+        (?P<extra>.+)
+      )?
+      """
+
+    [[file]]
+    src = "version.py"
+    version_template = '({major}, {minor}, {patch}, "{extra}")'
+    search = "version_info = {current_version}"
+
+    [[field]]
+    # the name of the field
+    name = "extra"
+    # the default value to use, if there is no match
+    default = ""
