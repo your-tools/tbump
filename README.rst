@@ -252,7 +252,8 @@ This is useful if you need the command to run on a clean repository, without un-
 Setting default values for version fields
 +++++++++++++++++++++++++++++++++++++++++
 
-.. versionadded:: 6.6
+
+(Added in 6.6.0)
 
 If you have a ``version_template`` that includes fields that don't always have a match
 (e.g. prerelease info),
