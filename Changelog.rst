@@ -1,6 +1,22 @@
 Changelog
 =========
 
+6.6.0 (unreleased)
+------------------
+
+Added new ``[[field]]`` option for setting default values for version fields
+with no match in the version regex (e.g. prerelease fields),
+avoiding errors when these fields are present in a version_template.
+Patch by @minrk.
+
+For example:
+
+.. code-block:: toml
+
+   [[field]]
+   name = "prerelease"
+   default = ""
+
 6.5.0 (2021-10-16)
 ------------------
 
