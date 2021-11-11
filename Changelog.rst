@@ -7,8 +7,9 @@ Changelog
 Add support for other config paths
 ++++++++++++++++++++++++++++++++++
 
-Added `-c, --config` to `tbump` command line, allowing using
-a different config file than `tbump.toml`.
+Added ``-c, --config`` to ``tbump`` command line, allowing using
+a different config file than `tbump.toml` (based on early work by
+@achary)
 
 Add support default values for versions fields
 ++++++++++++++++++++++++++++++++++++++++++++++
