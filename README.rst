@@ -60,7 +60,7 @@ Here's what a typical usage of ``tbump`` looks like:
     + tbump.toml:2 current = "5.0.5"
     => Would run these hooks before commit
     * (1/2) $ ./test.sh
-    * (2/2) $ grep -q 5.0.5 Changelog.rst
+    * (2/2) $ grep -q -F 5.0.5 Changelog.rst
     => Would run these git commands
      * git add --update
      * git commit --message Bump to 5.0.5
@@ -228,7 +228,7 @@ Here's an example:
 
     [[before_commit]]
     name = "Check Changelog"
-    cmd = "grep -q {new_version} Changelog.rst"
+    cmd = "grep -q -F {new_version} Changelog.rst"
 
 
 The name is mandatory. The command will be executed via the shell, after the  ``{new_version}``  placeholder is replaced with the new version.
