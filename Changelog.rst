@@ -1,6 +1,12 @@
 Changelog
 =========
 
+6.6.1 (2021-12-17)
+------------------
+
+* Relax dependency on `cli-ui`
+* Use a better example in the README (patch by @umonoca)
+
 6.6.0 (2021-11-11)
 ------------------
 
