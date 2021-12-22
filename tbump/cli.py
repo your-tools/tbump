@@ -1,10 +1,10 @@
 import sys
 import textwrap
 import urllib.parse
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
-import attr
 import cli_ui as ui
 import docopt
 
@@ -47,13 +47,13 @@ class Canceled(Error):
         ui.error("Canceled by user")
 
 
-@attr.s
+@dataclass
 class BumpOptions:
-    working_path: Path = attr.ib()
-    new_version: str = attr.ib()
-    interactive: bool = attr.ib(default=True)
-    dry_run: bool = attr.ib(default=False)
-    config_path: Optional[Path] = attr.ib(default=None)
+    working_path: Path
+    new_version: str
+    interactive: bool = True
+    dry_run: bool = False
+    config_path: Optional[Path] = None
 
 
 def run(cmd: List[str]) -> None:

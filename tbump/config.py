@@ -1,9 +1,9 @@
 import abc
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern, Tuple, Union
 
-import attr
 import cli_ui as ui
 import schema
 import tomlkit
@@ -13,32 +13,32 @@ from tbump.error import Error
 from tbump.hooks import HOOKS_CLASSES, Hook
 
 
-@attr.s
+@dataclass
 class File:
-    src: str = attr.ib()
-    search: Optional[str] = attr.ib(default=None)
-    version_template: Optional[str] = attr.ib(default=None)
+    src: str
+    search: Optional[str] = None
+    version_template: Optional[str] = None
 
 
-@attr.s
+@dataclass
 class Field:
-    name: str = attr.ib()
-    default: Optional[Union[str, int]] = attr.ib(default=None)
+    name: str
+    default: Optional[Union[str, int]] = None
 
 
-@attr.s
+@dataclass
 class Config:
-    current_version: str = attr.ib()
-    version_regex: Pattern[str] = attr.ib()
+    current_version: str
+    version_regex: Pattern[str]
 
-    git_tag_template: str = attr.ib()
-    git_message_template: str = attr.ib()
+    git_tag_template: str
+    git_message_template: str
 
-    files: List[File] = attr.ib()
-    hooks: List[Hook] = attr.ib()
-    fields: List[Field] = attr.ib()
+    files: List[File]
+    hooks: List[Hook]
+    fields: List[Field]
 
-    github_url: Optional[str] = attr.ib()
+    github_url: Optional[str]
 
 
 class ConfigFile(metaclass=abc.ABCMeta):
