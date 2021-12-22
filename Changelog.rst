@@ -5,7 +5,7 @@ Changelog
 ------------------
 
 * Drop support for Python 3.6
-* Drop dependency on `attr`
+* Drop dependency on ``attr``
 
 6.6.1 (2021-12-17)
 ------------------
