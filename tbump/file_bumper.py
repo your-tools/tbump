@@ -1,9 +1,9 @@
 import glob
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Pattern
 
-import attr
 import cli_ui as ui
 
 from tbump.action import Action
@@ -11,12 +11,12 @@ from tbump.config import ConfigFile, Field, File, get_config_file
 from tbump.error import Error
 
 
-@attr.s
+@dataclass
 class ChangeRequest:
-    src: str = attr.ib()
-    old_string: str = attr.ib()
-    new_string: str = attr.ib()
-    search: Optional[str] = attr.ib(default=None)
+    src: str
+    old_string: str
+    new_string: str
+    search: Optional[str] = None
 
 
 class Patch(Action):
