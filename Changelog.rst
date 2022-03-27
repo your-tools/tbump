@@ -1,6 +1,11 @@
 Changelog
 =========
 
+6.8.0 (2022-03-27)
+------------------
+
+* Allow usage of ``python -m tbump`` in addtion to just ``tbump``
+
 6.7.0 (2021-12-22)
 ------------------
 
