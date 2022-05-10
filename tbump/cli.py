@@ -23,6 +23,7 @@ USAGE = textwrap.dedent(
     """
 Usage:
   tbump [options] <new_version>
+  tbump [options] current-version
   tbump [options] init [--pyproject] <current_version>
   tbump --help
   tbump --version
@@ -92,6 +93,15 @@ def run(cmd: List[str]) -> None:
         return
 
     new_version = opt_dict["<new_version>"]
+
+    if new_version == 'current-version':
+        config_file = get_config_file(
+            working_path, specified_config_path=specified_config_path
+        )
+        config = config_file.get_config()
+        ui.info(config.current_version)
+        return
+
     bump_options = BumpOptions(
         working_path=working_path,
         new_version=new_version,

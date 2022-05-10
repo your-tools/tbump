@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 from typing import Any, Optional
 
 import pytest
@@ -123,6 +124,8 @@ def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
 
     assert bump_done(test_repo, previous_commit)
 
+    output = subprocess.check_output(["tbump", "current-version"], cwd=test_repo)
+    assert output.decode('utf-8').strip() == '1.2.41-alpha-2'
 
 def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_pyproject_repo, "rev-parse", "HEAD")
@@ -137,6 +140,9 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
     foo_py = test_pyproject_repo / "foo" / "__init__.py"
     actual = foo_py.read_text()
     assert "0.2.0" in actual
+
+    output = subprocess.check_output(["tbump", "current-version"], cwd=test_pyproject_repo)
+    assert output.decode('utf-8').strip() == '0.2.0'
 
 
 def test_using_specified_path(
@@ -159,6 +165,9 @@ def test_using_specified_path(
     # fmt: on
 
     assert files_bumped(test_repo, config_path=config_path)
+
+    output = subprocess.check_output(["tbump", "current-version", "-C", str(test_repo), '--config', str(config_path)], cwd=test_repo)
+    assert output.decode('utf-8').strip() == '1.2.41-alpha-2'
 
 
 def test_dry_run_interactive(test_repo: Path) -> None:
