@@ -150,6 +150,12 @@ You can use ``--non-interactive`` to disable this behavior.
 
 If you only want to bump the files without performing any git actions or running the hook commands, use the ``--only-patch`` option.
 
+The current version of the project can be found using the command:
+
+.. code-block:: console
+
+    $ tbump current-version
+
 Advanced configuration
 ----------------------
 
