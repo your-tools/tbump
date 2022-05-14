@@ -99,7 +99,7 @@ def run(cmd: List[str]) -> None:
             working_path, specified_config_path=specified_config_path
         )
         config = config_file.get_config()
-        ui.info(config.current_version)
+        print(config.current_version)
         return
 
     bump_options = BumpOptions(
