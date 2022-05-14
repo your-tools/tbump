@@ -1,6 +1,12 @@
 Changelog
 =========
 
+6.9.0 (2022-03-27)
+------------------
+
+* Add ``tbump current-version`` command, to print the current version.
+  Path by @blink1073
+
 6.8.0 (2022-03-27)
 ------------------
 
