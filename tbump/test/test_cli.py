@@ -1,10 +1,9 @@
 import subprocess
 from pathlib import Path
-from typing import Any, Iterator, Optional
+from typing import Any, Optional
 
 import pytest
 import tomlkit
-from cli_ui.tests import MessageRecorder
 
 from tbump.cli import run as run_tbump
 from tbump.config import ConfigNotFound, InvalidConfig
@@ -119,19 +118,11 @@ def only_patch_done(test_repo: Path, previous_commit: str) -> bool:
     )
 
 
-@pytest.fixture
-def message_recorder() -> Iterator[MessageRecorder]:
-    res = MessageRecorder()
-    res.start()
-    yield res
-    res.stop()
-
-
-def test_get_current_version(
-    test_repo: Path, message_recorder: MessageRecorder
-) -> None:
+def test_get_current_version(test_repo: Path, capsys: pytest.CaptureFixture) -> None:
     run_tbump(["-C", str(test_repo), "current-version"])
-    assert message_recorder.find("1.2.41-alpha-1")
+    captured = capsys.readouterr()
+    assert captured.out == "1.2.41-alpha-1\n"
+    assert captured.err == ""
 
 
 def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
