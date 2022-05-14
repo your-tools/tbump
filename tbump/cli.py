@@ -3,7 +3,7 @@ import textwrap
 import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import cli_ui as ui
 import docopt
@@ -57,75 +57,109 @@ class BumpOptions:
     config_path: Optional[Path] = None
 
 
+@dataclass
+class Arguments:
+    dry_run: bool
+    interactive: bool
+    current_version: str
+    new_version: str
+    run_init: bool
+    show_version: bool
+    specified_config_path: Optional[Path]
+    working_path: Path
+    use_pyproject: bool
+    operations: List[str]
+
+    @classmethod
+    def from_opts(cls, opt_dict: Dict[str, str]) -> "Arguments":
+        config_opt = opt_dict["--config"]
+        if config_opt:
+            specified_config_path: Optional[Path] = Path(config_opt)
+        else:
+            specified_config_path = None
+        if opt_dict["--cwd"]:
+            working_path = Path(opt_dict["--cwd"])
+        else:
+            working_path = Path.cwd()
+
+        operations = ["patch", "hooks", "commit", "tag", "push_commit", "push_tag"]
+        if opt_dict["--only-patch"]:
+            operations = ["patch"]
+        if opt_dict["--no-push"]:
+            operations.remove("push_commit")
+            operations.remove("push_tag")
+        if opt_dict["--no-tag-push"]:
+            operations.remove("push_tag")
+        if opt_dict["--no-tag"]:
+            operations.remove("tag")
+            # Also remove push_tag if it's still in the list:
+            if "push_tag" in operations:
+                operations.remove("push_tag")
+
+        return cls(
+            current_version=opt_dict["<current_version>"],
+            show_version=bool(opt_dict["--version"]),
+            new_version=opt_dict["<new_version>"],
+            specified_config_path=specified_config_path,
+            use_pyproject=bool(opt_dict["--pyproject"]),
+            working_path=working_path,
+            run_init=bool(opt_dict["init"]),
+            dry_run=bool(opt_dict["--dry-run"]),
+            interactive=not opt_dict["--non-interactive"],
+            operations=operations,
+        )
+
+
 def run(cmd: List[str]) -> None:
     opt_dict = docopt.docopt(USAGE, argv=cmd)
-    if opt_dict["--version"]:
+    arguments = Arguments.from_opts(opt_dict)
+
+    if arguments.show_version:
         print("tbump", TBUMP_VERSION)
         return
 
     # when running `tbump init` (with current_version missing),
     # docopt thinks we are running `tbump` with new_version = "init"
     # bail out early in this case
-    if opt_dict["<new_version>"] == "init":
+    if arguments.new_version == "init":
         sys.exit(USAGE)
 
-    config_opt = opt_dict["--config"]
-    if config_opt:
-        specified_config_path: Optional[Path] = Path(config_opt)
-    else:
-        specified_config_path = None
-
-    if opt_dict["--cwd"]:
-        working_path = Path(opt_dict["--cwd"])
-    else:
-        working_path = Path.cwd()
-
-    if opt_dict["init"]:
-        current_version = opt_dict["<current_version>"]
-        use_pyproject = opt_dict["--pyproject"]
-
-        init(
-            working_path,
-            current_version=current_version,
-            use_pyproject=use_pyproject,
-            specified_config_path=specified_config_path,
-        )
-        return
-
-    new_version = opt_dict["<new_version>"]
-
-    if new_version == "current-version":
+    # Ditto for `tbump current-version`
+    if arguments.new_version == "current-version":
         config_file = get_config_file(
-            working_path, specified_config_path=specified_config_path
+            arguments.working_path,
+            specified_config_path=arguments.specified_config_path,
         )
         config = config_file.get_config()
         print(config.current_version)
         return
 
-    bump_options = BumpOptions(
-        working_path=working_path,
-        new_version=new_version,
-        config_path=specified_config_path,
-    )
-    if opt_dict["--dry-run"]:
-        bump_options.dry_run = True
-    if opt_dict["--non-interactive"]:
-        bump_options.interactive = False
+    if arguments.run_init:
+        run_init(arguments)
+        return
 
-    operations = ["patch", "hooks", "commit", "tag", "push_commit", "push_tag"]
-    if opt_dict["--only-patch"]:
-        operations = ["patch"]
-    if opt_dict["--no-push"]:
-        operations.remove("push_commit")
-        operations.remove("push_tag")
-    if opt_dict["--no-tag-push"]:
-        operations.remove("push_tag")
-    if opt_dict["--no-tag"]:
-        operations.remove("tag")
-        # Also remove push_tag if it's still in the list:
-        if "push_tag" in operations:
-            operations.remove("push_tag")
-    bump(bump_options, operations)
+    run_bump(arguments)
+
+
+def run_init(arguments: Arguments) -> None:
+    init(
+        arguments.working_path,
+        current_version=arguments.current_version,
+        use_pyproject=arguments.use_pyproject,
+        specified_config_path=arguments.specified_config_path,
+    )
+
+
+def run_bump(arguments: Arguments) -> None:
+    bump_options = BumpOptions(
+        working_path=arguments.working_path,
+        new_version=arguments.new_version,
+        config_path=arguments.specified_config_path,
+        dry_run=arguments.dry_run,
+        interactive=arguments.interactive,
+    )
+
+    bump(bump_options, arguments.operations)
 
 
 def bump(options: BumpOptions, operations: List[str]) -> None:
