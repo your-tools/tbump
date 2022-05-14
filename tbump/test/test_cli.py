@@ -1,9 +1,10 @@
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 import pytest
 import tomlkit
+from cli_ui.tests import MessageRecorder
 
 from tbump.cli import run as run_tbump
 from tbump.config import ConfigNotFound, InvalidConfig
@@ -118,14 +119,26 @@ def only_patch_done(test_repo: Path, previous_commit: str) -> bool:
     )
 
 
+@pytest.fixture
+def message_recorder() -> Iterator[MessageRecorder]:
+    res = MessageRecorder()
+    res.start()
+    yield res
+    res.stop()
+
+
+def test_get_current_version(
+    test_repo: Path, message_recorder: MessageRecorder
+) -> None:
+    run_tbump(["-C", str(test_repo), "current-version"])
+    assert message_recorder.find("1.2.41-alpha-1")
+
+
 def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive"])
 
     assert bump_done(test_repo, previous_commit)
-
-    output = subprocess.check_output(["tbump", "current-version"], cwd=test_repo)
-    assert output.decode("utf-8").strip() == "1.2.41-alpha-2"
 
 
 def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
@@ -141,11 +154,6 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
     foo_py = test_pyproject_repo / "foo" / "__init__.py"
     actual = foo_py.read_text()
     assert "0.2.0" in actual
-
-    output = subprocess.check_output(
-        ["tbump", "current-version"], cwd=test_pyproject_repo
-    )
-    assert output.decode("utf-8").strip() == "0.2.0"
 
 
 def test_using_specified_path(
