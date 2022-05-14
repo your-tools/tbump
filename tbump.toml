@@ -35,4 +35,4 @@ cmd = "grep -q {new_version} Changelog.rst"
 
 [[after_push]]
 name = "Publish to pypi"
-cmd = "tools/publish.sh"
+cmd = "poetry publish --build"
