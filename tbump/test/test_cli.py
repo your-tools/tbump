@@ -1,4 +1,3 @@
-import subprocess
 from pathlib import Path
 from typing import Any, Optional
 
@@ -167,19 +166,6 @@ def test_using_specified_path(
     # fmt: on
 
     assert files_bumped(test_repo, config_path=config_path)
-
-    output = subprocess.check_output(
-        [
-            "tbump",
-            "current-version",
-            "-C",
-            str(test_repo),
-            "--config",
-            str(config_path),
-        ],
-        cwd=test_repo,
-    )
-    assert output.decode("utf-8").strip() == "1.2.41-alpha-2"
 
 
 def test_dry_run_interactive(test_repo: Path) -> None:
