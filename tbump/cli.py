@@ -94,7 +94,7 @@ def run(cmd: List[str]) -> None:
 
     new_version = opt_dict["<new_version>"]
 
-    if new_version == 'current-version':
+    if new_version == "current-version":
         config_file = get_config_file(
             working_path, specified_config_path=specified_config_path
         )
