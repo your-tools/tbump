@@ -59,7 +59,7 @@ class ConfigFile(metaclass=abc.ABCMeta):
         """
         pass
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def set_new_version(self, version: str) -> None:
         pass
 
