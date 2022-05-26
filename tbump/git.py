@@ -63,7 +63,7 @@ def run_git_captured(
     options["stderr"] = subprocess.STDOUT
 
     ui.debug(ui.lightgray, working_path, "$", ui.reset, *git_cmd)
-    process = subprocess.Popen(git_cmd, cwd=working_path, **options)  # type: ignore
+    process = subprocess.Popen(git_cmd, cwd=working_path, **options)  # type: ignore[call-overload]
     output, _ = process.communicate()
     output = output.decode("utf-8")
     if output.endswith("\n"):

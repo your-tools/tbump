@@ -81,8 +81,8 @@ class TbumpTomlConfig(ConfigFile):
         # Document -> dict
         return self.doc.value
 
-    def set_new_version(self, new_version: str) -> None:
-        self.doc["version"]["current"] = new_version  # type: ignore
+    def set_new_version(self, version: str) -> None:
+        self.doc["version"]["current"] = version  # type: ignore[index]
         self.save()
 
 
@@ -96,14 +96,14 @@ class PyprojectConfig(ConfigFile):
 
     def get_parsed(self) -> dict:
         try:
-            tool_section = self.doc["tool"]["tbump"].value  # type: ignore
+            tool_section = self.doc["tool"]["tbump"].value  # type: ignore[index, union-attr]
         except KeyError as e:
             raise InvalidConfig(parse_error=e)
 
-        return tool_section.value  # type: ignore
+        return tool_section.value  # type: ignore[no-any-return, union-attr]
 
     def set_new_version(self, new_version: str) -> None:
-        self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore
+        self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore[index]
         self.save()
 
 

@@ -17,7 +17,7 @@ def test_creates_tbump_toml_config(test_repo: Path) -> None:
 
     assert tbump_path.exists()
     config = tomlkit.loads(tbump_path.read_text())
-    assert config["version"]["current"] == "1.2.41-alpha1"  # type: ignore
+    assert config["version"]["current"] == "1.2.41-alpha1"  # type: ignore[index]
 
 
 def test_append_to_pyproject(test_repo: Path) -> None:
@@ -35,8 +35,8 @@ def test_append_to_pyproject(test_repo: Path) -> None:
 
     assert cfg_path.exists()
     config = tomlkit.loads(cfg_path.read_text())
-    assert config["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha1"  # type: ignore
-    assert config["tool"]["isort"]["profile"] == "black"  # type: ignore
+    assert config["tool"]["tbump"]["version"]["current"] == "1.2.41-alpha1"  # type: ignore[index]
+    assert config["tool"]["isort"]["profile"] == "black"  # type: ignore[index]
 
 
 def test_abort_if_tbump_toml_exists(

@@ -21,7 +21,7 @@ from tbump.test.conftest import file_contains
 def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
     config_path = config_path or test_repo / "tbump.toml"
     new_toml = tomlkit.loads(config_path.read_text())
-    current_version = new_toml["version"]["current"]  # type: ignore
+    current_version = new_toml["version"]["current"]  # type: ignore[index]
 
     assert current_version == "1.2.41-alpha-2"
 
@@ -37,7 +37,7 @@ def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
 def files_not_bumped(test_repo: Path) -> bool:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
-    assert new_toml["version"]["current"] == "1.2.41-alpha-1"  # type: ignore
+    assert new_toml["version"]["current"] == "1.2.41-alpha-1"  # type: ignore[index]
 
     return all(
         (
@@ -138,8 +138,8 @@ def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:
 
     pyproject_toml = test_pyproject_repo / "pyproject.toml"
     doc = tomlkit.loads(pyproject_toml.read_text())
-    assert doc["tool"]["tbump"]["version"]["current"] == "0.2.0"  # type: ignore
-    assert doc["tool"]["poetry"]["version"] == "0.2.0"  # type: ignore
+    assert doc["tool"]["tbump"]["version"]["current"] == "0.2.0"  # type: ignore[index]
+    assert doc["tool"]["poetry"]["version"] == "0.2.0"  # type: ignore[index]
 
     foo_py = test_pyproject_repo / "foo" / "__init__.py"
     actual = foo_py.read_text()
@@ -316,7 +316,7 @@ def test_do_not_add_untracked_files(test_repo: Path) -> None:
 def test_bad_substitution(test_repo: Path) -> None:
     toml_path = test_repo / "tbump.toml"
     new_toml = tomlkit.loads(toml_path.read_text())
-    new_toml["file"][0]["version_template"] = "{build}"  # type: ignore
+    new_toml["file"][0]["version_template"] = "{build}"  # type: ignore[index]
     toml_path.write_text(tomlkit.dumps(new_toml))
     run_git(test_repo, "add", ".")
     run_git(test_repo, "commit", "--message", "update repo")

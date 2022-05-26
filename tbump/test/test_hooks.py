@@ -22,7 +22,7 @@ def add_hook(test_repo: Path, name: str, cmd: str, after_push: bool = False) -> 
     hook_config = tomlkit.table()
     hook_config.add("cmd", cmd)
     hook_config.add("name", name)
-    parsed[key].append(hook_config)  # type: ignore
+    parsed[key].append(hook_config)  # type: ignore[arg-type, call-arg,  union-attr]
     cfg_path.write_text(tomlkit.dumps(parsed))
     run_git(test_repo, "add", ".")
     run_git(test_repo, "commit", "--message", "update hooks")
