@@ -23,15 +23,14 @@
 tbump: bump software releases
 =============================
 
-tbump helps you bump the version of your project in a easy way.
+tbump helps you bump the version of your project easily.
 
 Note
 ----
 
 This project was originally hosted on the `TankerHQ
 <https://github.com/TankerHQ>`_ organization, which was my employer from 2016
-to 2021. They kindly agreed to give back ownership of this project to
-me. Thanks!
+to 2021. They kindly agreed to give me back ownership of this project. Thanks!
 
 Installation
 ------------
@@ -156,8 +155,31 @@ The current version of the project can be found using the command:
 
     $ tbump current-version
 
-Advanced configuration
-----------------------
+Advanced configuration 
+---------------------- 
+
+Configuration options through Cli
+++++++++++++++++++++++++++++++++++++++++
+.. code-block:: console 
+  
+    Usage:
+      tbump [options] <new_version>
+      tbump [options] current-version
+      tbump [options] init [--pyproject] <current_version>
+      tbump --help
+      tbump --version
+
+    Options:
+      -h --help          Show this screen.
+      -v --version       Show version.
+      -C --cwd=<path>    Set working directory to <path>.
+      -c --config=<path> Use specified toml config file. When not set, `tbump.toml` is assumed.
+      --non-interactive  Never prompt for confirmation. Useful for automated scripts.
+      --dry-run          Only display the changes that would be made.
+      --only-patch       Only patches files, skipping any git operations or hook commands.
+      --no-tag           Do not create a tag
+      --no-push          Do not push after creating the commit and/or tag
+      --no-tag-push      Create a tag, but don't push it 
 
 Restricting the lines that are replaced
 +++++++++++++++++++++++++++++++++++++++
@@ -177,7 +199,7 @@ Sometimes you want to make sure only the line matching a given pattern is replac
        }
     }
 
-you'll want to make sure that when you bump from ``0.42`` to ``0.43`` that the line containing ``some-dep`` does not change.
+you'll want to make sure that when you bump from ``0.42`` to ``0.43``, that the line containing ``some-dep`` does not change.
 
 In this case, you can set a ``search`` option in the ``file`` section:
 
