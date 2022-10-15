@@ -2,8 +2,9 @@ import sys
 import textwrap
 import urllib.parse
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, cast
 
 import cli_ui as ui
 import docopt
@@ -57,109 +58,130 @@ class BumpOptions:
     config_path: Optional[Path] = None
 
 
+class Command(Enum):
+    bump = "bump"
+    init = "init"
+    current_version = "current_version"
+    version = "version"
+
+
 @dataclass
-class Arguments:
+class GivenCliArguments:
+    """
+    Values of the CLI arguments that were given.
+
+    Bool values indicate that that argument was given, NOT the intended behavior of the program.
+    """
+
+    command: Command
+    bump_new_version: Optional[str]
+    init_current_version: Optional[str]
+    init_pyproject: bool
+    working_path: Optional[Path]
+    config_path: Optional[Path]
+    non_interactive: bool
     dry_run: bool
-    interactive: bool
-    current_version: str
-    new_version: str
-    run_init: bool
-    show_version: bool
-    specified_config_path: Optional[Path]
-    working_path: Path
-    use_pyproject: bool
-    operations: List[str]
+    only_patch: bool
+    no_tag: bool
+    no_push: bool
+    no_tag_push: bool
 
     @classmethod
-    def from_opts(cls, opt_dict: Dict[str, str]) -> "Arguments":
-        config_opt = opt_dict["--config"]
-        if config_opt:
-            specified_config_path: Optional[Path] = Path(config_opt)
-        else:
-            specified_config_path = None
-        if opt_dict["--cwd"]:
-            working_path = Path(opt_dict["--cwd"])
-        else:
-            working_path = Path.cwd()
+    def from_opts(
+        cls, opt_dict: Dict[str, Union[bool, Optional[str]]]
+    ) -> "GivenCliArguments":
+        def _get_path(key: str) -> Optional[Path]:
+            value = opt_dict[key]
+            if value is None:
+                return None
+            return Path(cast(str, value))
 
-        operations = ["patch", "hooks", "commit", "tag", "push_commit", "push_tag"]
-        if opt_dict["--only-patch"]:
-            operations = ["patch"]
-        if opt_dict["--no-push"]:
-            operations.remove("push_commit")
-            operations.remove("push_tag")
-        if opt_dict["--no-tag-push"]:
-            operations.remove("push_tag")
-        if opt_dict["--no-tag"]:
-            operations.remove("tag")
-            # Also remove push_tag if it's still in the list:
-            if "push_tag" in operations:
-                operations.remove("push_tag")
+        def _get_str(key: str) -> Optional[str]:
+            return cast(Optional[str], opt_dict[key])
+
+        def _get_bool(key: str) -> bool:
+            return cast(bool, opt_dict[key])
+
+        # docopt has a hard time parsing the commands because run_bump uses that same cli slot for
+        # the new version. This corrects those issues.
+        command = Command.bump
+        new_version = opt_dict["<new_version>"]
+        if new_version == "init" or opt_dict["init"]:
+            command = Command.init
+        elif new_version == "current-version":
+            command = Command.current_version
+        elif opt_dict["--version"]:
+            command = Command.version
 
         return cls(
-            current_version=opt_dict["<current_version>"],
-            show_version=bool(opt_dict["--version"]),
-            new_version=opt_dict["<new_version>"],
-            specified_config_path=specified_config_path,
-            use_pyproject=bool(opt_dict["--pyproject"]),
-            working_path=working_path,
-            run_init=bool(opt_dict["init"]),
-            dry_run=bool(opt_dict["--dry-run"]),
-            interactive=not opt_dict["--non-interactive"],
-            operations=operations,
+            command=command,
+            bump_new_version=_get_str("<new_version>"),
+            init_current_version=_get_str("<current_version>"),
+            init_pyproject=_get_bool("--pyproject"),
+            working_path=_get_path("--cwd"),
+            config_path=_get_path("--config"),
+            non_interactive=_get_bool("--non-interactive"),
+            dry_run=_get_bool("--dry-run"),
+            only_patch=_get_bool("--only-patch"),
+            no_tag=_get_bool("--no-tag"),
+            no_push=_get_bool("--no-push"),
+            no_tag_push=_get_bool("--no-tag-push"),
         )
 
 
 def run(cmd: List[str]) -> None:
     opt_dict = docopt.docopt(USAGE, argv=cmd)
-    arguments = Arguments.from_opts(opt_dict)
+    arguments = GivenCliArguments.from_opts(opt_dict)
 
-    if arguments.show_version:
+    if arguments.command == Command.version:
         print("tbump", TBUMP_VERSION)
         return
 
     # when running `tbump init` (with current_version missing),
     # docopt thinks we are running `tbump` with new_version = "init"
     # bail out early in this case
-    if arguments.new_version == "init":
+    if arguments.command == Command.init and arguments.init_current_version is None:
         sys.exit(USAGE)
 
+    # if a path wasn't given, use current working directory
+    working_path = arguments.working_path or Path.cwd()
+
     # Ditto for `tbump current-version`
-    if arguments.new_version == "current-version":
+    if arguments.command == Command.current_version:
         config_file = get_config_file(
-            arguments.working_path,
-            specified_config_path=arguments.specified_config_path,
+            working_path,
+            specified_config_path=arguments.config_path,
         )
         config = config_file.get_config()
         print(config.current_version)
         return
 
-    if arguments.run_init:
-        run_init(arguments)
+    if arguments.command == Command.init:
+        run_init(arguments, working_path)
         return
 
-    run_bump(arguments)
+    run_bump(arguments, working_path)
 
 
-def run_init(arguments: Arguments) -> None:
+def run_init(arguments: GivenCliArguments, working_path: Path) -> None:
     init(
-        arguments.working_path,
-        current_version=arguments.current_version,
-        use_pyproject=arguments.use_pyproject,
-        specified_config_path=arguments.specified_config_path,
+        working_path,
+        current_version=cast(str, arguments.init_current_version),
+        use_pyproject=arguments.init_pyproject,
+        specified_config_path=arguments.config_path,
     )
 
 
-def run_bump(arguments: Arguments) -> None:
+def run_bump(arguments: GivenCliArguments, working_path: Path) -> None:
     bump_options = BumpOptions(
-        working_path=arguments.working_path,
-        new_version=arguments.new_version,
-        config_path=arguments.specified_config_path,
+        working_path=working_path,
+        new_version=cast(str, arguments.bump_new_version),
+        config_path=arguments.config_path,
         dry_run=arguments.dry_run,
-        interactive=arguments.interactive,
+        interactive=not arguments.non_interactive,
     )
 
-    bump(bump_options, arguments.operations)
+    bump(bump_options, _construct_operations(arguments))
 
 
 def bump(options: BumpOptions, operations: List[str]) -> None:
@@ -246,3 +268,20 @@ def main(args: Optional[List[str]] = None) -> None:
     except Error as error:
         error.print_error()
         sys.exit(1)
+
+
+def _construct_operations(arguments: GivenCliArguments) -> List[str]:
+    operations = ["patch", "hooks", "commit", "tag", "push_commit", "push_tag"]
+    if arguments.only_patch:
+        operations = ["patch"]
+    if arguments.no_push:
+        operations.remove("push_commit")
+        operations.remove("push_tag")
+    if arguments.no_tag_push:
+        operations.remove("push_tag")
+    if arguments.no_tag:
+        operations.remove("tag")
+        # Also remove push_tag if it's still in the list:
+        if "push_tag" in operations:
+            operations.remove("push_tag")
+    return operations
