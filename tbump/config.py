@@ -96,7 +96,7 @@ class PyprojectConfig(ConfigFile):
 
     def get_parsed(self) -> dict:
         try:
-            tool_section = self.doc["tool"]["tbump"].value  # type: ignore[index, union-attr]
+            tool_section = self.doc["tool"]["tbump"].value  # type: ignore[index]
         except KeyError as e:
             raise InvalidConfig(parse_error=e)
 
