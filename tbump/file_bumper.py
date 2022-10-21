@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Pattern
 import cli_ui as ui
 
 from tbump.action import Action
-from tbump.config import ConfigFile, Field, File, get_config_file
+from tbump.config import Config, File, get_config_file
 from tbump.error import Error
 
 
@@ -157,16 +157,16 @@ def on_version_containing_none(
 
 
 class FileBumper:
-    def __init__(self, working_path: Path):
+    def __init__(self, working_path: Path, config: Config):
         self.working_path = working_path
-        self.files: List[File] = []
-        self.fields: List[Field] = []
-        self.version_regex = re.compile(".")
-        self.current_version = ""
-        self.current_groups: Dict[str, str] = {}
+        self.files = config.files
+        self.fields = config.fields
+        self.version_regex = config.version_regex
+        self.current_version = config.current_version
+
+        self.current_groups = self.parse_version(self.current_version)
         self.new_version = ""
         self.new_groups: Dict[str, str] = {}
-        self.config_file: Optional[ConfigFile] = None
 
     def parse_version(self, version: str) -> Dict[str, str]:
         assert self.version_regex
@@ -180,16 +180,6 @@ class FileBumper:
             if groups.get(field.name) is None:
                 groups[field.name] = str(field.default)
         return groups
-
-    def set_config_file(self, config_file: ConfigFile) -> None:
-        self.config_file = config_file
-        config = config_file.get_config()
-        self.files = config.files
-        self.fields = config.fields
-        self.check_files_exist()
-        self.version_regex = config.version_regex
-        self.current_version = config.current_version
-        self.current_groups = self.parse_version(self.current_version)
 
     def check_files_exist(self) -> None:
         assert self.files
@@ -242,7 +232,6 @@ class FileBumper:
         # When bumping files in a project, we need to bump:
         #  * every file listed in the config file
         #  * and the `current_version` value in tbump's config file
-        assert self.config_file
         change_requests = []
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
@@ -282,9 +271,9 @@ class FileBumper:
 
 def bump_files(new_version: str, repo_path: Optional[Path] = None) -> None:
     repo_path = repo_path or Path(".")
-    bumper = FileBumper(repo_path)
     config_file = get_config_file(repo_path)
-    bumper.set_config_file(config_file)
+    bumper = FileBumper(repo_path, config_file.get_config())
+    bumper.check_files_exist()
     patches = bumper.get_patches(new_version=new_version)
     n = len(patches)
     for i, patch in enumerate(patches):

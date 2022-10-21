@@ -215,8 +215,8 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
         else:
             raise
 
-    file_bumper = FileBumper(working_path)
-    file_bumper.set_config_file(config_file)
+    file_bumper = FileBumper(working_path, config)
+    file_bumper.check_files_exist()
 
     executor = Executor(new_version, file_bumper, config_file.updater)
 
