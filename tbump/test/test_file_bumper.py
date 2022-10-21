@@ -8,10 +8,9 @@ from tbump.test.conftest import file_contains
 
 
 def test_file_bumper_simple(test_repo: Path) -> None:
-    bumper = FileBumper(test_repo)
-    config_file = get_config_file(test_repo)
+    bumper = _bumper_for(test_repo)
     assert bumper.working_path == test_repo
-    bumper.set_config_file(config_file)
+
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
     for patch in patches:
         patch.apply()
@@ -35,15 +34,13 @@ def test_patcher_preserve_endings(tmp_path: Path) -> None:
 
 
 def test_file_bumper_preserve_endings(test_repo: Path) -> None:
-    bumper = FileBumper(test_repo)
-    config_file = get_config_file(test_repo)
+    bumper = _bumper_for(test_repo)
     package_json = test_repo / "package.json"
 
     # Make sure package.json contain CRLF line endings
     lines = package_json.read_text().splitlines(keepends=False)
     package_json.write_bytes(b"\r\n".join([x.encode() for x in lines]))
 
-    bumper.set_config_file(config_file)
     patches = bumper.get_patches(new_version="1.2.41-alpha-2")
     for patch in patches:
         patch.apply()
@@ -84,9 +81,7 @@ def test_looking_for_empty_groups(tmp_path: Path) -> None:
         version = "1.2"
         """
     )
-    config_file = get_config_file(tmp_path)
-    bumper = FileBumper(tmp_path)
-    bumper.set_config_file(config_file)
+    bumper = _bumper_for(tmp_path)
     with pytest.raises(BadSubstitution) as e:
         bumper.get_patches(new_version="1.3.1")
     assert e.value.src == "foo"
@@ -111,10 +106,8 @@ def test_current_version_not_found(tmp_path: Path) -> None:
     )
     version_txt_path = tmp_path / "version.txt"
     version_txt_path.write_text("nope")
-    config_file = get_config_file(tmp_path)
+    bumper = _bumper_for(tmp_path)
 
-    bumper = FileBumper(tmp_path)
-    bumper.set_config_file(config_file)
     with pytest.raises(CurrentVersionNotFound) as e:
         bumper.get_patches(new_version="1.3.1")
     assert e.value.src == "version.txt"
@@ -153,9 +146,7 @@ def test_replacing_with_empty_groups(tmp_path: Path) -> None:
         """
     )
 
-    bumper = FileBumper(tmp_path)
-    config_file = get_config_file(tmp_path)
-    bumper.set_config_file(config_file)
+    bumper = _bumper_for(tmp_path)
     with pytest.raises(BadSubstitution) as e:
         bumper.get_patches(new_version="1.3")
     assert e.value.groups == {"major": "1", "minor": "3", "patch": None}
@@ -200,12 +191,15 @@ def test_changing_same_file_twice(tmp_path: Path) -> None:
         #define PUBLIC_VERSION "1.2"
         """
     )
-    bumper = FileBumper(tmp_path)
-    config_file = get_config_file(tmp_path)
-    bumper.set_config_file(config_file)
+    bumper = _bumper_for(tmp_path)
     patches = bumper.get_patches(new_version="1.3.0")
     for patch in patches:
         patch.do()
 
     assert file_contains(tmp_path / foo_c, '#define FULL_VERSION "1.3.0"')
     assert file_contains(tmp_path / foo_c, '#define PUBLIC_VERSION "1.3"')
+
+
+def _bumper_for(working_path: Path) -> FileBumper:
+    config_file = get_config_file(working_path)
+    return FileBumper(working_path, config_file.get_config())
