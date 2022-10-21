@@ -2,7 +2,7 @@ import abc
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Pattern, Tuple, Union
+from typing import Callable, Dict, List, Optional, Pattern, Tuple, Union
 
 import cli_ui as ui
 import schema
@@ -41,6 +41,12 @@ class Config:
     github_url: Optional[str]
 
 
+@dataclass
+class ConfigFileVersionUpdater:
+    update_version: Callable[[str], None]
+    file_name: str
+
+
 class ConfigFile(metaclass=abc.ABCMeta):
     """Base class representing a config file"""
 
@@ -69,6 +75,10 @@ class ConfigFile(metaclass=abc.ABCMeta):
         res = from_parsed_config(parsed)
         validate_config(res)
         return res
+
+    @property
+    def updater(self) -> ConfigFileVersionUpdater:
+        return ConfigFileVersionUpdater(self.set_new_version, self.path.name)
 
 
 class TbumpTomlConfig(ConfigFile):

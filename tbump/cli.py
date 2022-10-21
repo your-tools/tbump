@@ -218,7 +218,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     file_bumper = FileBumper(working_path)
     file_bumper.set_config_file(config_file)
 
-    executor = Executor(new_version, file_bumper)
+    executor = Executor(new_version, file_bumper, config_file.updater)
 
     hooks_runner = HooksRunner(working_path, config.current_version, operations)
     if "hooks" in operations:

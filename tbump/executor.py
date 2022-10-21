@@ -3,7 +3,7 @@ from typing import List, Sequence
 import cli_ui as ui
 
 from tbump.action import Action
-from tbump.config import ConfigFile
+from tbump.config import ConfigFileVersionUpdater
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
@@ -41,8 +41,8 @@ class ActionGroup:
 
 
 class UpdateConfig(Action):
-    def __init__(self, config_file: ConfigFile, new_version: str):
-        self.config_file = config_file
+    def __init__(self, updater: ConfigFileVersionUpdater, new_version: str):
+        self.updater = updater
         self.new_version = new_version
 
     def print_self(self) -> None:
@@ -52,23 +52,26 @@ class UpdateConfig(Action):
         # fmt: off
         ui.info_3(
             "Set current version to", ui.blue, self.new_version, ui.reset,
-            "in", ui.bold, self.config_file.path.name
+            "in", ui.bold, self.updater.file_name
         )
         # fmt: on
-        self.config_file.set_new_version(self.new_version)
+        self.updater.update_version(self.new_version)
 
 
 class Executor:
-    def __init__(self, new_version: str, file_bumper: FileBumper):
+    def __init__(
+        self,
+        new_version: str,
+        file_bumper: FileBumper,
+        config_version_updater: ConfigFileVersionUpdater,
+    ):
         self.new_version = new_version
         self.work: List[ActionGroup] = []
 
-        config_file = file_bumper.config_file
-        assert config_file
-        update_config = UpdateConfig(config_file, new_version)
+        update_config = UpdateConfig(config_version_updater, new_version)
 
         update_config_group = ActionGroup(
-            f"Would update current version in {config_file.path.name}",
+            f"Would update current version in {config_version_updater.file_name}",
             "Updating current version",
             [update_config],
             should_enumerate=False,
