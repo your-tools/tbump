@@ -10,9 +10,6 @@
 .. image:: https://github.com/dmerejkowsky/tbump/workflows/linters/badge.svg
    :target: https://github.com/dmerejkowsky/tbump/actions
 
-.. image:: https://img.shields.io/badge/deps%20scanning-pyup.io-green
-   :target: https://github.com/dmerejkowsky/tbump/workflows/safety/
-
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
    :target: https://github.com/psf/black
 
@@ -155,13 +152,13 @@ The current version of the project can be found using the command:
 
     $ tbump current-version
 
-Advanced configuration 
----------------------- 
+Advanced configuration
+----------------------
 
 Configuration options through Cli
 ++++++++++++++++++++++++++++++++++++++++
-.. code-block:: console 
-  
+.. code-block:: console
+
     Usage:
       tbump [options] <new_version>
       tbump [options] current-version
@@ -179,7 +176,7 @@ Configuration options through Cli
       --only-patch       Only patches files, skipping any git operations or hook commands.
       --no-tag           Do not create a tag
       --no-push          Do not push after creating the commit and/or tag
-      --no-tag-push      Create a tag, but don't push it 
+      --no-tag-push      Create a tag, but don't push it
 
 Restricting the lines that are replaced
 +++++++++++++++++++++++++++++++++++++++
