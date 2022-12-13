@@ -367,6 +367,26 @@ def test_no_tag_no_push(test_repo: Path) -> None:
     assert not tag_created(test_repo)
 
 
+def test_no_tag_no_push_no_tag_push(test_repo: Path) -> None:
+    _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
+    run_git(test_repo, "branch", "--unset-upstream")
+
+    run_tbump(
+        [
+            "-C",
+            str(test_repo),
+            "1.2.41-alpha-2",
+            "--non-interactive",
+            "--no-tag-push",
+            "--no-push",
+        ]
+    )
+
+    assert commit_created(test_repo)
+    assert tag_created(test_repo)
+    assert not tag_pushed(test_repo)
+
+
 def test_create_tag_but_do_not_push_it(test_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
 

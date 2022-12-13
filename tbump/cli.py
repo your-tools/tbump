@@ -278,7 +278,9 @@ def _construct_operations(arguments: GivenCliArguments) -> List[str]:
         operations.remove("push_commit")
         operations.remove("push_tag")
     if arguments.no_tag_push:
-        operations.remove("push_tag")
+        # may have been removed by the above line
+        if "push_tag" in operations:
+            operations.remove("push_tag")
     if arguments.no_tag:
         operations.remove("tag")
         # Also remove push_tag if it's still in the list:
