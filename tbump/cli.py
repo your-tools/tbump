@@ -14,7 +14,7 @@ from tbump.error import Error
 from tbump.executor import Executor
 from tbump.file_bumper import FileBumper
 from tbump.git import GitError
-from tbump.git_bumper import GitBumper
+from tbump.git_bumper import GitBumper, GitBumperOptions
 from tbump.hooks import HooksRunner
 from tbump.init import init
 
@@ -30,16 +30,17 @@ Usage:
   tbump --version
 
 Options:
-   -h --help          Show this screen.
-   -v --version       Show version.
-   -C --cwd=<path>    Set working directory to <path>.
-   -c --config=<path> Use specified toml config file. When not set, `tbump.toml` is assumed.
-   --non-interactive  Never prompt for confirmation. Useful for automated scripts.
-   --dry-run          Only display the changes that would be made.
-   --only-patch       Only patches files, skipping any git operations or hook commands.
-   --no-tag           Do not create a tag
-   --no-push          Do not push after creating the commit and/or tag
-   --no-tag-push      Create a tag, but don't push it
+   -h --help           Show this screen.
+   -v --version        Show version.
+   -C --cwd=<path>     Set working directory to <path>.
+   -c --config=<path>  Use specified toml config file. When not set, `tbump.toml` is assumed.
+   --non-interactive   Never prompt for confirmation. Useful for automated scripts.
+   --dry-run           Only display the changes that would be made.
+   --tag-message=<msg> Message to use for tag instead of being based on the tag template
+   --only-patch        Only patches files, skipping any git operations or hook commands.
+   --no-tag            Do not create a tag
+   --no-push           Do not push after creating the commit and/or tag
+   --no-tag-push       Create a tag, but don't push it
 """
 )
 
@@ -56,6 +57,7 @@ class BumpOptions:
     interactive: bool = True
     dry_run: bool = False
     config_path: Optional[Path] = None
+    tag_message: Optional[str] = None
 
 
 class Command(Enum):
@@ -79,6 +81,7 @@ class GivenCliArguments:
     init_pyproject: bool
     working_path: Optional[Path]
     config_path: Optional[Path]
+    tag_message: Optional[str]
     non_interactive: bool
     dry_run: bool
     only_patch: bool
@@ -123,6 +126,7 @@ class GivenCliArguments:
             non_interactive=_get_bool("--non-interactive"),
             dry_run=_get_bool("--dry-run"),
             only_patch=_get_bool("--only-patch"),
+            tag_message=_get_str("--tag-message"),
             no_tag=_get_bool("--no-tag"),
             no_push=_get_bool("--no-push"),
             no_tag_push=_get_bool("--no-tag-push"),
@@ -160,7 +164,7 @@ def run(cmd: List[str]) -> None:
         run_init(arguments, working_path)
         return
 
-    run_bump(arguments, working_path)
+    run_bump(arguments, working_path, arguments.tag_message)
 
 
 def run_init(arguments: GivenCliArguments, working_path: Path) -> None:
@@ -172,9 +176,12 @@ def run_init(arguments: GivenCliArguments, working_path: Path) -> None:
     )
 
 
-def run_bump(arguments: GivenCliArguments, working_path: Path) -> None:
+def run_bump(
+    arguments: GivenCliArguments, working_path: Path, tag_message: Optional[str]
+) -> None:
     bump_options = BumpOptions(
         working_path=working_path,
+        tag_message=tag_message,
         new_version=cast(str, arguments.bump_new_version),
         config_path=arguments.config_path,
         dry_run=arguments.dry_run,
@@ -203,7 +210,8 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     )
     # fmt: on
 
-    git_bumper = GitBumper(working_path, operations)
+    bumper_options = GitBumperOptions(options.working_path, options.tag_message)
+    git_bumper = GitBumper(bumper_options, operations)
     git_bumper.set_config(config)
     git_state_error = None
     try:

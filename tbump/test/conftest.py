@@ -76,3 +76,8 @@ def test_pyproject_repo(tmp_path: Path, test_pyproject: Path) -> Path:
     res = setup_repo(tmp_path, test_pyproject)
     setup_remote(tmp_path)
     return res
+
+
+@pytest.fixture(params=[None, "test tag message"])
+def tag_message(request):
+    return request.param
