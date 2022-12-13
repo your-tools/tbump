@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import cli_ui as ui
 
@@ -60,9 +61,16 @@ class Command(Action):
         return run_git(self.repo_path, *self.cmd, verbose=False)
 
 
+@dataclass
+class GitBumperOptions:
+    working_path: Path
+    tag_message: Optional[str] = None
+
+
 class GitBumper:
-    def __init__(self, repo_path: Path, operations: List[str]):
-        self.repo_path = repo_path
+    def __init__(self, options: GitBumperOptions, operations: List[str]):
+        self.repo_path = options.working_path
+        self.tag_message = options.tag_message
         self.tag_template = ""
         self.message_template = ""
         self.remote_name = ""
@@ -140,8 +148,12 @@ class GitBumper:
         commit_message = self.message_template.format(new_version=new_version)
         self.add_command(res, "commit", "--message", commit_message)
         tag_name = self.get_tag_name(new_version)
-        tag_message = tag_name
         if "tag" in self.operations:
+            if self.tag_message:
+                tag_message = self.tag_message
+            else:
+                tag_message = tag_name
+
             self.add_command(
                 res, "tag", "--annotate", "--message", tag_message, tag_name
             )

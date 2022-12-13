@@ -53,9 +53,15 @@ def commit_created(test_repo: Path) -> bool:
     return "Bump to 1.2.41-alpha-2" in out
 
 
-def tag_created(test_repo: Path) -> bool:
-    _, out = run_git_captured(test_repo, "tag", "--list")
-    return "v1.2.41-alpha-2" in out
+def tag_created(test_repo: Path, tag_message: Optional[str] = None) -> bool:
+    _, out = run_git_captured(test_repo, "tag", "-n1")
+
+    tag_exists = "v1.2.41-alpha-2" in out
+
+    if tag_message:
+        tag_exists &= tag_message in out
+
+    return tag_exists
 
 
 def tag_pushed(test_repo: Path) -> bool:
@@ -382,3 +388,20 @@ def test_create_tag_but_do_not_push_it(test_repo: Path) -> None:
 
     assert tag_created(test_repo)
     assert not tag_pushed(test_repo)
+
+
+def test_tag_message(test_repo: Path, tag_message: Optional[str]) -> None:
+    args = [
+        "-C",
+        str(test_repo),
+        "1.2.41-alpha-2",
+        "--non-interactive",
+        "--no-tag-push",
+    ]
+
+    if tag_message:
+        args.append("--tag-message='{}'".format(tag_message))
+
+    run_tbump(args)
+
+    assert tag_created(test_repo, tag_message)
