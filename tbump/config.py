@@ -103,10 +103,17 @@ class PyprojectConfig(ConfigFile):
 
     def __init__(self, path: Path, doc: TOMLDocument):
         super().__init__(path, doc)
+        
+    @staticmethod
+    def unwrap_data(data):
+        if hasattr(data, 'unwrap') and callable(data.unwrap):
+            return data.unwrap()
+        else:
+            return data
 
     def get_parsed(self) -> dict:
         try:
-            tool_section = self.doc.unwrap()["tool"]["tbump"]  # type: ignore[index]
+            tool_section = PyprojectConfig.unwrap_data(self.doc["tool"]["tbump"])  # type: ignore[index]
         except KeyError as e:
             raise InvalidConfig(parse_error=e)
 
