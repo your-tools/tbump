@@ -2,7 +2,7 @@ import abc
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Pattern, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple, Union
 
 import cli_ui as ui
 import schema
@@ -105,7 +105,7 @@ class PyprojectConfig(ConfigFile):
         super().__init__(path, doc)
 
     @staticmethod
-    def unwrap_data(data):
+    def unwrap_data(data: Any) -> Any:
         if hasattr(data, "unwrap") and callable(data.unwrap):
             return data.unwrap()
         else:
@@ -113,11 +113,13 @@ class PyprojectConfig(ConfigFile):
 
     def get_parsed(self) -> dict:
         try:
-            tool_section = PyprojectConfig.unwrap_data(self.doc["tool"]["tbump"])  # type: ignore[index]
+            tool_section = PyprojectConfig.unwrap_data(
+                self.doc["tool"]["tbump"]  # type: ignore[index]
+            )
         except KeyError as e:
             raise InvalidConfig(parse_error=e)
 
-        return tool_section  # type: ignore[no-any-return, union-attr]
+        return tool_section  # type: ignore[no-any-return]
 
     def set_new_version(self, new_version: str) -> None:
         self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore[index]
