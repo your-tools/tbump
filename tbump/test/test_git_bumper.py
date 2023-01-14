@@ -8,9 +8,9 @@ from tbump.config import get_config_file
 from tbump.git import run_git, run_git_captured
 from tbump.git_bumper import (
     GitBumper,
+    GitBumperOptions,
     NotOnAnyBranch,
     NoTrackedBranch,
-    GitBumperOptions,
 )
 
 
