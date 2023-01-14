@@ -103,10 +103,10 @@ class PyprojectConfig(ConfigFile):
 
     def __init__(self, path: Path, doc: TOMLDocument):
         super().__init__(path, doc)
-        
+
     @staticmethod
     def unwrap_data(data):
-        if hasattr(data, 'unwrap') and callable(data.unwrap):
+        if hasattr(data, "unwrap") and callable(data.unwrap):
             return data.unwrap()
         else:
             return data
