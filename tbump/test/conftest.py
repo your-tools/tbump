@@ -79,5 +79,5 @@ def test_pyproject_repo(tmp_path: Path, test_pyproject: Path) -> Path:
 
 
 @pytest.fixture(params=[None, "test tag message"])
-def tag_message(request):
+def tag_message(request: Any) -> Any:
     return request.param
