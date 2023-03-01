@@ -325,7 +325,7 @@ class ConfigNotFound(Error):
         self.project_path = project_path
 
     def print_error(self) -> None:
-        ui.error("No configuration for tbump fond in", self.project_path)
+        ui.error("No configuration for tbump found in", self.project_path)
         ui.info("Please run `tbump init` to create a tbump.toml file")
         ui.info("Or add a [tool.tbump] section in the pyproject.toml file")
 
