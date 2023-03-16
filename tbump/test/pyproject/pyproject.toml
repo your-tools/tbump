@@ -30,9 +30,5 @@ message_template = "Bump to {new_version}"
 tag_template = "v{new_version}"
 
 [[tool.tbump.file]]
-src = "pyproject.toml"
-search = 'version = "{current_version}"'
-
-[[tool.tbump.file]]
 src = "foo/__init__.py"
 search = '__version__ = "{current_version}"'
