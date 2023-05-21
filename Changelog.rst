@@ -4,7 +4,7 @@ Changelog
 6.10.0 (2023-05-21)
 ------------------
 
-Buf fixes:
+Bug fixes:
 ++++++++++
 
 * Fix #156, where the ``pyproject.toml`` file could not be parsed - patch by @vipcxj
