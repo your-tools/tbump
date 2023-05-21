@@ -67,6 +67,23 @@ class Command(Enum):
     version = "version"
 
 
+def print_diff(filename: str, lineno: int, old: str, new: str) -> None:
+    # fmt: off
+    ui.info(
+        ui.red, "- ", ui.reset,
+        ui.bold, filename, ":", lineno, ui.reset,
+        " ", ui.red, old,
+        sep="",
+    )
+    ui.info(
+        ui.green, "+ ", ui.reset,
+        ui.bold, filename, ":", lineno,  ui.reset,
+        " ", ui.green, new,
+        sep="",
+    )
+    # fmt: on
+
+
 @dataclass
 class GivenCliArguments:
     """
@@ -225,8 +242,9 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
 
     file_bumper = FileBumper(working_path, config)
     file_bumper.check_files_exist()
+    config_file.set_new_version(new_version)
 
-    executor = Executor(new_version, file_bumper, config_file.updater)
+    executor = Executor(new_version, file_bumper, config_file)
 
     hooks_runner = HooksRunner(working_path, config.current_version, operations)
     if "hooks" in operations:

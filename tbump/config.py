@@ -2,13 +2,14 @@ import abc
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple, Union
+from typing import Any, Dict, List, Optional, Pattern, Tuple, Union
 
 import cli_ui as ui
 import schema
 import tomlkit
 from tomlkit.toml_document import TOMLDocument
 
+from tbump.action import Action
 from tbump.error import Error
 from tbump.hooks import HOOKS_CLASSES, Hook
 
@@ -41,29 +42,39 @@ class Config:
     github_url: Optional[str]
 
 
-@dataclass
-class ConfigFileVersionUpdater:
-    update_version: Callable[[str], None]
-    file_name: str
-
-
-class ConfigFile(metaclass=abc.ABCMeta):
+class ConfigFile(Action, metaclass=abc.ABCMeta):
     """Base class representing a config file"""
 
     def __init__(self, path: Path, doc: TOMLDocument):
         self.path = path
         self.doc = doc
 
-    def save(self) -> None:
-        as_string = tomlkit.dumps(self.doc)
-        self.path.write_text(as_string)
+    def print_self(self) -> None:
+        from tbump.cli import print_diff
+
+        old_text = self.path.read_text()
+        new_text = tomlkit.dumps(self.doc)
+
+        lineno = 1
+        for old_line, new_line in zip(old_text.splitlines(), new_text.splitlines()):
+            if old_line != new_line:
+                print_diff(
+                    str(self.path),
+                    lineno + 1,
+                    old_line.strip(),
+                    new_line.strip(),
+                )
+            lineno += 1
+
+    def do(self) -> None:
+        new_text = tomlkit.dumps(self.doc)
+        self.path.write_text(new_text)
 
     @abc.abstractmethod
     def get_parsed(self) -> dict:
         """Return a plain dictionary, suitable for validation
         by the `schema` library
         """
-        pass
 
     @abc.abstractmethod
     def set_new_version(self, version: str) -> None:
@@ -75,10 +86,6 @@ class ConfigFile(metaclass=abc.ABCMeta):
         res = from_parsed_config(parsed)
         validate_config(res)
         return res
-
-    @property
-    def updater(self) -> ConfigFileVersionUpdater:
-        return ConfigFileVersionUpdater(self.set_new_version, self.path.name)
 
 
 class TbumpTomlConfig(ConfigFile):
@@ -93,7 +100,6 @@ class TbumpTomlConfig(ConfigFile):
 
     def set_new_version(self, version: str) -> None:
         self.doc["version"]["current"] = version  # type: ignore[index]
-        self.save()
 
 
 class PyprojectConfig(ConfigFile):
@@ -123,7 +129,6 @@ class PyprojectConfig(ConfigFile):
 
     def set_new_version(self, new_version: str) -> None:
         self.doc["tool"]["tbump"]["version"]["current"] = new_version  # type: ignore[index]
-        self.save()
 
 
 def validate_template(name: str, pattern: str, value: str) -> None:

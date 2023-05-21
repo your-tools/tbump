@@ -3,7 +3,7 @@ from typing import List, Sequence
 import cli_ui as ui
 
 from tbump.action import Action
-from tbump.config import ConfigFileVersionUpdater
+from tbump.config import ConfigFile
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
@@ -40,40 +40,20 @@ class ActionGroup:
             action.do()
 
 
-class UpdateConfig(Action):
-    def __init__(self, updater: ConfigFileVersionUpdater, new_version: str):
-        self.updater = updater
-        self.new_version = new_version
-
-    def print_self(self) -> None:
-        return
-
-    def do(self) -> None:
-        # fmt: off
-        ui.info_3(
-            "Set current version to", ui.blue, self.new_version, ui.reset,
-            "in", ui.bold, self.updater.file_name
-        )
-        # fmt: on
-        self.updater.update_version(self.new_version)
-
-
 class Executor:
     def __init__(
         self,
         new_version: str,
         file_bumper: FileBumper,
-        config_version_updater: ConfigFileVersionUpdater,
+        config_file: ConfigFile,
     ):
         self.new_version = new_version
         self.work: List[ActionGroup] = []
 
-        update_config = UpdateConfig(config_version_updater, new_version)
-
         update_config_group = ActionGroup(
-            f"Would update current version in {config_version_updater.file_name}",
+            f"Would update current version in {config_file.path}",
             "Updating current version",
-            [update_config],
+            [config_file],
             should_enumerate=False,
         )
         self.work.append(update_config_group)
