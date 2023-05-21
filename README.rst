@@ -155,28 +155,15 @@ The current version of the project can be found using the command:
 Advanced configuration
 ----------------------
 
-Configuration options through Cli
-++++++++++++++++++++++++++++++++++++++++
+Command-line options
+++++++++++++++++++++
+
+See:
+
 .. code-block:: console
 
-    Usage:
-      tbump [options] <new_version>
-      tbump [options] current-version
-      tbump [options] init [--pyproject] <current_version>
-      tbump --help
-      tbump --version
+   tbump --help
 
-    Options:
-      -h --help          Show this screen.
-      -v --version       Show version.
-      -C --cwd=<path>    Set working directory to <path>.
-      -c --config=<path> Use specified toml config file. When not set, `tbump.toml` is assumed.
-      --non-interactive  Never prompt for confirmation. Useful for automated scripts.
-      --dry-run          Only display the changes that would be made.
-      --only-patch       Only patches files, skipping any git operations or hook commands.
-      --no-tag           Do not create a tag
-      --no-push          Do not push after creating the commit and/or tag
-      --no-tag-push      Create a tag, but don't push it
 
 Restricting the lines that are replaced
 +++++++++++++++++++++++++++++++++++++++
