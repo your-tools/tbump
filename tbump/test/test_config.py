@@ -11,7 +11,7 @@ from tbump.config import (
     Field,
     File,
     InvalidConfig,
-    TbumpTomlConfig,
+    TbumpTomlUpdater,
     from_parsed_config,
     get_config_file,
     validate_basic_schema,
@@ -106,7 +106,7 @@ def test_use_specified_path(tmp_path: Path, test_project: Path) -> None:
     test_toml = test_project / "tbump.toml"
     other_path.write_text(test_toml.read_text())
     expected_file = get_config_file(tmp_path, specified_config_path=other_path)
-    assert isinstance(expected_file, TbumpTomlConfig)
+    assert isinstance(expected_file, TbumpTomlUpdater)
 
 
 def test_raise_when_specified_path_does_not_exists(tmp_path: Path) -> None:

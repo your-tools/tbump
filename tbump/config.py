@@ -42,7 +42,7 @@ class Config:
     github_url: Optional[str]
 
 
-class ConfigFile(Action, metaclass=abc.ABCMeta):
+class ConfigFileUpdater(Action, metaclass=abc.ABCMeta):
     """Base class representing a config file"""
 
     def __init__(self, project_path: Path, path: Path, doc: TOMLDocument):
@@ -93,7 +93,7 @@ class ConfigFile(Action, metaclass=abc.ABCMeta):
         return res
 
 
-class TbumpTomlConfig(ConfigFile):
+class TbumpTomlUpdater(ConfigFileUpdater):
     """Represent config inside a tbump.toml file"""
 
     def __init__(self, project_path: Path, path: Path, doc: TOMLDocument):
@@ -107,7 +107,7 @@ class TbumpTomlConfig(ConfigFile):
         self.doc["version"]["current"] = version  # type: ignore[index]
 
 
-class PyprojectConfig(ConfigFile):
+class PyprojectUpdater(ConfigFileUpdater):
     """Represent a config inside a pyproject.toml file,
     under the [tool.tbump] key
     """
@@ -124,7 +124,7 @@ class PyprojectConfig(ConfigFile):
 
     def get_parsed(self) -> dict:
         try:
-            tool_section = PyprojectConfig.unwrap_data(
+            tool_section = PyprojectUpdater.unwrap_data(
                 self.doc["tool"]["tbump"]  # type: ignore[index]
             )
         except KeyError as e:
@@ -241,7 +241,7 @@ def validate_config(cfg: Config) -> None:
 
 def get_config_file(
     project_path: Path, *, specified_config_path: Optional[Path] = None
-) -> ConfigFile:
+) -> ConfigFileUpdater:
     try:
         config_type, config_path = _get_config_path_and_type(
             project_path, specified_config_path
@@ -275,13 +275,13 @@ def _get_config_path_and_type(
 
 def _get_config_file(
     project_path: Path, config_type: str, config_path: Path
-) -> ConfigFile:
+) -> ConfigFileUpdater:
     if config_type == "tbump.toml":
         doc = tomlkit.loads(config_path.read_text())
-        return TbumpTomlConfig(project_path, config_path, doc)
+        return TbumpTomlUpdater(project_path, config_path, doc)
     elif config_type == "pyproject.toml":
         doc = tomlkit.loads(config_path.read_text())
-        return PyprojectConfig(project_path, config_path, doc)
+        return PyprojectUpdater(project_path, config_path, doc)
     raise ValueError("unknown config_type: {config_type}")
 
 

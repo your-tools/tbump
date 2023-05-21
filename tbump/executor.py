@@ -3,7 +3,7 @@ from typing import List, Sequence
 import cli_ui as ui
 
 from tbump.action import Action
-from tbump.config import ConfigFile
+from tbump.config import ConfigFileUpdater
 from tbump.file_bumper import FileBumper
 from tbump.git_bumper import GitBumper
 from tbump.hooks import HooksRunner
@@ -45,7 +45,7 @@ class Executor:
         self,
         new_version: str,
         file_bumper: FileBumper,
-        config_file: ConfigFile,
+        config_file: ConfigFileUpdater,
     ):
         self.new_version = new_version
         self.work: List[ActionGroup] = []
