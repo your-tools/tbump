@@ -51,7 +51,7 @@ class Executor:
         self.work: List[ActionGroup] = []
 
         update_config_group = ActionGroup(
-            f"Would update current version in {config_file.path}",
+            f"Would update current version in {config_file.relative_path}",
             "Updating current version",
             [config_file],
             should_enumerate=False,

@@ -45,9 +45,14 @@ class Config:
 class ConfigFile(Action, metaclass=abc.ABCMeta):
     """Base class representing a config file"""
 
-    def __init__(self, path: Path, doc: TOMLDocument):
+    def __init__(self, project_path: Path, path: Path, doc: TOMLDocument):
+        self.project_path = project_path
         self.path = path
         self.doc = doc
+
+    @property
+    def relative_path(self) -> Path:
+        return self.path.relative_to(self.project_path)
 
     def print_self(self) -> None:
         from tbump.cli import print_diff
@@ -59,7 +64,7 @@ class ConfigFile(Action, metaclass=abc.ABCMeta):
         for old_line, new_line in zip(old_text.splitlines(), new_text.splitlines()):
             if old_line != new_line:
                 print_diff(
-                    str(self.path),
+                    str(self.relative_path),
                     lineno + 1,
                     old_line.strip(),
                     new_line.strip(),
@@ -91,8 +96,8 @@ class ConfigFile(Action, metaclass=abc.ABCMeta):
 class TbumpTomlConfig(ConfigFile):
     """Represent config inside a tbump.toml file"""
 
-    def __init__(self, path: Path, doc: TOMLDocument):
-        super().__init__(path, doc)
+    def __init__(self, project_path: Path, path: Path, doc: TOMLDocument):
+        super().__init__(project_path, path, doc)
 
     def get_parsed(self) -> dict:
         # Document -> dict
@@ -107,8 +112,8 @@ class PyprojectConfig(ConfigFile):
     under the [tool.tbump] key
     """
 
-    def __init__(self, path: Path, doc: TOMLDocument):
-        super().__init__(path, doc)
+    def __init__(self, project_path: Path, path: Path, doc: TOMLDocument):
+        super().__init__(project_path, path, doc)
 
     @staticmethod
     def unwrap_data(data: Any) -> Any:
@@ -241,7 +246,7 @@ def get_config_file(
         config_type, config_path = _get_config_path_and_type(
             project_path, specified_config_path
         )
-        res = _get_config_file(config_type, config_path)
+        res = _get_config_file(project_path, config_type, config_path)
         # Make sure config is correct before returning it
         res.get_config()
         return res
@@ -268,13 +273,15 @@ def _get_config_path_and_type(
     raise ConfigNotFound(project_path)
 
 
-def _get_config_file(config_type: str, config_path: Path) -> ConfigFile:
+def _get_config_file(
+    project_path: Path, config_type: str, config_path: Path
+) -> ConfigFile:
     if config_type == "tbump.toml":
         doc = tomlkit.loads(config_path.read_text())
-        return TbumpTomlConfig(config_path, doc)
+        return TbumpTomlConfig(project_path, config_path, doc)
     elif config_type == "pyproject.toml":
         doc = tomlkit.loads(config_path.read_text())
-        return PyprojectConfig(config_path, doc)
+        return PyprojectConfig(project_path, config_path, doc)
     raise ValueError("unknown config_type: {config_type}")
 
 
