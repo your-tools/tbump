@@ -1,6 +1,24 @@
 Changelog
 =========
 
+6.10.0 (2023-05-21)
+------------------
+
+Buf fixes:
+++++++++++
+
+* Fix #156, where the ``pyproject.toml`` file could not be parsed - patch by @vipcxj
+* Fix #158 : also display changes when setting the current version in
+  the ``pyproject.toml`` or ``tbump.toml`` files
+
+Other
++++++
+
+* Bump some dependencies
+* Add ``--tag-message`` command line option to specify a custom tag message
+  (by default it's the same as the tag name) - Patch by Michael Boulton
+* Add support for Python 3.11
+
 6.9.0 (2022-03-27)
 ------------------
 
