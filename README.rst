@@ -299,3 +299,11 @@ For example:
     name = "extra"
     # the default value to use, if there is no match
     default = ""
+
+
+Working with git providers that don't support --atomic
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+If the push destination does not support ``--atomic``, either use the 
+``--no-atomic-push`` option, or add ``push_use_atomic=false`` to the config file,
+under the ``[git]`` section.

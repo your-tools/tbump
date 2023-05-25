@@ -65,12 +65,14 @@ class Command(Action):
 class GitBumperOptions:
     working_path: Path
     tag_message: Optional[str] = None
+    no_atomic: bool = False
 
 
 class GitBumper:
     def __init__(self, options: GitBumperOptions, operations: List[str]):
         self.repo_path = options.working_path
         self.tag_message = options.tag_message
+        self.use_atomic = not options.no_atomic
         self.tag_template = ""
         self.message_template = ""
         self.remote_name = ""
@@ -84,6 +86,7 @@ class GitBumper:
     def set_config(self, config: Config) -> None:
         self.tag_template = config.git_tag_template
         self.message_template = config.git_message_template
+        self.use_atomic = config.git_push_use_atomic
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
         return run_git(self.repo_path, *args, verbose=verbose)
@@ -158,10 +161,20 @@ class GitBumper:
                 res, "tag", "--annotate", "--message", tag_message, tag_name
             )
         if "push_commit" in self.operations and "push_tag" in self.operations:
-            self.add_command(
-                res, "push", "--atomic", self.remote_name, self.remote_branch, tag_name
-            )
-
+            if self.use_atomic:
+                self.add_command(
+                    res,
+                    "push",
+                    "--atomic",
+                    self.remote_name,
+                    self.remote_branch,
+                    tag_name,
+                )
+            else:
+                # Need to do the op separately, otherwise tag will get pushed
+                # even if branch fails
+                self.add_command(res, "push", self.remote_name, self.remote_branch)
+                self.add_command(res, "push", self.remote_name, tag_name)
         elif "push_commit" in self.operations:
             self.add_command(res, "push", self.remote_name, self.remote_branch)
         elif "push_tag" in self.operations:

@@ -41,6 +41,7 @@ Options:
    --no-tag            Do not create a tag
    --no-push           Do not push after creating the commit and/or tag
    --no-tag-push       Create a tag, but don't push it
+   --no-atomic-push    Don't use --atomic when calling push
 """
 )
 
@@ -58,6 +59,7 @@ class BumpOptions:
     dry_run: bool = False
     config_path: Optional[Path] = None
     tag_message: Optional[str] = None
+    no_atomic: bool = False
 
 
 class Command(Enum):
@@ -105,6 +107,7 @@ class GivenCliArguments:
     no_tag: bool
     no_push: bool
     no_tag_push: bool
+    no_atomic_push: bool
 
     @classmethod
     def from_opts(
@@ -147,6 +150,7 @@ class GivenCliArguments:
             no_tag=_get_bool("--no-tag"),
             no_push=_get_bool("--no-push"),
             no_tag_push=_get_bool("--no-tag-push"),
+            no_atomic_push=_get_bool("--no-atomic-push"),
         )
 
 
@@ -203,6 +207,7 @@ def run_bump(
         config_path=arguments.config_path,
         dry_run=arguments.dry_run,
         interactive=not arguments.non_interactive,
+        no_atomic=arguments.no_atomic_push,
     )
 
     bump(bump_options, _construct_operations(arguments))
@@ -227,7 +232,11 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     )
     # fmt: on
 
-    bumper_options = GitBumperOptions(options.working_path, options.tag_message)
+    bumper_options = GitBumperOptions(
+        working_path=options.working_path,
+        tag_message=options.tag_message,
+        no_atomic=options.no_atomic,
+    )
     git_bumper = GitBumper(bumper_options, operations)
     git_bumper.set_config(config)
     git_state_error = None

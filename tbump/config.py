@@ -34,6 +34,7 @@ class Config:
 
     git_tag_template: str
     git_message_template: str
+    git_push_use_atomic: bool
 
     files: List[File]
     hooks: List[Hook]
@@ -196,7 +197,11 @@ def validate_basic_schema(config: dict) -> None:
     tbump_schema = schema.Schema(
         {
             "version": {"current": str, "regex": schema.Use(validate_re)},
-            "git": {"message_template": str, "tag_template": str},
+            "git": {
+                "message_template": str,
+                "tag_template": str,
+                schema.Optional("push_use_atomic"): bool,
+            },
             "file": [file_schema],
             schema.Optional("field"): [field_schema],
             schema.Optional("hook"): [hook_schema],  # retro-compat
@@ -290,6 +295,7 @@ def from_parsed_config(parsed: dict) -> Config:
     current_version = parsed["version"]["current"]
     git_message_template = parsed["git"]["message_template"]
     git_tag_template = parsed["git"]["tag_template"]
+    git_push_use_atomic = parsed["git"].get("push_use_atomic", True)
     version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
     for file_dict in parsed["file"]:
@@ -321,6 +327,7 @@ def from_parsed_config(parsed: dict) -> Config:
         version_regex=version_regex,
         git_message_template=git_message_template,
         git_tag_template=git_tag_template,
+        git_push_use_atomic=git_push_use_atomic,
         fields=fields,
         files=files,
         hooks=hooks,
