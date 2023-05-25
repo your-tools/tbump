@@ -233,7 +233,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     # fmt: on
 
     bumper_options = GitBumperOptions(
-        working_path=options.working_path, 
+        working_path=options.working_path,
         tag_message=options.tag_message,
         no_atomic=options.no_atomic,
     )

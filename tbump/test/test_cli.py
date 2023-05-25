@@ -139,7 +139,15 @@ def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
 
 def test_end_to_end_using_tbump_toml_no_atomic(test_repo: Path) -> None:
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
-    run_tbump(["-C", str(test_repo), "1.2.41-alpha-2", "--non-interactive", "--no-atomic-push"])
+    run_tbump(
+        [
+            "-C",
+            str(test_repo),
+            "1.2.41-alpha-2",
+            "--non-interactive",
+            "--no-atomic-push",
+        ]
+    )
 
     assert bump_done(test_repo, previous_commit)
 

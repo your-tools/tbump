@@ -198,7 +198,7 @@ def validate_basic_schema(config: dict) -> None:
         {
             "version": {"current": str, "regex": schema.Use(validate_re)},
             "git": {
-                "message_template": str, 
+                "message_template": str,
                 "tag_template": str,
                 schema.Optional("push_use_atomic"): bool,
             },
