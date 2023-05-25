@@ -1,11 +1,47 @@
 import os
 import shutil
+from copy import copy
 from pathlib import Path
 from typing import Any, Iterator
 
 import pytest
 
+import tbump.git
 from tbump.git import run_git
+
+
+class GitRecorder:
+    """Helper class to record git commands that are run"""
+
+    def __init__(self) -> None:
+        tbump.git._GIT_COMMANDS = []
+
+    def start(self) -> None:
+        """Start recording messages"""
+        tbump.git._RECORD = True
+
+    def stop(self) -> None:
+        """Stop recording messages"""
+        tbump.git._RECORD = False
+
+    def reset(self) -> None:
+        """Reset the list"""
+        tbump.git._GIT_COMMANDS = []
+
+    def commands(self) -> list[list[str]]:
+        """Find a message in the list of recorded message
+
+        :param pattern: regular expression pattern to use
+                        when looking for recorded message
+        """
+        return copy(tbump.git._GIT_COMMANDS)
+
+
+@pytest.fixture
+def git_recorder() -> GitRecorder:
+    res = GitRecorder()
+    res.start()
+    return res
 
 
 @pytest.fixture()

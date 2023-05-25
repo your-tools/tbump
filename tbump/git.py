@@ -6,6 +6,9 @@ import cli_ui as ui
 
 from tbump.error import Error
 
+_GIT_COMMANDS = []
+_RECORD = False
+
 
 class GitError(Error):
     pass
@@ -37,6 +40,8 @@ def run_git(working_path: Path, *cmd: str, verbose: bool = False) -> None:
     Raise GitCommandError if return code is non-zero.
     """
     cmd_list = list(cmd)
+    if _RECORD:
+        _GIT_COMMANDS.append(cmd_list)
     if verbose:
         print_git_command(cmd_list)
     git_cmd = list(cmd)
