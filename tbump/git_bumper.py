@@ -71,8 +71,8 @@ class GitBumperOptions:
 class GitBumper:
     def __init__(self, options: GitBumperOptions, operations: List[str]):
         self.repo_path = options.working_path
+        self.use_atomic = True
         self.tag_message = options.tag_message
-        self.use_atomic = not options.no_atomic
         self.tag_template = ""
         self.message_template = ""
         self.remote_name = ""
@@ -86,7 +86,10 @@ class GitBumper:
     def set_config(self, config: Config) -> None:
         self.tag_template = config.git_tag_template
         self.message_template = config.git_message_template
-        self.use_atomic = config.git_push_use_atomic
+        # use_atomic is True by default, and must be explicitely
+        # disabled in the configuration:
+        if config.git_push_use_atomic is False:
+            self.use_atomic = False
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
         return run_git(self.repo_path, *args, verbose=verbose)
