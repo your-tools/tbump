@@ -140,6 +140,14 @@ def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
 def test_end_to_end_using_tbump_toml_no_atomic(
     test_repo: Path, git_recorder: GitRecorder
 ) -> None:
+
+    tbump_toml = test_repo / "tbump.toml"
+    doc = tomlkit.loads(tbump_toml.read_text())
+    doc["git"]["push_use_atomic"] = False
+    tbump_toml.write_text(tomlkit.dumps(doc))
+    run_git(test_repo, "add", ".")
+    run_git(test_repo, "commit", "--message", "tbump: do not use atomtic push")
+
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(
         [
@@ -147,7 +155,6 @@ def test_end_to_end_using_tbump_toml_no_atomic(
             str(test_repo),
             "1.2.41-alpha-2",
             "--non-interactive",
-            "--no-atomic-push",
         ]
     )
 
