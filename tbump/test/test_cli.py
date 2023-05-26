@@ -143,7 +143,7 @@ def test_end_to_end_using_tbump_toml_no_atomic(
 
     tbump_toml = test_repo / "tbump.toml"
     doc = tomlkit.loads(tbump_toml.read_text())
-    doc["git"]["push_use_atomic"] = False
+    doc["git"]["push_use_atomic"] = False  # type: ignore[index]
     tbump_toml.write_text(tomlkit.dumps(doc))
     run_git(test_repo, "add", ".")
     run_git(test_repo, "commit", "--message", "tbump: do not use atomtic push")
