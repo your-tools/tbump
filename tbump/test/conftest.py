@@ -2,7 +2,7 @@ import os
 import shutil
 from copy import copy
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, List
 
 import pytest
 
@@ -28,7 +28,7 @@ class GitRecorder:
         """Reset the list"""
         tbump.git._GIT_COMMANDS = []
 
-    def commands(self) -> list[list[str]]:
+    def commands(self) -> List[List[str]]:
         """Find a message in the list of recorded message
 
         :param pattern: regular expression pattern to use
