@@ -15,7 +15,7 @@ from tbump.file_bumper import (
 )
 from tbump.git import run_git, run_git_captured
 from tbump.git_bumper import DirtyRepository, NoTrackedBranch, RefAlreadyExists
-from tbump.test.conftest import file_contains
+from tbump.test.conftest import GitRecorder, file_contains
 
 
 def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
@@ -137,7 +137,17 @@ def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
     assert bump_done(test_repo, previous_commit)
 
 
-def test_end_to_end_using_tbump_toml_no_atomic(test_repo: Path) -> None:
+def test_end_to_end_using_tbump_toml_no_atomic(
+    test_repo: Path, git_recorder: GitRecorder
+) -> None:
+
+    tbump_toml = test_repo / "tbump.toml"
+    doc = tomlkit.loads(tbump_toml.read_text())
+    doc["git"]["atomic_push"] = False  # type: ignore[index]
+    tbump_toml.write_text(tomlkit.dumps(doc))
+    run_git(test_repo, "add", ".")
+    run_git(test_repo, "commit", "--message", "tbump: do not use atomtic push")
+
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(
         [
@@ -145,11 +155,12 @@ def test_end_to_end_using_tbump_toml_no_atomic(test_repo: Path) -> None:
             str(test_repo),
             "1.2.41-alpha-2",
             "--non-interactive",
-            "--no-atomic-push",
         ]
     )
 
     assert bump_done(test_repo, previous_commit)
+    last_command = git_recorder.commands()[-1]
+    assert "--atomic" not in last_command
 
 
 def test_end_to_end_using_pyproject_toml(test_pyproject_repo: Path) -> None:

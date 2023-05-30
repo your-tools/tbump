@@ -304,6 +304,12 @@ For example:
 Working with git providers that don't support --atomic
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-If the push destination does not support ``--atomic``, either use the 
-``--no-atomic-push`` option, or add ``push_use_atomic=false`` to the config file,
-under the ``[git]`` section.
+If the push destination does not support ``--atomic``,
+add ``atomic_push=false`` to the config file,
+under the ``[git]`` section:
+
+..code-block:: ini
+
+  [git]
+  atomic_push = false
+

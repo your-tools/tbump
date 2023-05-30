@@ -1,6 +1,15 @@
 Changelog
 =========
 
+6.11.0
+------
+
+* Atomic pushes, introduced in version  6.5, are not supported
+  everywhere. Starting with this release, you can now set
+  ``atomic_push=false`` in the config file to use the old behavior
+  (pushing the branch and the tag separately). Inital patch by @mlongtin0
+
+
 6.10.0 (2023-05-21)
 ------------------
 
