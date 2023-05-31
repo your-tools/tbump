@@ -140,7 +140,6 @@ def test_end_to_end_using_tbump_toml(test_repo: Path) -> None:
 def test_end_to_end_using_tbump_toml_no_atomic(
     test_repo: Path, git_recorder: GitRecorder
 ) -> None:
-
     tbump_toml = test_repo / "tbump.toml"
     doc = tomlkit.loads(tbump_toml.read_text())
     doc["git"]["atomic_push"] = False  # type: ignore[index]
@@ -160,6 +159,7 @@ def test_end_to_end_using_tbump_toml_no_atomic(
 
     assert bump_done(test_repo, previous_commit)
     last_command = git_recorder.commands()[-1]
+    assert "push" in last_command
     assert "--atomic" not in last_command
 
 
