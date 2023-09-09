@@ -3,7 +3,7 @@ profile = "black"
 
 [tool.poetry]
 name = "tbump"
-version = "6.10.0"
+version = "6.11.0"
 description = "Bump software releases"
 readme = "README.rst"
 authors = ["Dimitri Merejkowsky <dimitri@dmerej.info>"]
