@@ -112,7 +112,7 @@ class SourceFileNotFound(Error):
         self.src = src
 
     def print_error(self) -> None:
-        ui.error(self.src, "does not exist")
+        ui.error("the file", self.src, "does not exist")
 
 
 class CurrentVersionNotFound(Error):
