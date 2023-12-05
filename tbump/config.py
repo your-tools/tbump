@@ -53,7 +53,7 @@ class ConfigFileUpdater(Action, metaclass=abc.ABCMeta):
 
     @property
     def relative_path(self) -> Path:
-        return self.path.relative_to(self.project_path)
+        return self.project_path / self.path
 
     def print_self(self) -> None:
         from tbump.cli import print_diff
