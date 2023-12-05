@@ -72,6 +72,7 @@ class GitBumper:
     def __init__(self, options: GitBumperOptions, operations: List[str]):
         self.repo_path = options.working_path
         self.atomic_push = True
+        self.sign = False
         self.tag_message = options.tag_message
         self.tag_template = ""
         self.message_template = ""
@@ -88,8 +89,11 @@ class GitBumper:
         self.message_template = config.git_message_template
         # atomic_push is True by default, and must be explicitely
         # disabled in the configuration:
-        if config.atomic_push is False:
+        if not config.atomic_push:
             self.atomic_push = False
+
+        if config.sign:
+            self.sign = True
 
     def run_git(self, *args: str, verbose: bool = False) -> None:
         return run_git(self.repo_path, *args, verbose=verbose)
@@ -160,9 +164,14 @@ class GitBumper:
             else:
                 tag_message = tag_name
 
-            self.add_command(
-                res, "tag", "--annotate", "--message", tag_message, tag_name
-            )
+            if not self.sign:
+                self.add_command(
+                    res, "tag", "--annotate", "--message", tag_message, tag_name
+                )
+            else:
+                self.add_command(
+                    res, "tag", "--sign", "--annotate", "--message", tag_message, tag_name
+                )
         if "push_commit" in self.operations and "push_tag" in self.operations:
             if self.atomic_push:
                 self.add_command(

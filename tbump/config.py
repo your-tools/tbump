@@ -35,6 +35,7 @@ class Config:
     git_tag_template: str
     git_message_template: str
     atomic_push: bool
+    sign: bool
 
     files: List[File]
     hooks: List[Hook]
@@ -201,6 +202,7 @@ def validate_basic_schema(config: dict) -> None:
                 "message_template": str,
                 "tag_template": str,
                 schema.Optional("atomic_push"): bool,
+                schema.Optional("sign"): bool,
             },
             "file": [file_schema],
             schema.Optional("field"): [field_schema],
@@ -296,6 +298,7 @@ def from_parsed_config(parsed: dict) -> Config:
     git_message_template = parsed["git"]["message_template"]
     git_tag_template = parsed["git"]["tag_template"]
     atomic_push = parsed["git"].get("atomic_push", True)
+    sign = parsed["git"].get("sign", False)
     version_regex = re.compile(parsed["version"]["regex"], re.VERBOSE)
     files = []
     for file_dict in parsed["file"]:
@@ -328,6 +331,7 @@ def from_parsed_config(parsed: dict) -> Config:
         git_message_template=git_message_template,
         git_tag_template=git_tag_template,
         atomic_push=atomic_push,
+        sign=sign,
         fields=fields,
         files=files,
         hooks=hooks,
