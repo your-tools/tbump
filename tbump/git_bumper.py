@@ -170,7 +170,13 @@ class GitBumper:
                 )
             else:
                 self.add_command(
-                    res, "tag", "--sign", "--annotate", "--message", tag_message, tag_name
+                    res,
+                    "tag",
+                    "--sign",
+                    "--annotate",
+                    "--message",
+                    tag_message,
+                    tag_name,
                 )
         if "push_commit" in self.operations and "push_tag" in self.operations:
             if self.atomic_push:
