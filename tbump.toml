@@ -9,6 +9,9 @@ regex = '''
   (?P<minor>\d+)
   \.
   (?P<patch>\d+)
+  (\-
+    (?P<extra>.+)
+  )?
   '''
 
 
@@ -24,6 +27,7 @@ search = 'version = "{current_version}"'
 
 [[file]]
 src = "tbump/cli.py"
+version_template = "{major}.{minor}.{patch}"
 
 [[before_commit]]
 name = "Run CI"
