@@ -224,6 +224,8 @@ class FileBumper:
         change_requests = []
         for file in self.files:
             change_request = self.compute_change_request_for_file(file)
+            if change_request.old_string == change_request.new_string:
+                continue
             change_requests.append(change_request)
         return change_requests
 
