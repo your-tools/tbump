@@ -7,7 +7,7 @@ Changelog
 * Atomic pushes, introduced in version  6.5, are not supported
   everywhere. Starting with this release, you can now set
   ``atomic_push=false`` in the config file to use the old behavior
-  (pushing the branch and the tag separately). Inital patch by @mlongtin0
+  (pushing the branch and the tag separately). Initial patch by @mlongtin0
 
 
 6.10.0 (2023-05-21)
@@ -37,7 +37,7 @@ Other
 6.8.0 (2022-03-27)
 ------------------
 
-* Allow usage of ``python -m tbump`` in addtion to just ``tbump``
+* Allow usage of ``python -m tbump`` in addition to just ``tbump``
 
 6.7.0 (2021-12-22)
 ------------------

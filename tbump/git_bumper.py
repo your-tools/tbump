@@ -87,7 +87,7 @@ class GitBumper:
     def set_config(self, config: Config) -> None:
         self.tag_template = config.git_tag_template
         self.message_template = config.git_message_template
-        # atomic_push is True by default, and must be explicitely
+        # atomic_push is True by default, and must be explicitly
         # disabled in the configuration:
         if not config.atomic_push:
             self.atomic_push = False

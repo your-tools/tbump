@@ -145,7 +145,7 @@ def test_end_to_end_using_tbump_toml_no_atomic(
     doc["git"]["atomic_push"] = False  # type: ignore[index]
     tbump_toml.write_text(tomlkit.dumps(doc))
     run_git(test_repo, "add", ".")
-    run_git(test_repo, "commit", "--message", "tbump: do not use atomtic push")
+    run_git(test_repo, "commit", "--message", "tbump: do not use atomic push")
 
     _, previous_commit = run_git_captured(test_repo, "rev-parse", "HEAD")
     run_tbump(
