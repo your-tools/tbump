@@ -16,7 +16,7 @@ Issues = "https://github.com/dmerejkowsky/tbump/issues"
 
 [tool.poetry.dependencies]
 # Note: keep this in sync with .github/workflows/tests.yml
-python = "^3.7"
+python = "^3.8"
 
 docopt = "^0.6.2"
 cli-ui = ">=0.10.3"
