@@ -5,6 +5,7 @@ import pytest
 import tomlkit
 
 from tbump.cli import run as run_tbump
+from tbump.cli import NotANewVersion
 from tbump.config import ConfigNotFound, InvalidConfig
 from tbump.error import Error
 from tbump.file_bumper import (
@@ -317,7 +318,7 @@ def test_abort_if_file_does_not_contain_current_version(test_repo: Path) -> None
 def test_no_tracked_branch_but_ref_exists(test_repo: Path) -> None:
     run_git(test_repo, "checkout", "-b", "devel")
 
-    with pytest.raises(RefAlreadyExists):
+    with pytest.raises(NotANewVersion):
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-1"])
 
 
