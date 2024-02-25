@@ -315,9 +315,10 @@ def test_abort_if_file_does_not_contain_current_version(test_repo: Path) -> None
 
 
 def test_no_tracked_branch_but_ref_exists(test_repo: Path) -> None:
-    run_git(test_repo, "checkout", "-b", "devel")
+    run_git(test_repo, "tag", "v1.2.41-alpha-2")
 
     with pytest.raises(RefAlreadyExists):
+        run_tbump(["-C", str(test_repo), "1.2.41-alpha-2"])
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-1"])
 
 
