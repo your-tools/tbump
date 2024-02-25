@@ -208,6 +208,13 @@ def run_bump(
     bump(bump_options, _construct_operations(arguments))
 
 
+class NotANewVersion(Error):
+    def __init__(self):
+        super().__init__()
+
+    def print_error(self) -> None:
+        ui.error("New version is the same as the previous one")
+
 def bump(options: BumpOptions, operations: List[str]) -> None:
     working_path = options.working_path
     new_version = options.new_version
@@ -219,6 +226,9 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
         options.working_path, specified_config_path=specified_config_path
     )
     config = config_file.get_config()
+
+    if config.current_version == new_version:
+        raise NotANewVersion()
 
     # fmt: off
     ui.info_1(
