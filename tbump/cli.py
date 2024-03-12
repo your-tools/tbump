@@ -215,6 +215,7 @@ class NotANewVersion(Error):
     def print_error(self) -> None:
         ui.error("New version is the same as the previous one")
 
+
 def bump(options: BumpOptions, operations: List[str]) -> None:
     working_path = options.working_path
     new_version = options.new_version

@@ -320,6 +320,7 @@ def test_no_tracked_branch_but_ref_exists(test_repo: Path) -> None:
     with pytest.raises(RefAlreadyExists):
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-2"])
 
+
 def test_not_a_new_versions(test_repo: Path) -> None:
     with pytest.raises(NotANewVersion):
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-1"])
