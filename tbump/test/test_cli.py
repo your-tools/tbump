@@ -4,7 +4,8 @@ from typing import Any, Optional
 import pytest
 import tomlkit
 
-from tbump.cli import run as run_tbump, NotANewVersion
+from tbump.cli import NotANewVersion
+from tbump.cli import run as run_tbump
 from tbump.config import ConfigNotFound, InvalidConfig
 from tbump.error import Error
 from tbump.file_bumper import (
