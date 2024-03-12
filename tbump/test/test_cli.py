@@ -4,7 +4,7 @@ from typing import Any, Optional
 import pytest
 import tomlkit
 
-from tbump.cli import NotANewVersion
+from tbump.cli import NotANewVersion, OlderNewVersion
 from tbump.cli import run as run_tbump
 from tbump.config import ConfigNotFound, InvalidConfig
 from tbump.error import Error
@@ -325,6 +325,11 @@ def test_no_tracked_branch_but_ref_exists(test_repo: Path) -> None:
 def test_not_a_new_versions(test_repo: Path) -> None:
     with pytest.raises(NotANewVersion):
         run_tbump(["-C", str(test_repo), "1.2.41-alpha-1"])
+
+
+def test_new_version_is_older(test_repo: Path) -> None:
+    with pytest.raises(OlderNewVersion):
+        run_tbump(["-C", str(test_repo), "1.2.40"])
 
 
 def test_no_tracked_branch_non_interactive(test_repo: Path) -> None:

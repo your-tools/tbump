@@ -1,6 +1,7 @@
 import sys
 import textwrap
 import urllib.parse
+from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -8,6 +9,8 @@ from typing import Dict, List, Optional, Union, cast
 
 import cli_ui as ui
 import docopt
+from packaging.version import InvalidVersion
+from packaging.version import parse as parse_version
 
 from tbump.config import get_config_file
 from tbump.error import Error
@@ -216,6 +219,25 @@ class NotANewVersion(Error):
         ui.error("New version is the same as the previous one")
 
 
+class OlderNewVersion(Error):
+    def __init__(self, *, new_version: str, current_version: str) -> None:
+        self.new_version = new_version
+        self.current_version = current_version
+        super().__init__()
+
+    def print_error(self) -> None:
+        ui.error(
+            ui.reset,
+            "New version",
+            ui.bold,
+            self.new_version,
+            ui.reset,
+            "is older than current version",
+            ui.bold,
+            self.current_version,
+        )
+
+
 def bump(options: BumpOptions, operations: List[str]) -> None:
     working_path = options.working_path
     new_version = options.new_version
@@ -228,8 +250,7 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     )
     config = config_file.get_config()
 
-    if config.current_version == new_version:
-        raise NotANewVersion()
+    check_versions(current=config.current_version, new=new_version)
 
     # fmt: off
     ui.info_1(
@@ -287,6 +308,17 @@ def bump(options: BumpOptions, operations: List[str]) -> None:
     if config.github_url and "push_tag" in operations:
         tag_name = git_bumper.get_tag_name(new_version)
         suggest_creating_github_release(config.github_url, tag_name)
+
+
+def check_versions(*, current: str, new: str) -> None:
+    if current == new:
+        raise NotANewVersion()
+
+    with suppress(InvalidVersion):
+        parsed_current = parse_version(current)
+        parsed_new = parse_version(new)
+        if parsed_new < parsed_current:
+            raise OlderNewVersion(current_version=current, new_version=new)
 
 
 def suggest_creating_github_release(github_url: str, tag_name: str) -> None:
