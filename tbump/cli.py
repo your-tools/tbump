@@ -209,7 +209,7 @@ def run_bump(
 
 
 class NotANewVersion(Error):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def print_error(self) -> None:
