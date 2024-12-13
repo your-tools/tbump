@@ -29,6 +29,7 @@ class Patch(Action):
         self.lineno = lineno
         self.old_line = old_line
         self.new_line = new_line
+        unused_variable = "unused"
 
     def print_self(self) -> None:
         from tbump.cli import print_diff
