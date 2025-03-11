@@ -24,7 +24,7 @@ schema = "^0.7.1"
 tomlkit = "^0.11"
 packaging = "^24.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 # Task runner
 invoke = "^2.2"
 
