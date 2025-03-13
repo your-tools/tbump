@@ -18,11 +18,11 @@ Issues = "https://github.com/dmerejkowsky/tbump/issues"
 # Note: keep this in sync with .github/workflows/tests.yml
 python = "^3.9"
 
-docopt = "^0.6.2"
 cli-ui = ">=0.10.3"
+docopt-ng = "^0.9"
+packaging = "^24.0"
 schema = "^0.7.1"
 tomlkit = "^0.11"
-packaging = "^24.0"
 
 [tool.poetry.group.dev.dependencies]
 # Task runner
@@ -38,9 +38,9 @@ black = "^24.3"
 flake8 = "7.1"
 flake8-bugbear = "^24.12"
 flake8-comprehensions = "^3.16"
-pep8-naming = "^0.14"
 isort = "^5.13"
 mypy = "1.13"
+pep8-naming = "^0.14"
 
 [tool.poetry.scripts]
 tbump = "tbump.cli:main"

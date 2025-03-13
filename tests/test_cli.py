@@ -16,7 +16,7 @@ from tbump.file_bumper import (
 )
 from tbump.git import run_git, run_git_captured
 from tbump.git_bumper import DirtyRepository, NoTrackedBranch, RefAlreadyExists
-from tbump.test.conftest import GitRecorder, file_contains
+from tests.conftest import GitRecorder, file_contains
 
 
 def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
