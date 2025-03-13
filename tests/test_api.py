@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from tbump import bump_files
-from tbump.test.conftest import file_contains
+from tests.conftest import file_contains
 
 
 def test_bump_files_defaults_to_working_dir(test_repo: Path, monkeypatch: Any) -> None:

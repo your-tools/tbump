@@ -4,7 +4,7 @@ import pytest
 
 from tbump.config import get_config_file
 from tbump.file_bumper import BadSubstitution, CurrentVersionNotFound, FileBumper, Patch
-from tbump.test.conftest import file_contains
+from tests.conftest import file_contains
 
 
 def test_file_bumper_simple(test_repo: Path) -> None:
