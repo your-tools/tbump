@@ -202,7 +202,7 @@ class FileBumper:
         for file_path_str in glob.glob(str(file_path_glob), recursive=True):
             file_path = Path(file_path_str)
             expanded_src = file_path.relative_to(self.working_path)
-            old_lines = file_path.read_text().splitlines(keepends=False)
+            old_lines = file_path.read_text(encoding="utf8").splitlines(keepends=False)
 
             for i, old_line in enumerate(old_lines):
                 if should_replace(old_line, old_string, search):
