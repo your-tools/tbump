@@ -20,7 +20,7 @@
 tbump: bump software releases
 =============================
 
-**This repository has moved to [codeberg](https://codeberg.org/your-tools/) - see you there !**
+**This repository has moved to** `codeberg <https://codeberg.org/your-tools/>`_ - **see you there !**
 
 
 tbump helps you bump the version of your project easily.
