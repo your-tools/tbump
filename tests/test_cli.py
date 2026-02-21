@@ -24,7 +24,7 @@ def files_bumped(test_repo: Path, config_path: Optional[Path] = None) -> bool:
     new_toml = tomlkit.loads(config_path.read_text())
     current_version = new_toml["version"]["current"]  # type: ignore[index]
 
-    assert current_version == "1.2.41-alpha-2"
+    assert current_version == "oups"
 
     return all(
         (
